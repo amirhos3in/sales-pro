@@ -48,10 +48,10 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="mx-auto max-w-5xl space-y-8">
       <section>
         <p className="text-sm text-primary">صفحهٔ ورود</p>
-        <h1 className="mt-2 text-3xl font-semibold leading-snug">
+        <h1 className="mt-2 max-w-2xl text-3xl font-semibold leading-snug">
           مسیر آموزش را از این چهار آیکون شروع کنید.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
@@ -65,7 +65,7 @@ export function LoginScreen() {
 
       <form
         onSubmit={submit}
-        className="rounded-3xl bg-card p-5 ring-1 ring-foreground/10"
+        className="mx-auto max-w-md rounded-3xl bg-card p-5 ring-1 ring-foreground/10"
       >
         <h2 className="text-lg font-semibold">ورود به آکادمی</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">

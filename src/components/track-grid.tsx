@@ -37,13 +37,13 @@ export function TrackGrid({ compact = false }: { compact?: boolean }) {
         <Link
           key={track.slug}
           href={`/courses/${track.slug}`}
-          className="group flex flex-col items-center gap-3 rounded-3xl bg-card px-3 py-5 text-center ring-1 ring-foreground/10 transition hover:-translate-y-0.5 hover:ring-primary/40"
+          className="group flex min-w-0 flex-col items-center gap-3 rounded-3xl bg-card px-3 py-5 text-center ring-1 ring-foreground/10 transition hover:-translate-y-0.5 hover:ring-primary/40"
         >
           <TrackIconBadge
             icon={track.icon}
             className="transition group-hover:scale-105"
           />
-          <span className="text-sm font-semibold leading-6">{track.title}</span>
+          <span className="text-balance text-sm font-semibold leading-6">{track.title}</span>
           {compact ? null : (
             <span className="text-xs leading-5 text-muted-foreground">
               {track.subtitle}
