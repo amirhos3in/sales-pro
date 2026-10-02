@@ -1,20 +1,21 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { LessonScreen } from "@/components/course-views";
+import { lessonStaticParams } from "@/lib/curriculum";
 
-export default function LessonPage() {
-  const params = useParams<{ track: string; module: string; lesson: string }>();
-  return (
-    <LessonScreen
-      trackSlug={one(params.track)}
-      moduleSlug={one(params.module)}
-      lessonSlug={one(params.lesson)}
-    />
-  );
+export function generateStaticParams() {
+  return lessonStaticParams();
 }
 
-function one(value: string | string[] | undefined) {
-  if (Array.isArray(value)) return value[0] ?? "";
-  return value ?? "";
+export default async function LessonPage({
+  params,
+}: {
+  params: Promise<{ track: string; module: string; lesson: string }>;
+}) {
+  const resolved = await params;
+  return (
+    <LessonScreen
+      trackSlug={resolved.track}
+      moduleSlug={resolved.module}
+      lessonSlug={resolved.lesson}
+    />
+  );
 }

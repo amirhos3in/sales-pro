@@ -13,4 +13,12 @@ npm run dev -- -p 43123
 
 سپس در مرورگر [http://127.0.0.1:43123](http://127.0.0.1:43123) را باز کنید.
 
+نسخهٔ عمومی: [https://amirhos3in.github.io/sales-pro/](https://amirhos3in.github.io/sales-pro/)
+
+برای ساخت همان خروجی ثابت:
+
+```bash
+npm run export:pages
+```
+
 ورود آزمایشی: `demo@nexsell.ir` با رمز `demo`. موجودی اولیه کیف پول ۱۰ میلیون تومان است و با آن می‌توان پلن اکو، پلاس یا پرو را خرید.

@@ -1,16 +1,17 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { ModuleScreen } from "@/components/course-views";
+import { moduleStaticParams } from "@/lib/curriculum";
 
-export default function ModulePage() {
-  const params = useParams<{ track: string; module: string }>();
-  const track = one(params.track);
-  const moduleSlug = one(params.module);
-  return <ModuleScreen trackSlug={track} moduleSlug={moduleSlug} />;
+export function generateStaticParams() {
+  return moduleStaticParams();
 }
 
-function one(value: string | string[] | undefined) {
-  if (Array.isArray(value)) return value[0] ?? "";
-  return value ?? "";
+export default async function ModulePage({
+  params,
+}: {
+  params: Promise<{ track: string; module: string }>;
+}) {
+  const resolved = await params;
+  return (
+    <ModuleScreen trackSlug={resolved.track} moduleSlug={resolved.module} />
+  );
 }

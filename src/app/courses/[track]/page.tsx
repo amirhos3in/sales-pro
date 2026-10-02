@@ -1,10 +1,15 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { TrackScreen } from "@/components/course-views";
+import { trackStaticParams } from "@/lib/curriculum";
 
-export default function TrackPage() {
-  const params = useParams<{ track: string }>();
-  const track = Array.isArray(params.track) ? params.track[0] : params.track;
+export function generateStaticParams() {
+  return trackStaticParams();
+}
+
+export default async function TrackPage({
+  params,
+}: {
+  params: Promise<{ track: string }>;
+}) {
+  const { track } = await params;
   return <TrackScreen slug={track} />;
 }

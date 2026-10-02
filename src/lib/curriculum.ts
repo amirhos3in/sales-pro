@@ -925,6 +925,31 @@ export const tracks: Track[] = [
   },
 ];
 
+export function trackStaticParams() {
+  return tracks.map((track) => ({ track: track.slug }));
+}
+
+export function moduleStaticParams() {
+  return tracks.flatMap((track) =>
+    track.modules.map((courseModule) => ({
+      track: track.slug,
+      module: courseModule.slug,
+    })),
+  );
+}
+
+export function lessonStaticParams() {
+  return tracks.flatMap((track) =>
+    track.modules.flatMap((courseModule) =>
+      courseModule.lessons.map((lesson) => ({
+        track: track.slug,
+        module: courseModule.slug,
+        lesson: lesson.slug,
+      })),
+    ),
+  );
+}
+
 export function lessonKey(track: string, moduleSlug: string, lesson: string) {
   return `${track}/${moduleSlug}/${lesson}`;
 }
