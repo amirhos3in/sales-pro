@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { categories, lessonsOf, pickText } from "@/lib/courses-data";
 import { useGate } from "@/components/gates";
-import { useI18n } from "@/lib/i18n";
+import { localeNumber } from "@/lib/format";
+import { useI18n, type Lang } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 
 export function HomeScreen() {
@@ -62,6 +64,8 @@ export function HomeScreen() {
         ) : null}
       </section>
 
+      <MetricsStrip />
+
       <section className="grid gap-4 md:grid-cols-2">
         {categories.map((category) => (
           <Link
@@ -95,6 +99,98 @@ export function HomeScreen() {
       </section>
     </div>
   );
+}
+
+const metrics = [
+  { key: "students", value: 5000, prefix: "+", suffix: "", label: "metricStudents" },
+  { key: "hours", value: 120, prefix: "+", suffix: "", label: "metricHours" },
+  { key: "satisfaction", value: 98, prefix: "", suffix: "%", label: "metricSatisfaction" },
+  { key: "teams", value: 300, prefix: "+", suffix: "", label: "metricTeams" },
+] as const;
+
+function MetricsStrip() {
+  const { copy, lang } = useI18n();
+  return (
+    <section className="glass relative overflow-hidden rounded-[2rem] p-5 shadow-2xl sm:p-7">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <h2 className="text-lg font-semibold">{copy.home.metricsTitle}</h2>
+        <p className="text-xs leading-6 text-muted-foreground">{copy.home.metricsHint}</p>
+      </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => (
+          <article
+            key={metric.key}
+            className="rounded-2xl border border-[#D4AF37]/35 bg-white/40 px-4 py-4 shadow-[inset_0_1px_0_rgba(212,175,55,0.35)] backdrop-blur-md dark:bg-[#0F1C3F]/40"
+          >
+            <p className="text-2xl font-semibold tracking-tight text-[#0B132B] dark:text-[#F3E5AB] sm:text-3xl">
+              <CountUp
+                value={metric.value}
+                prefix={metric.prefix}
+                suffix={metric.suffix}
+                lang={lang}
+              />
+            </p>
+            <p className="mt-2 text-xs leading-6 text-muted-foreground">{copy.home[metric.label]}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CountUp({
+  value,
+  prefix,
+  suffix,
+  lang,
+}: {
+  value: number;
+  prefix: string;
+  suffix: string;
+  lang: Lang;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const percent = suffix === "%";
+    const paint = (current: number) => {
+      const mark = percent ? (lang === "fa" ? "٪" : "%") : suffix;
+      node.textContent = `${prefix}${localeNumber(current, lang)}${mark}`;
+    };
+    paint(0);
+    let frame = 0;
+    let started = false;
+    const run = () => {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const start = performance.now();
+      const tick = (now: number) => {
+        const progress = reduce ? 1 : Math.min(1, (now - start) / 1300);
+        const eased = 1 - (1 - progress) ** 3;
+        paint(Math.round(value * eased));
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && !started) {
+          started = true;
+          run();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [lang, prefix, suffix, value]);
+
+  return <span ref={ref}>{`${prefix}${localeNumber(0, lang)}${suffix === "%" ? (lang === "fa" ? "٪" : "%") : suffix}`}</span>;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

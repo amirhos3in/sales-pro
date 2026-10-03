@@ -14,6 +14,8 @@ const copy = {
       services: "خدمات",
       support: "پشتیبانی",
       plans: "اشتراک",
+      about: "درباره ما",
+      contact: "ارتباط با ما",
     },
     menu: {
       account: "حساب",
@@ -50,6 +52,12 @@ const copy = {
         "مسیرهای اصلی بدون پلن فعال، دکمه ارتقای پلن را نشان می‌دهند.",
         "با پلن فعال، ویدیوی بعدی فقط بعد از قبولی چالش قبلی باز می‌شود.",
       ],
+      metricsTitle: "اثر آکادمی",
+      metricsHint: "عددها نمونهٔ نمایشی‌اند و با ورود به بخش، نرم می‌شمارند.",
+      metricStudents: "دانش‌پذیر فعال",
+      metricHours: "ساعت آموزش تخصصی فروش و مذاکره",
+      metricSatisfaction: "رضایت فارغ‌التحصیلان",
+      metricTeams: "بیزنس و تیم آموزش‌دیده",
     },
     learn: {
       back: "بازگشت به مسیرها",
@@ -141,6 +149,81 @@ const copy = {
       missing: "مقاله پیدا نشد",
       by: "نویسنده",
     },
+    aboutPage: {
+      kicker: "آکادمی تخصصی فروش و مذاکره",
+      title: "فروش آنلاین، حضوری و تلفنی را با مذاکرهٔ دقیق به نتیجه می‌رسانیم.",
+      missionTitle: "مأموریت",
+      mission:
+        "توانمند کردن کسب‌وکارها و متخصصان برای تسلط بر فروش آنلاین، فروش حضوری و فروش تلفنی، همراه با مذاکره در موقعیت‌های حساس.",
+      visionTitle: "چشم‌انداز",
+      vision:
+        "مرجع آموزش فروش و مذاکره؛ جایی که هر تیم با استاندارد روز دنیا و اخلاق حرفه‌ای، گفتگو را به تصمیم روشن تبدیل کند.",
+      statement:
+        "نکس‌سل جای شعار نیست. هر مسیر تمرین، بازخورد و استانداردی دارد که فروشنده بتواند فردا سر میز، پشت تلفن یا در پیام همان کار را انجام دهد.",
+      valuesTitle: "ارزش‌های بنیادین آکادمی",
+      values: [
+        {
+          title: "آموزش عملی و نتیجه‌محور",
+          text: "هر درس به یک جمله، یک اعتراض یا یک بستن معامله وصل است؛ نه به اسلاید بدون تمرین.",
+        },
+        {
+          title: "استانداردهای روز دنیا",
+          text: "چارچوب فروش و مذاکره با الگوی تیم‌های حرفه‌ای هم‌تراز می‌شود و برای بازار ایران بازنویسی می‌شود.",
+        },
+        {
+          title: "همراهی و پشتیبانی مستمر",
+          text: "بعد از تماشای ویدیو، چالش و گفتگوی پشتیبانی کنار مسیر می‌ماند تا تمرین رها نشود.",
+        },
+        {
+          title: "اخلاق حرفه‌ای در مذاکره",
+          text: "امتیاز، فشار و بستن معامله بدون پنهان‌کاری و بدون آسیب به اعتماد طرف مقابل پیش می‌رود.",
+        },
+      ],
+      leadTitle: "مدرس و بنیان‌گذار",
+      leadName: "امیرحسین قاری",
+      leadRole: "استراتژیست فروش و مذاکره‌کننده ارشد",
+      leadBadge: "بنیان‌گذار آکادمی",
+      leadBio:
+        "امیرحسین قاری تیم‌های فروش آنلاین، حضوری و تلفنی را برای گفتگوهای سخت همراهی کرده است. آکادمی نکس‌سل را بر پایهٔ آموزش عملی، استاندارد جهانی و اخلاق مذاکره بنا گذاشته تا مدیر و فروشنده هر دو بدانند قدم بعدی چیست.",
+      credentials: [
+        "طراحی مسیر فروش آنلاین، حضوری و تلفنی",
+        "مربی مذاکره در موقعیت‌های پرمخاطره",
+        "نویسندهٔ یادداشت‌های کاربردی آکادمی",
+      ],
+    },
+    contactPage: {
+      kicker: "ارتباط با ما",
+      title: "کانال مستقیم، بدون فرم اضافه.",
+      intro: "آدرس، تلفن، ایمیل و ساعت پاسخگویی همین‌جاست. پیام و تیکت از آیکون پشتیبانی پایین صفحه ثبت می‌شود.",
+      hq: "دفتر مرکزی",
+      address: "تهران، خیابان ولیعصر، برج فناوری، طبقه ۸",
+      phone: "تماس مستقیم",
+      phones: [
+        { label: "۰۲۱-۸۸۸۸۰۰۰۰", href: "tel:+982188880000" },
+        { label: "۰۹۱۲-۰۰۰-۰۰۰۰", href: "tel:+989120000000" },
+      ],
+      email: "پست الکترونیک",
+      emails: [
+        { label: "support@academy.com", href: "mailto:support@academy.com" },
+        { label: "info@academy.com", href: "mailto:info@academy.com" },
+      ],
+      hours: "ساعات پاسخگویی",
+      hoursText: "شنبه تا چهارشنبه ۹:۰۰ الی ۱۸:۰۰",
+      socialTitle: "سوشال مدیا و شبکه‌های اجتماعی",
+      socials: [
+        { name: "اینستاگرام", handle: "@academy_sales", href: "https://instagram.com/academy_sales", tone: "instagram" },
+        { name: "تلگرام", handle: "@academy_support", href: "https://t.me/academy_support", tone: "telegram" },
+        { name: "لینکدین", handle: "Academy Sales & Negotiation", href: "https://www.linkedin.com/company/academy-sales-negotiation", tone: "linkedin" },
+        {
+          name: "یوتیوب / آپارات",
+          handle: "Academy Official",
+          href: "https://www.youtube.com/@academyofficial",
+          aparat: "https://www.aparat.com/academyofficial",
+          tone: "video",
+        },
+      ],
+      widgetNote: "برای دریافت پاسخ آنی یا ثبت تیکت، می‌توانید از آیکون پشتیبانی گوشه صفحه استفاده کنید.",
+    },
   },
   en: {
     brand: "NexSell",
@@ -151,6 +234,8 @@ const copy = {
       services: "Services",
       support: "Support",
       plans: "Plans",
+      about: "About Us",
+      contact: "Contact Us",
     },
     menu: {
       account: "Account",
@@ -187,6 +272,12 @@ const copy = {
         "Without an active plan, a specialist video shows Upgrade plan.",
         "With a plan, the next video opens only after the previous challenge is passed.",
       ],
+      metricsTitle: "Academy impact",
+      metricsHint: "These figures are display samples and count up as the strip comes into view.",
+      metricStudents: "Active Students",
+      metricHours: "Hours of Specialized Training",
+      metricSatisfaction: "Student Satisfaction Rate",
+      metricTeams: "Trained Teams & Businesses",
     },
     learn: {
       back: "All paths",
@@ -277,6 +368,81 @@ const copy = {
       back: "Back to articles",
       missing: "Article not found",
       by: "Author",
+    },
+    aboutPage: {
+      kicker: "Specialized Sales & Negotiation Academy",
+      title: "Online, direct, and telephone sales, closed with high-stakes negotiation.",
+      missionTitle: "Mission",
+      mission:
+        "Empowering businesses and professionals to master online, direct, and telephone sales along with high-stakes negotiation.",
+      visionTitle: "Vision",
+      vision:
+        "A reference academy where every sales team turns a conversation into a clear decision, using current global standards and professional ethics.",
+      statement:
+        "NexSell is not a slogan deck. Each path is practice, feedback, and a standard a seller can use tomorrow at the table, on the phone, or in a message.",
+      valuesTitle: "Core values of the academy",
+      values: [
+        {
+          title: "Actionable Training",
+          text: "Every lesson ties to a line, an objection, or a close. Slides without practice do not count.",
+        },
+        {
+          title: "Global Sales Standards",
+          text: "Frameworks sit next to professional sales teams, then get rewritten for the markets we actually sell in.",
+        },
+        {
+          title: "Continuous Mentorship",
+          text: "After the film, the challenge and the support chat stay on the path so practice is not left alone.",
+        },
+        {
+          title: "Ethical Negotiation",
+          text: "Concessions, pressure, and the close move without concealment and without spending the other side’s trust.",
+        },
+      ],
+      leadTitle: "Founder and lead trainer",
+      leadName: "Amirhossein Ghari",
+      leadRole: "Sales Strategist & Master Negotiator",
+      leadBadge: "Academy founder",
+      leadBio:
+        "Amirhossein Ghari has coached online, direct, and telephone sales teams through hard conversations. He built NexSell on actionable training, global standards, and negotiation ethics so managers and sellers both know the next move.",
+      credentials: [
+        "Paths for online, in-person, and telephone sales",
+        "Coach for high-stakes negotiation",
+        "Author of the academy’s field notes",
+      ],
+    },
+    contactPage: {
+      kicker: "Contact Us",
+      title: "Direct channels, without a second message form.",
+      intro: "Address, phone, email, and hours live here. Messages and tickets go through the support icon at the bottom-left.",
+      hq: "Headquarters",
+      address: "Tehran, Valiasr Street, Technology Tower, Floor 8",
+      phone: "Direct Phone Lines",
+      phones: [
+        { label: "021-88880000", href: "tel:+982188880000" },
+        { label: "0912-000-0000", href: "tel:+989120000000" },
+      ],
+      email: "Email Address",
+      emails: [
+        { label: "support@academy.com", href: "mailto:support@academy.com" },
+        { label: "info@academy.com", href: "mailto:info@academy.com" },
+      ],
+      hours: "Working Hours",
+      hoursText: "Sat–Wed 09:00 – 18:00",
+      socialTitle: "Social media",
+      socials: [
+        { name: "Instagram", handle: "@academy_sales", href: "https://instagram.com/academy_sales", tone: "instagram" },
+        { name: "Telegram", handle: "@academy_support", href: "https://t.me/academy_support", tone: "telegram" },
+        { name: "LinkedIn", handle: "Academy Sales & Negotiation", href: "https://www.linkedin.com/company/academy-sales-negotiation", tone: "linkedin" },
+        {
+          name: "YouTube / Aparat",
+          handle: "Academy Official",
+          href: "https://www.youtube.com/@academyofficial",
+          aparat: "https://www.aparat.com/academyofficial",
+          tone: "video",
+        },
+      ],
+      widgetNote: "For instant AI answers or tickets, use the support widget at the bottom-left.",
     },
   },
 } as const;

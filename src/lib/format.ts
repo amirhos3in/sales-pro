@@ -2,6 +2,10 @@ export function faNumber(value: number) {
   return new Intl.NumberFormat("fa-IR").format(value);
 }
 
+export function localeNumber(value: number, lang: "fa" | "en") {
+  return new Intl.NumberFormat(lang === "fa" ? "fa-IR" : "en-US").format(value);
+}
+
 export function toman(value: number) {
   return `${faNumber(value)} تومان`;
 }

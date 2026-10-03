@@ -83,7 +83,7 @@ function ProfileFields({
   );
 }
 
-export function AboutScreen() {
+export function AboutMeScreen() {
   return (
     <AccountGate title="درباره من">
       <AboutForm />

@@ -1,4 +1,4 @@
-import { AboutScreen } from "@/components/account-screens";
+import { AboutScreen } from "@/components/about-screen";
 
 export default function AboutPage() {
   return <AboutScreen />;

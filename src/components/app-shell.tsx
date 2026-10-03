@@ -60,10 +60,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/services", label: copy.nav.services },
     { href: "/support", label: copy.nav.support },
     { href: "/subscription", label: copy.nav.plans },
+    { href: "/about", label: copy.nav.about },
+    { href: "/contact", label: copy.nav.contact },
   ];
   const menu = [
     { href: "/profile", label: copy.menu.profile, icon: UserRound },
-    { href: "/about", label: copy.menu.about, icon: UserRound },
+    { href: "/me", label: copy.menu.about, icon: UserRound },
     { href: "/subscription", label: copy.menu.buy, icon: BadgeCheck },
     { href: "/wallet", label: copy.menu.wallet, icon: Wallet },
     { href: "/progress", label: copy.menu.progress, icon: ChartNoAxesCombined },
