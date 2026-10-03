@@ -9,7 +9,6 @@ import {
   LogOut,
   Menu,
   Moon,
-  Newspaper,
   Sun,
   UserRound,
   Wallet,
@@ -57,6 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const nav = [
     { href: "/", label: copy.nav.home },
+    { href: "/articles", label: copy.nav.articles },
     { href: "/services", label: copy.nav.services },
     { href: "/support", label: copy.nav.support },
     { href: "/subscription", label: copy.nav.plans },
@@ -64,7 +64,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const menu = [
     { href: "/profile", label: copy.menu.profile, icon: UserRound },
     { href: "/about", label: copy.menu.about, icon: UserRound },
-    { href: "/articles", label: copy.menu.articles, icon: Newspaper },
     { href: "/subscription", label: copy.menu.buy, icon: BadgeCheck },
     { href: "/wallet", label: copy.menu.wallet, icon: Wallet },
     { href: "/progress", label: copy.menu.progress, icon: ChartNoAxesCombined },
@@ -86,7 +85,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
 
-          <nav className="ms-6 hidden items-center gap-1 md:flex">
+          <nav className="ms-4 hidden min-w-0 items-center gap-0.5 overflow-x-auto md:flex">
             {nav.map((item) => (
               <Link
                 key={item.href}

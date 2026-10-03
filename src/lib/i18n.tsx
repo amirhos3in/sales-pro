@@ -10,6 +10,7 @@ const copy = {
     brandLine: "آکادمی مهارت‌های فروش",
     nav: {
       home: "خانه",
+      articles: "مقالات",
       services: "خدمات",
       support: "پشتیبانی",
       plans: "اشتراک",
@@ -132,12 +133,21 @@ const copy = {
       luxuryBody: "این مسیر درگاه را شبیه‌سازی می‌کند و دسترسی ویدیوهای ویژه را روشن می‌کند.",
       open: "خرید و ارتقای پلن",
     },
+    articlesPage: {
+      title: "مقالات",
+      intro: "یادداشت‌های کوتاه فروش آنلاین، حضوری، تلفنی و مذاکره. هر کدام را تا آخر بخوانید.",
+      more: "ادامه مطلب",
+      back: "بازگشت به مقالات",
+      missing: "مقاله پیدا نشد",
+      by: "نویسنده",
+    },
   },
   en: {
     brand: "NexSell",
     brandLine: "Sales skills academy",
     nav: {
       home: "Home",
+      articles: "Articles",
       services: "Services",
       support: "Support",
       plans: "Plans",
@@ -259,6 +269,14 @@ const copy = {
       luxury: "Practice Gold and VIP checkout",
       luxuryBody: "This runs the simulated gateway and turns specialist videos on.",
       open: "Buy and upgrade",
+    },
+    articlesPage: {
+      title: "Articles",
+      intro: "Short notes on online, in-person, and phone selling, plus negotiation. Open any piece to read it through.",
+      more: "Read more",
+      back: "Back to articles",
+      missing: "Article not found",
+      by: "Author",
     },
   },
 } as const;
