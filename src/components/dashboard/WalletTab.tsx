@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
+import { useWallet } from "@/hooks/useWallet";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
@@ -22,6 +23,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
   const { copy, lang } = useI18n();
   const text = copy.dash;
   const { updateProfile } = useAuth();
+  const { walletBalance, progressPercent } = useWallet();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(PRESETS[0]);
   const rows = user.transactions ?? [];
@@ -63,10 +65,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
           {text.cashbackEarned}: {localeNumber(user.cashbackEarned, lang)} {text.toman}
         </p>
         <CashbackBadge amount={user.cashbackEarned} className="mt-3" />
-        <div className="mt-6">
-          <CashbackGoalBar />
-        </div>
-        <button type="button" className="mt-2 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
+        <button type="button" className="mt-6 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
           {text.deposit}
         </button>
       </section>
@@ -74,6 +73,13 @@ export function WalletTab({ user }: { user: AcademyUser }) {
       <section className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F3E5AB 100%)", color: "#0B132B" }}>
         <p className="text-sm font-semibold">{text.txCashback}</p>
         <p className="mt-2 text-sm leading-7">{text.cashback}</p>
+      </section>
+
+      <section className="glass rounded-[28px] p-5" style={frostStyle}>
+        <p className="text-sm font-medium leading-7">
+          موجودی فعلی: {localeNumber(walletBalance, lang)} تومان | {localeNumber(progressPercent, lang)}% تا هدف اشتراک سالانه
+        </p>
+        <CashbackGoalBar />
       </section>
 
       <section className="glass overflow-hidden rounded-[28px]" style={frostStyle}>

@@ -18,7 +18,7 @@ const glass = {
   WebkitBackdropFilter: "blur(12px)",
 };
 
-export function CashbackGoalBar() {
+export function CashbackGoalBar({ compact = false }: { compact?: boolean }) {
   const { lang } = useI18n();
   const { currentUser } = useAuth();
   const redeem = useWalletRedeem();
@@ -39,7 +39,7 @@ export function CashbackGoalBar() {
 
   return (
     <section className="px-1 pb-2 pt-1">
-      <div dir="ltr" className="relative mx-3 mt-8 mb-10 h-3">
+      <div dir="ltr" className={compact ? "relative mx-2 mt-5 mb-8 h-3" : "relative mx-3 mt-8 mb-10 h-3"}>
         <div
           className="absolute inset-0 overflow-hidden rounded-full border border-white/10 bg-white/5"
           style={glass}
