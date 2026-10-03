@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthProvider } from "@/context/AuthContext";
 import { GateProvider } from "@/components/gates";
 import { SupportWidget } from "@/components/support-widget";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,11 +20,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <I18nProvider>
         <StoreProvider>
+          <AuthProvider>
           <GateProvider>
             {children}
             <SupportWidget />
             <ToastHost />
           </GateProvider>
+          </AuthProvider>
         </StoreProvider>
       </I18nProvider>
     </ThemeProvider>

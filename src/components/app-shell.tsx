@@ -5,7 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   BadgeCheck,
+  BookOpen,
   ChartNoAxesCombined,
+  LayoutDashboard,
   LogOut,
   Menu,
   Moon,
@@ -13,7 +15,7 @@ import {
   UserRound,
   Wallet,
 } from "lucide-react";
-import { useGate } from "@/components/gates";
+import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,9 +48,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { ready, user, logout } = useStore();
+  const { ready: authReady, isAuthenticated, currentUser, logout: endSession } = useAuth();
   const { copy, lang, setLang, dir } = useI18n();
   const { theme, toggle } = useThemeMode();
-  const { openAuth } = useGate();
   const [open, setOpen] = useState(false);
   const total = allVideoLessons().length;
   const passed = user?.passed.length ?? 0;
@@ -121,7 +123,50 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Button variant="outline" size="icon" className="rounded-full" onClick={toggle} aria-label={theme}>
               {theme === "dark" ? <Sun /> : <Moon />}
             </Button>
-            {ready && user ? (
+            {authReady && isAuthenticated && currentUser ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="glass flex items-center gap-2 rounded-full py-1 ps-1 pe-3"
+                  style={{ backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+                >
+                  <Avatar>
+                    <AvatarFallback>{currentUser.name.slice(0, 1)}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden max-w-28 truncate text-sm sm:inline">{currentUser.name}</span>
+                  <span className="rounded-full bg-[#D4AF37] px-2 py-0.5 text-[10px] font-medium text-[#0B132B]">
+                    {currentUser.plan === "vip" ? copy.session.gold : copy.session.free}
+                  </span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>{currentUser.phone}</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                      <LayoutDashboard />
+                      {copy.session.panel}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/dashboard?tab=wallet")}>
+                      <Wallet />
+                      {copy.session.wallet}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/dashboard?tab=courses")}>
+                      <BookOpen />
+                      {copy.session.courses}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      endSession();
+                      router.push("/");
+                    }}
+                  >
+                    <LogOut />
+                    {copy.session.signOut}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : ready && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 rounded-full py-1 ps-1 pe-3 ring-1 ring-[color:var(--glass-border)] hover:bg-foreground/5">
                   <Avatar>
@@ -155,9 +200,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button className="h-9 bg-[#D4AF37] px-3 text-[#0B132B] hover:bg-[#E5C07B]" onClick={openAuth}>
-                {copy.menu.login}
-              </Button>
+              <Link
+                href="/login"
+                className="glass inline-flex h-9 items-center rounded-full px-3 text-sm"
+                style={{ backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+              >
+                {copy.session.join}
+              </Link>
             )}
             <Button
               variant="outline"
@@ -192,6 +241,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             ))}
             <p className="mt-4 px-3 text-xs text-muted-foreground">{copy.menu.account}</p>
+            {isAuthenticated && currentUser ? (
+              <>
+                <Link href="/dashboard" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">
+                  {copy.session.panel}
+                </Link>
+                <Link href="/dashboard?tab=wallet" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">
+                  {copy.session.wallet}
+                </Link>
+                <Link href="/dashboard?tab=courses" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">
+                  {copy.session.courses}
+                </Link>
+                <button
+                  className="rounded-xl px-3 py-2 text-start text-sm text-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    endSession();
+                    setOpen(false);
+                    router.push("/");
+                  }}
+                >
+                  {copy.session.signOut}
+                </button>
+              </>
+            ) : (
+              <Link href="/login" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">
+                {copy.session.join}
+              </Link>
+            )}
             {menu.map((item) => (
               <Link
                 key={item.href}
