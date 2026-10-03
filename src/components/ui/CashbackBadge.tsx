@@ -5,12 +5,13 @@ import { Sparkles } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-function grouped(amount: number) {
-  return Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 function persianDigits(value: string) {
   return value.replace(/\d/g, (digit) => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
+}
+
+export function formatPrice(amount: number, lang: "fa" | "en" = "fa") {
+  const grouped = Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return lang === "fa" ? persianDigits(grouped) : grouped;
 }
 
 export function CashbackBadge({ amount, className }: { amount: number; className?: string }) {
@@ -18,9 +19,7 @@ export function CashbackBadge({ amount, className }: { amount: number; className
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
   const tipId = useId();
-  const label = lang === "fa"
-    ? `+ ${persianDigits(grouped(amount))} تومان ${copy.dash.cashbackGift}`
-    : `+ ${grouped(amount)} Toman ${copy.dash.cashbackGift}`;
+  const label = `+ ${formatPrice(amount, lang)} ${copy.dash.cashbackGift}`;
 
   useEffect(() => {
     if (!open) return;

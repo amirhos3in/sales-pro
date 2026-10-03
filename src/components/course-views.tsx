@@ -24,9 +24,9 @@ import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const planLabel: Record<PlanId, string> = {
-  eco: "اکو",
-  plus: "پلاس",
-  pro: "پرو",
+  eco: "ماهانه",
+  plus: "۳ ماهه",
+  pro: "سالانه",
 };
 
 export function TrackScreen({ slug }: { slug: string }) {
