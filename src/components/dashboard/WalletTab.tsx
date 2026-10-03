@@ -13,12 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
-import { settleCheckout } from "@/lib/checkout";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { PLAN_RANK, planById, type PlanId } from "@/lib/plans";
-import { subscriptionForPlan } from "@/lib/subscription";
-import { useStore } from "@/lib/store";
 
 const PRESETS = [200_000, 500_000, 1_000_000];
 
@@ -26,7 +22,6 @@ export function WalletTab({ user }: { user: AcademyUser }) {
   const { copy, lang } = useI18n();
   const text = copy.dash;
   const { updateProfile } = useAuth();
-  const { grantPlan, user: learner } = useStore();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(PRESETS[0]);
   const rows = user.transactions ?? [];
@@ -38,25 +33,6 @@ export function WalletTab({ user }: { user: AcademyUser }) {
 
   function stamp(value: string) {
     return new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(value));
-  }
-
-  function activateFromBalance(planId: PlanId) {
-    const plan = planById(planId);
-    if (user.walletBalance < plan.price) return;
-    const currentType = user.subscription?.isActive ? user.subscription.planType : null;
-    const currentRank = currentType ? PLAN_RANK[currentType === "monthly" ? "eco" : currentType === "quarterly" ? "plus" : "pro"] : 0;
-    if (currentRank >= PLAN_RANK[planId]) {
-      toast.success(lang === "fa" ? "این پلن همین حالا فعال است." : "This plan is already active.");
-      return;
-    }
-    const result = settleCheckout(user, `اشتراک ${plan.name}`, plan.price, true);
-    updateProfile({
-      ...result.patch,
-      plan: "vip",
-      subscription: subscriptionForPlan(plan.id),
-    });
-    if (learner) grantPlan(plan.id);
-    toast.success(lang === "fa" ? `اشتراک ${plan.name} با موجودی کیف پول فعال شد.` : `${plan.name} is now active from your wallet.`);
   }
 
   function deposit() {
@@ -88,7 +64,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
         </p>
         <CashbackBadge amount={user.cashbackEarned} className="mt-3" />
         <div className="mt-6">
-          <CashbackGoalBar onActivate={activateFromBalance} />
+          <CashbackGoalBar />
         </div>
         <button type="button" className="mt-2 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
           {text.deposit}
@@ -112,7 +88,10 @@ export function WalletTab({ user }: { user: AcademyUser }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
+              {rows.map((row) => {
+                const debit = row.type === "DEBIT";
+                const signed = debit ? -Math.abs(row.amount) : row.amount;
+                return (
                 <tr key={row.id} className="border-t border-[#D4AF37]/20">
                   <td className="px-3 py-3">
                     <span>{row.title || labels[row.kind]}</span>
@@ -122,13 +101,14 @@ export function WalletTab({ user }: { user: AcademyUser }) {
                       </span>
                     ) : null}
                   </td>
-                  <td className={`px-3 py-3 font-medium ${row.amount < 0 ? "text-rose-600 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
-                    {row.amount > 0 ? "+" : ""}
-                    {localeNumber(row.amount, lang)} {text.toman}
+                  <td className={`px-3 py-3 font-medium ${signed < 0 ? "text-rose-600 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
+                    {signed > 0 ? "+" : ""}
+                    {localeNumber(signed, lang)} {text.toman}
                   </td>
-                  <td className="px-3 py-3 text-muted-foreground">{stamp(row.at)}</td>
+                  <td className="px-3 py-3 text-muted-foreground">{stamp(row.date ?? row.at)}</td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

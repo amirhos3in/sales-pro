@@ -17,6 +17,8 @@ export type WalletTx = {
   at: string;
   title?: string;
   status?: "success";
+  type?: "DEBIT";
+  date?: string;
 };
 
 export type AcademyUser = {

@@ -2,10 +2,14 @@
 
 import { useEffect, useId, useState } from "react";
 import { Check, Lock } from "lucide-react";
-import { useWallet } from "@/hooks/useWallet";
+import { useWallet, useWalletRedeem } from "@/hooks/useWallet";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import type { PlanId } from "@/lib/plans";
+import { planById, type PlanId } from "@/lib/plans";
+import { coveredPlan } from "@/lib/redeem";
+import { useAuth } from "@/context/AuthContext";
+import { goldGlassButton } from "@/components/wallet/gold-glass";
+import { WalletRedeemDialog } from "@/components/wallet/WalletRedeemDialog";
 import { cn } from "@/lib/utils";
 
 const glass = {
@@ -14,8 +18,11 @@ const glass = {
   WebkitBackdropFilter: "blur(12px)",
 };
 
-export function CashbackGoalBar({ onActivate }: { onActivate: (planId: PlanId) => void }) {
+export function CashbackGoalBar() {
   const { lang } = useI18n();
+  const { currentUser } = useAuth();
+  const redeem = useWalletRedeem();
+  const [pendingId, setPendingId] = useState<PlanId | null>(null);
   const { walletBalance, plans, maxTarget, progressPercent, unlockedPlans } = useWallet();
   const unlockedIds = new Set(unlockedPlans.map((plan) => plan.id));
   const fill = progressPercent;
@@ -56,6 +63,7 @@ export function CashbackGoalBar({ onActivate }: { onActivate: (planId: PlanId) =
         {plans.map((plan) => {
           const percent = maxTarget > 0 ? (plan.price / maxTarget) * 100 : 0;
           const reached = unlockedIds.has(plan.id);
+          const canRedeem = reached && !coveredPlan(currentUser, plan.id);
           const open = openId === plan.id;
           const remain = Math.max(0, plan.price - walletBalance);
           const remainLabel = localeNumber(remain, lang);
@@ -113,14 +121,14 @@ export function CashbackGoalBar({ onActivate }: { onActivate: (planId: PlanId) =
                   }}
                 >
                   <span className="block">{tip}</span>
-                  {reached ? (
+                  {canRedeem ? (
                     <button
                       type="button"
-                      className="mt-2 inline-flex h-9 w-full items-center justify-center rounded-xl text-xs font-medium"
-                      style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
-                      onClick={() => onActivate(plan.id)}
+                      className="mt-2 inline-flex h-9 w-full items-center justify-center rounded-xl px-2 text-[11px] font-medium"
+                      style={goldGlassButton}
+                      onClick={() => setPendingId(plan.id)}
                     >
-                      {lang === "fa" ? "فعال‌سازی سریع" : "Activate now"}
+                      فعال‌سازی ۱۰۰٪ رایگان با اعتبار کیف پول
                     </button>
                   ) : null}
                 </span>
@@ -129,6 +137,14 @@ export function CashbackGoalBar({ onActivate }: { onActivate: (planId: PlanId) =
           );
         })}
       </div>
+      <WalletRedeemDialog
+        plan={pendingId ? planById(pendingId) : null}
+        open={Boolean(pendingId)}
+        onClose={() => setPendingId(null)}
+        onConfirm={() => {
+          if (pendingId && redeem(pendingId)) setPendingId(null);
+        }}
+      />
     </section>
   );
 }
