@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useCourseAccess } from "@/components/courses/CourseCard";
+import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { useGate } from "@/components/gates";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,8 +27,8 @@ export function LessonPlayer({
 }) {
   const { copy, lang } = useI18n();
   const { ready, user, markWatched, passQuiz } = useStore();
-  const { subscribed } = useCourseAccess();
-  const { openAuth, openPaywall } = useGate();
+  const { subscribed, authenticated } = useCourseAccess();
+  const { openAuth } = useGate();
   const [quizOpen, setQuizOpen] = useState(false);
   const [answers, setAnswers] = useState<number[]>([-1, -1, -1]);
   const [result, setResult] = useState<"pass" | "fail" | null>(null);
@@ -48,7 +49,10 @@ export function LessonPlayer({
   }
 
   const { category, subtopic, lesson } = found;
-  const gate = lessonGate(category, lesson.id, user, user?.passed ?? [], subscribed);
+  const gate = lessonGate(category, lesson.id, user, user?.passed ?? [], {
+    authenticated,
+    subscriptionActive: subscribed,
+  });
   const watched = Boolean(user?.watched.includes(lesson.id));
   const passed = Boolean(user?.passed.includes(lesson.id));
   const upcoming = nextLessonId(category, lesson.id);
@@ -92,10 +96,10 @@ export function LessonPlayer({
       ) : null}
 
       {ready && gate.state === "plan" ? (
-        <LockCard
-          title={copy.learn.lockedPlan}
-          action={copy.learn.upgrade}
-          onClick={() => openPaywall()}
+        <VideoPlayer
+          title={pickText(lesson.title, lang)}
+          src={`https://www.aparat.com/video/video/embed/videohash/${lesson.aparat}/vt/frame`}
+          locked
         />
       ) : null}
 
@@ -107,17 +111,11 @@ export function LessonPlayer({
 
       {ready && gate.state === "open" ? (
         <div className="space-y-4">
-          <div className="overflow-hidden rounded-3xl border border-[color:var(--glass-border)] shadow-2xl">
-            <div className="relative aspect-video bg-[#0B132B]">
-              <iframe
-                title={pickText(lesson.title, lang)}
-                src={`https://www.aparat.com/video/video/embed/videohash/${lesson.aparat}/vt/frame`}
-                className="absolute inset-0 h-full w-full"
-                allow="autoplay; fullscreen"
-                allowFullScreen
-              />
-            </div>
-          </div>
+          <VideoPlayer
+            title={pickText(lesson.title, lang)}
+            src={`https://www.aparat.com/video/video/embed/videohash/${lesson.aparat}/vt/frame`}
+            locked={false}
+          />
           {passed || watched ? (
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}

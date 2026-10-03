@@ -66,7 +66,7 @@ export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
           </div>
         </div>
         <p className="mt-3 inline-flex rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-medium text-[#0B132B]">
-          {user.plan === "vip" ? copy.dash.vipPlan : copy.dash.freePlan}
+          {user.subscription?.isActive ? copy.dash.vipPlan : copy.dash.freePlan}
         </p>
         <nav className="mt-5 flex flex-col gap-1">{links(false)}</nav>
       </aside>

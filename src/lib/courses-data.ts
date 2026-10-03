@@ -770,11 +770,13 @@ export function lessonGate(
   lessonId: string,
   user: { isPremium: boolean } | null,
   passed: string[],
-  subscribed = false,
+  access: { authenticated: boolean; subscriptionActive: boolean } = {
+    authenticated: Boolean(user),
+    subscriptionActive: Boolean(user?.isPremium),
+  },
 ): Gate {
-  const unlocked = Boolean(user?.isPremium) || subscribed;
-  if (!user && !subscribed) return { state: "auth" };
-  if (category.tierRequired === "pro" && !unlocked) return { state: "plan" };
+  if (category.tierRequired === "pro" && !access.subscriptionActive) return { state: "plan" };
+  if (!access.authenticated) return { state: "auth" };
   const list = lessonsOf(category);
   const index = list.findIndex((item) => item.lesson.id === lessonId);
   if (index > 0) {

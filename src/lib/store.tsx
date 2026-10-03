@@ -8,6 +8,13 @@ import {
   useState,
 } from "react";
 import { planById, PLAN_RANK, supportSla, type PlanId } from "@/lib/plans";
+import {
+  inactiveSubscription,
+  normalizeSubscription,
+  planTypeFromId,
+  subscriptionForPlan,
+  type SubscriptionStatus,
+} from "@/lib/subscription";
 
 const KEY = "nexsell-db-v1";
 
@@ -40,6 +47,7 @@ export type UserState = {
   bio: string;
   goals: string[];
   plan: PlanId | null;
+  subscription: SubscriptionStatus;
   isPremium: boolean;
   premiumTier: PremiumTier | null;
   wallet: number;
@@ -122,6 +130,17 @@ function normalizeUser(raw: Partial<UserState>): UserState {
     raw.name?.trim().split(/\s+/).slice(1).join(" ") ||
     "";
   const plan = raw.plan ?? null;
+  const subscription = raw.subscription
+    ? normalizeSubscription(raw.subscription)
+    : plan
+      ? { isActive: true, planType: planTypeFromId(plan), expiresAt: "2026-12-31T23:59:59.000Z" }
+      : raw.isPremium
+        ? {
+            isActive: true,
+            planType: raw.premiumTier === "vip" ? "yearly" as const : "quarterly" as const,
+            expiresAt: "2026-12-31T23:59:59.000Z",
+          }
+        : inactiveSubscription;
   return {
     name: fullName(firstName, lastName) || raw.name || "کاربر",
     firstName,
@@ -133,7 +152,8 @@ function normalizeUser(raw: Partial<UserState>): UserState {
     bio: raw.bio ?? "",
     goals: raw.goals ?? [],
     plan,
-    isPremium: raw.isPremium ?? Boolean(plan),
+    subscription,
+    isPremium: subscription.isActive,
     premiumTier: raw.premiumTier ?? (plan === "pro" ? "vip" : plan ? "gold" : null),
     wallet: raw.wallet ?? 10_000_000,
     transactions: raw.transactions ?? [],
@@ -314,6 +334,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         patchUser(db.session, (current) => ({
           ...current,
           plan,
+          subscription: subscriptionForPlan(plan),
           isPremium: true,
           premiumTier: plan === "pro" ? "vip" : "gold",
           wallet: current.wallet - selected.price,
@@ -334,17 +355,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         patchUser(db.session, (current) => ({
           ...current,
           plan,
+          subscription: subscriptionForPlan(plan),
           isPremium: true,
           premiumTier: plan === "pro" ? "vip" : "gold",
         }));
       },
       activatePremium: (tier) => {
         if (!db.session || !user) return "auth";
+        const plan: PlanId = tier === "vip" ? "pro" : user.plan === "pro" ? "pro" : "plus";
         patchUser(db.session, (current) => ({
           ...current,
           isPremium: true,
           premiumTier: tier,
-          plan: tier === "vip" ? "pro" : current.plan === "pro" ? "pro" : "plus",
+          plan,
+          subscription: subscriptionForPlan(plan),
           transactions: [
             {
               id: crypto.randomUUID(),

@@ -7,8 +7,10 @@ import { CheckoutModal } from "@/components/checkout/CheckoutModal";
 import { PricingSection } from "@/components/pricing/PricingSection";
 import { useGate } from "@/components/gates";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/lib/i18n";
 import { toman } from "@/lib/format";
+import { subscriptionForPlan } from "@/lib/subscription";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -16,6 +18,7 @@ import { cn } from "@/lib/utils";
 export function SubscriptionScreen() {
   const router = useRouter();
   const { ready, user, grantPlan } = useStore();
+  const { updateProfile } = useAuth();
   const { openPaywall } = useGate();
   const { copy } = useI18n();
   const [pending, setPending] = useState<PlanId | null>(null);
@@ -80,7 +83,9 @@ export function SubscriptionScreen() {
         itemName={selected ? `اشتراک ${selected.name}` : ""}
         price={selected?.price ?? 0}
         onPaid={() => {
-          if (selected) grantPlan(selected.id);
+          if (!selected) return;
+          grantPlan(selected.id);
+          updateProfile({ plan: "vip", subscription: subscriptionForPlan(selected.id) });
         }}
       />
     </div>

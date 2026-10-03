@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </Avatar>
                   <span className="hidden max-w-28 truncate text-sm sm:inline">{currentUser.name}</span>
                   <span className="rounded-full bg-[#D4AF37] px-2 py-0.5 text-[10px] font-medium text-[#0B132B]">
-                    {currentUser.plan === "vip" ? copy.session.gold : copy.session.free}
+                    {currentUser.subscription?.isActive ? copy.session.gold : copy.session.free}
                   </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">

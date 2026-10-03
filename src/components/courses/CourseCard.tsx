@@ -6,6 +6,7 @@ import { Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { lessonsOf, pickText, type Category, type CourseTier } from "@/lib/courses-data";
 import { useI18n } from "@/lib/i18n";
+import { normalizeSubscription } from "@/lib/subscription";
 import { useStore } from "@/lib/store";
 
 const frost = { backdropFilter: "blur(16px) saturate(1.6)" };
@@ -13,10 +14,13 @@ const goldButton = { backgroundColor: "#D4AF37", color: "#0B132B" };
 
 export function useCourseAccess() {
   const { user } = useStore();
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticated } = useAuth();
+  const academy = normalizeSubscription(currentUser?.subscription);
+  const learner = normalizeSubscription(user?.subscription);
   return {
     user,
-    subscribed: Boolean(user?.isPremium) || currentUser?.plan === "vip",
+    subscribed: academy.isActive || learner.isActive,
+    authenticated: isAuthenticated || Boolean(user),
     passed: user?.passed ?? [],
   };
 }

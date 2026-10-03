@@ -13,6 +13,7 @@ import { calculateCashback, finalPayablePrice, quoteCashback } from "@/lib/cashb
 import { cashbackToast, settleCheckout } from "@/lib/checkout";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { subscriptionForPlan } from "@/lib/subscription";
 import { useStore, type PremiumTier } from "@/lib/store";
 
 type GateValue = {
@@ -248,7 +249,11 @@ function PaywallModal({
     }
     const itemName = tier === "vip" ? copy.pay.vip : copy.pay.gold;
     const result = settleCheckout(currentUser, itemName, price, useWallet);
-    updateProfile(result.patch);
+    updateProfile({
+      ...result.patch,
+      plan: "vip",
+      subscription: subscriptionForPlan(tier === "vip" ? "pro" : "plus"),
+    });
     if (user) activatePremium(tier);
     if (result.quote.cashback > 0) toast.success(cashbackToast(localeNumber(result.quote.cashback, lang), lang));
     else toast.success(copy.pay.done);

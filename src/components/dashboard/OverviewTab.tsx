@@ -28,7 +28,10 @@ export function OverviewTab({ user }: { user: AcademyUser }) {
   const hello = hour < 17 ? text.morning : text.evening;
   const learning = coursesInProgress(learner?.passed ?? []);
   const analyses = DAILY_CALL_QUOTA - remainingCalls;
-  const expiry = new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "long" }).format(new Date(VIP_EXPIRES));
+  const active = Boolean(user.subscription?.isActive);
+  const expiry = new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "long" }).format(
+    new Date(user.subscription?.expiresAt ?? VIP_EXPIRES),
+  );
   const stats = [
     { label: text.statCourses, value: localeNumber(learning, lang) },
     { label: text.statAnalyses, value: localeNumber(analyses, lang), hint: text.analysesToday },
@@ -48,12 +51,12 @@ export function OverviewTab({ user }: { user: AcademyUser }) {
         </h1>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="inline-flex w-fit rounded-full bg-[#D4AF37] px-3 py-1 text-xs font-medium text-[#0B132B]">
-            {user.plan === "vip" ? text.vipPlan : text.freePlan}
+            {active ? text.vipPlan : text.freePlan}
           </span>
           <div className="glass flex flex-1 flex-col gap-3 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between" style={frostStyle}>
             <div>
               <p className="text-xs text-[#D4AF37]">{text.expiry}</p>
-              <p className="mt-1 text-sm font-medium">{user.plan === "vip" ? expiry : text.noPlan}</p>
+              <p className="mt-1 text-sm font-medium">{active ? expiry : text.noPlan}</p>
             </div>
             <Link href="/subscription" className="inline-flex h-10 items-center justify-center rounded-2xl px-4 text-sm font-medium" style={goldButtonStyle}>
               {copy.home.upgrade}

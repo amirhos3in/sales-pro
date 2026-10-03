@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { englishDigits, phoneKey, validPhone } from "@/lib/store";
+import { inactiveSubscription, normalizeSubscription, type SubscriptionStatus } from "@/lib/subscription";
 
 const KEY = "academy_user_session";
 
@@ -25,6 +26,7 @@ export type AcademyUser = {
   jobTitle: string;
   bio: string;
   plan: AcademyPlan;
+  subscription: SubscriptionStatus;
   walletBalance: number;
   cashbackEarned: number;
   avatarId?: string;
@@ -54,6 +56,11 @@ const seedProfile = {
   jobTitle: "استراتژیست فروش",
   bio: "فروش آنلاین، حضوری و تلفنی را با مذاکرهٔ دقیق تمرین می‌کنم.",
   plan: "vip" as const,
+  subscription: {
+    isActive: true,
+    planType: "quarterly" as const,
+    expiresAt: "2026-12-31T23:59:59.000Z",
+  },
   walletBalance: 2_450_000,
   cashbackEarned: 180_000,
   transactions: [
@@ -74,7 +81,7 @@ function readSession(): AcademySession {
     if (!parsed.isAuthenticated || !user || typeof user.phone !== "string" || typeof user.name !== "string") {
       return emptySession;
     }
-    return { isAuthenticated: true, currentUser: user };
+    return { isAuthenticated: true, currentUser: withSubscription(user) };
   } catch {
     return emptySession;
   }
@@ -84,14 +91,25 @@ function otpCode(value: string) {
   return englishDigits(value).replace(/\D/g, "");
 }
 
+function withSubscription(user: AcademyUser): AcademyUser {
+  if (user.subscription) return { ...user, subscription: normalizeSubscription(user.subscription) };
+  if (user.plan === "vip") {
+    return {
+      ...user,
+      subscription: { isActive: true, planType: "quarterly", expiresAt: "2026-12-31T23:59:59.000Z" },
+    };
+  }
+  return { ...user, subscription: inactiveSubscription };
+}
+
 function seededUser(patch: Partial<AcademyUser> & { phone: string }): AcademyUser {
-  return {
+  return withSubscription({
     ...seedProfile,
     ...patch,
     phone: patch.phone,
     name: patch.name?.trim() || seedProfile.name,
     jobTitle: patch.jobTitle?.trim() || seedProfile.jobTitle,
-  };
+  });
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

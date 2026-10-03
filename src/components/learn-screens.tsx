@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/i18n";
 
 export function CategoryScreen({ categoryId }: { categoryId: string }) {
   const { copy, lang } = useI18n();
-  const { user, subscribed, passed } = useCourseAccess();
+  const { user, subscribed, authenticated, passed } = useCourseAccess();
   const category = findCategory(categoryId);
   if (!category) return null;
 
@@ -37,7 +37,10 @@ export function CategoryScreen({ categoryId }: { categoryId: string }) {
           <h2 className="text-lg font-semibold">{pickText(subtopic.title, lang)}</h2>
           <div className="grid gap-3">
             {subtopic.lessons.map((lesson) => {
-              const gate = lessonGate(category, lesson.id, user, passed, subscribed);
+              const gate = lessonGate(category, lesson.id, user, passed, {
+                authenticated,
+                subscriptionActive: subscribed,
+              });
               const done = passed.includes(lesson.id);
               return (
                 <Link
