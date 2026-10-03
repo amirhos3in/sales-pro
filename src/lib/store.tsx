@@ -81,6 +81,7 @@ type StoreValue = {
   ) => void;
   topUp: (amount: number) => void;
   purchase: (plan: PlanId) => { ok: boolean; message: string };
+  grantPlan: (plan: PlanId) => void;
   activatePremium: (tier: PremiumTier) => string | null;
   setLessonDone: (id: string, done: boolean) => void;
   markWatched: (id: string) => void;
@@ -327,6 +328,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           ],
         }));
         return { ok: true, message: `پلن ${selected.name} فعال شد.` };
+      },
+      grantPlan: (plan) => {
+        if (!db.session) return;
+        patchUser(db.session, (current) => ({
+          ...current,
+          plan,
+          isPremium: true,
+          premiumTier: plan === "pro" ? "vip" : "gold",
+        }));
       },
       activatePremium: (tier) => {
         if (!db.session || !user) return "auth";

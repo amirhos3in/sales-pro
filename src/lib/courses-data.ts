@@ -26,6 +26,7 @@ export type Category = {
   title: Localized;
   description: Localized;
   premium: boolean;
+  price: number;
   subtopics: Subtopic[];
 };
 
@@ -75,6 +76,7 @@ function lesson(
 export const categories: Category[] = [
   {
     id: "online",
+    price: 1_800_000,
     title: text("آموزش فروش آنلاین", "Online Sales Mastery"),
     description: text(
       "قیف، اعتماد در اینستاگرام و تبدیل توجه به گفتگوی خرید.",
@@ -214,6 +216,7 @@ export const categories: Category[] = [
   },
   {
     id: "hozuri",
+    price: 2_000_000,
     title: text("آموزش فروش حضوری", "In-Person Sales Mastery"),
     description: text(
       "زبان بدن، ورود به جلسه و بستن رو در رو بدون فشار مصنوعی.",
@@ -353,6 +356,7 @@ export const categories: Category[] = [
   },
   {
     id: "telefoni",
+    price: 1_500_000,
     title: text("آموزش فروش تلفنی", "Telesales Mastery"),
     description: text(
       "برخورد اول، مکالمه بیمه و نقشه راه تماس سرد تا قرار بعدی.",
@@ -492,6 +496,7 @@ export const categories: Category[] = [
   },
   {
     id: "mozakerah",
+    price: 2_400_000,
     title: text("آموزش مذاکره", "Negotiation Mastery"),
     description: text(
       "اصول امتیاز، مخالفت مشتری و استراتژی قبل از اینکه تخفیف تنها ابزار شود.",
@@ -631,6 +636,7 @@ export const categories: Category[] = [
   },
   {
     id: "free",
+    price: 0,
     title: text("آموزش‌های رایگان", "Free Training Hub"),
     description: text(
       "برای همه کاربران واردشده باز است و فقط با رد کردن چالش درس قبل جلو می‌رود.",

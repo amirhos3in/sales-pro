@@ -14,6 +14,8 @@ export type WalletTx = {
   kind: WalletTxKind;
   amount: number;
   at: string;
+  title?: string;
+  status?: "success";
 };
 
 export type AcademyUser = {

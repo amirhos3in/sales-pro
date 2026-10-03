@@ -210,6 +210,10 @@ const copy = {
       done: "پرداخت آزمایشی ثبت شد. پلن شما فعال است.",
       close: "بستن",
       needAuth: "اول با موبایل وارد شوید.",
+      useWallet: "استفاده از موجودی کیف پول",
+      gatewayDue: "قابل پرداخت از درگاه",
+      buyCourse: "خرید دوره",
+      txSuccess: "موفق",
     },
     support: {
       button: "پشتیبانی",
@@ -577,6 +581,10 @@ const copy = {
       done: "Practice payment saved. Your plan is active.",
       close: "Close",
       needAuth: "Sign in with your mobile first.",
+      useWallet: "Use wallet balance",
+      gatewayDue: "Payable via gateway",
+      buyCourse: "Buy course",
+      txSuccess: "Successful",
     },
     support: {
       button: "Support",

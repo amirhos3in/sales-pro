@@ -86,7 +86,14 @@ export function WalletTab({ user }: { user: AcademyUser }) {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-[#D4AF37]/20">
-                  <td className="px-3 py-3">{labels[row.kind]}</td>
+                  <td className="px-3 py-3">
+                    <span>{row.title || labels[row.kind]}</span>
+                    {row.status === "success" ? (
+                      <span className="ms-2 rounded-full bg-[#D4AF37] px-2 py-0.5 text-[10px] font-medium text-[#0B132B]">
+                        {copy.pay.txSuccess}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className={`px-3 py-3 font-medium ${row.amount < 0 ? "text-rose-600 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
                     {row.amount > 0 ? "+" : ""}
                     {localeNumber(row.amount, lang)} {text.toman}

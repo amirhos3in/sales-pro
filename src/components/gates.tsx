@@ -1,11 +1,17 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/AuthContext";
+import { calculateCashback, finalPayablePrice, quoteCashback } from "@/lib/cashback";
+import { cashbackToast, settleCheckout } from "@/lib/checkout";
+import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useStore, type PremiumTier } from "@/lib/store";
 
@@ -222,29 +228,31 @@ function PaywallModal({
   notice?: string | null;
   onClose: () => void;
 }) {
-  const { copy } = useI18n();
+  const { copy, lang } = useI18n();
   const { user, activatePremium } = useStore();
-  const { openAuth } = useGate();
+  const { currentUser, updateProfile } = useAuth();
+  const router = useRouter();
   const [tier, setTier] = useState<PremiumTier>("gold");
+  const [useWallet, setUseWallet] = useState(true);
   const [phase, setPhase] = useState<"choose" | "working" | "done">("choose");
+  const tierPrice = { gold: 4_728_000, vip: 5_942_000 } as const;
+  const price = tierPrice[tier];
+  const quote = quoteCashback(finalPayablePrice(price, price), useWallet ? currentUser?.walletBalance ?? 0 : 0);
 
   function buy() {
-    if (!user) {
+    if (!currentUser) {
       toast.error(copy.pay.needAuth);
       onClose();
-      openAuth();
+      router.push("/login");
       return;
     }
-    setPhase("working");
-    window.setTimeout(() => {
-      const error = activatePremium(tier);
-      if (error) {
-        setPhase("choose");
-        toast.error(copy.pay.needAuth);
-        return;
-      }
-      setPhase("done");
-    }, 1400);
+    const itemName = tier === "vip" ? copy.pay.vip : copy.pay.gold;
+    const result = settleCheckout(currentUser, itemName, price, useWallet);
+    updateProfile(result.patch);
+    if (user) activatePremium(tier);
+    if (result.quote.cashback > 0) toast.success(cashbackToast(localeNumber(result.quote.cashback, lang), lang));
+    else toast.success(copy.pay.done);
+    setPhase("done");
   }
 
   return (
@@ -292,20 +300,31 @@ function PaywallModal({
             ["gold", copy.pay.gold, copy.pay.goldText],
             ["vip", copy.pay.vip, copy.pay.vipText],
           ] as const).map(([id, title, body]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTier(id)}
-              className={`w-full rounded-2xl border p-4 text-start transition ${
-                tier === id
-                  ? "border-[#D4AF37] bg-[#D4AF37]/10"
-                  : "border-[color:var(--glass-border)]"
-              }`}
-            >
-              <span className="block font-semibold">{title}</span>
-              <span className="mt-1 block text-sm leading-6 text-muted-foreground">{body}</span>
-            </button>
+            <div key={id}>
+              <button
+                type="button"
+                onClick={() => setTier(id)}
+                className={`w-full rounded-2xl border p-4 text-start transition ${
+                  tier === id
+                    ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                    : "border-[color:var(--glass-border)]"
+                }`}
+              >
+                <span className="block font-semibold">{title}</span>
+                <span className="mt-1 block text-sm leading-6 text-muted-foreground">{body}</span>
+                <span className="mt-2 block text-sm font-medium">{localeNumber(tierPrice[id], lang)} {copy.dash.toman}</span>
+              </button>
+              <CashbackBadge amount={calculateCashback(tierPrice[id])} className="mt-2" />
+            </div>
           ))}
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={useWallet} onChange={(event) => setUseWallet(event.target.checked)} className="size-4 accent-[#D4AF37]" />
+            <span>{copy.pay.useWallet}</span>
+          </label>
+          <p className="text-sm">
+            {copy.pay.gatewayDue}: {localeNumber(quote.gatewayAmount, lang)} {copy.dash.toman}
+          </p>
+          <CashbackBadge amount={calculateCashback(quote.gatewayAmount)} />
           <Button className="h-11 w-full bg-[#D4AF37] text-[#0B132B] hover:bg-[#E5C07B]" onClick={buy}>
             {copy.pay.buy}
           </Button>

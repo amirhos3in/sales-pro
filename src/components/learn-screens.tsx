@@ -1,19 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Check, Lock, Play } from "lucide-react";
+import { CheckoutModal } from "@/components/checkout/CheckoutModal";
+import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import {
   findCategory,
   lessonGate,
   lessonsOf,
   pickText,
 } from "@/lib/courses-data";
+import { calculateCashback } from "@/lib/cashback";
+import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 
 export function CategoryScreen({ categoryId }: { categoryId: string }) {
   const { copy, lang } = useI18n();
   const { user } = useStore();
+  const [open, setOpen] = useState(false);
   const category = findCategory(categoryId);
   if (!category) return null;
   const passed = user?.passed ?? [];
@@ -31,7 +37,31 @@ export function CategoryScreen({ categoryId }: { categoryId: string }) {
         <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
           {pickText(category.description, lang)}
         </p>
+        {category.price > 0 ? (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">
+                {localeNumber(category.price, lang)} {copy.dash.toman}
+              </p>
+              <CashbackBadge amount={calculateCashback(category.price)} className="mt-2" />
+            </div>
+            <button
+              type="button"
+              className="h-10 rounded-2xl px-4 text-sm font-medium"
+              style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
+              onClick={() => setOpen(true)}
+            >
+              {copy.pay.buyCourse}
+            </button>
+          </div>
+        ) : null}
       </header>
+      <CheckoutModal
+        open={open}
+        onOpenChange={setOpen}
+        itemName={pickText(category.title, lang)}
+        price={category.price}
+      />
       {category.subtopics.map((subtopic) => (
         <section key={subtopic.id} className="space-y-3">
           <h2 className="text-lg font-semibold">{pickText(subtopic.title, lang)}</h2>
