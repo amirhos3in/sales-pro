@@ -32,7 +32,7 @@ export function HomeScreen() {
           {ready && user ? (
             <button
               type="button"
-              onClick={openPaywall}
+              onClick={() => openPaywall()}
               className="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-medium text-[#0B132B]"
             >
               {copy.home.upgrade}

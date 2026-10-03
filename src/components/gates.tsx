@@ -11,7 +11,7 @@ import { useStore, type PremiumTier } from "@/lib/store";
 
 type GateValue = {
   openAuth: () => void;
-  openPaywall: () => void;
+  openPaywall: (notice?: string) => void;
 };
 
 const GateContext = createContext<GateValue | null>(null);
@@ -25,17 +25,29 @@ export function useGate() {
 export function GateProvider({ children }: { children: React.ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [payNotice, setPayNotice] = useState<string | null>(null);
 
   return (
     <GateContext.Provider
       value={{
         openAuth: () => setAuthOpen(true),
-        openPaywall: () => setPayOpen(true),
+        openPaywall: (notice) => {
+          setPayNotice(typeof notice === "string" ? notice : null);
+          setPayOpen(true);
+        },
       }}
     >
       {children}
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-      <PaywallModal open={payOpen} onClose={() => setPayOpen(false)} />
+      <PaywallModal
+        key={payOpen ? "pay-open" : "pay-closed"}
+        open={payOpen}
+        notice={payNotice}
+        onClose={() => {
+          setPayOpen(false);
+          setPayNotice(null);
+        }}
+      />
     </GateContext.Provider>
   );
 }
@@ -201,7 +213,15 @@ function AuthModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-function PaywallModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function PaywallModal({
+  open,
+  notice,
+  onClose,
+}: {
+  open: boolean;
+  notice?: string | null;
+  onClose: () => void;
+}) {
   const { copy } = useI18n();
   const { user, activatePremium } = useStore();
   const { openAuth } = useGate();
@@ -232,7 +252,7 @@ function PaywallModal({ open, onClose }: { open: boolean; onClose: () => void })
       <div className="mb-2 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">{copy.pay.title}</h2>
-          <p className="mt-1 text-sm leading-7 text-muted-foreground">{copy.pay.body}</p>
+          <p className="mt-1 text-sm leading-7 text-muted-foreground">{notice || copy.pay.body}</p>
         </div>
         <button type="button" onClick={onClose} aria-label={copy.pay.close}>
           <X className="size-4 text-muted-foreground" />

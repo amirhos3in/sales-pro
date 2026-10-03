@@ -36,7 +36,7 @@ export function SubscriptionScreen() {
           <h2 className="text-lg font-semibold">{copy.sub.luxury}</h2>
           <p className="mt-1 text-sm leading-7 text-muted-foreground">{copy.sub.luxuryBody}</p>
         </div>
-        <Button className="h-11 bg-[#D4AF37] px-4 text-[#0B132B] hover:bg-[#E5C07B]" onClick={openPaywall}>
+        <Button className="h-11 bg-[#D4AF37] px-4 text-[#0B132B] hover:bg-[#E5C07B]" onClick={() => openPaywall()}>
           {copy.sub.open}
         </Button>
       </section>

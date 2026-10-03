@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { AudioUploader } from "@/components/services/call-analyzer/AudioUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,7 @@ export function ServicesScreen() {
           برای تیم‌ها و فروشگاه‌هایی که به‌جای دورهٔ عمومی، اسکریپت، قیف و آموزش نیروی خودشان را می‌خواهند.
         </p>
       </header>
+      <AudioUploader />
       <div className="grid gap-3 md:grid-cols-2">
         {services.map((service) => (
           <article key={service.title} className="rounded-3xl bg-card p-5 ring-1 ring-foreground/10">

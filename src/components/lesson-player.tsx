@@ -93,7 +93,7 @@ export function LessonPlayer({
         <LockCard
           title={copy.learn.lockedPlan}
           action={copy.learn.upgrade}
-          onClick={openPaywall}
+          onClick={() => openPaywall()}
         />
       ) : null}
 

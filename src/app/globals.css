@@ -163,6 +163,10 @@ html.dark .glass {
   box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.45);
 }
 
+html.dark .glass.call-auditor {
+  background: rgba(11, 19, 43, 0.78);
+}
+
 html:not(.dark) :is(a, button).bg-\[\#D4AF37\] {
   background-color: #0f1c3f;
   color: #d4af37;
