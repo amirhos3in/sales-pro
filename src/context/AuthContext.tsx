@@ -16,6 +16,7 @@ export type AcademyUser = {
   plan: AcademyPlan;
   walletBalance: number;
   cashbackEarned: number;
+  avatarId?: string;
 };
 
 export type AcademySession = {
