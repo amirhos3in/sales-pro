@@ -1,18 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Square, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { AnalysisLoading } from "@/components/services/call-analyzer/AnalysisLoading";
 import { QuotaBadge } from "@/components/QuotaBadge";
 import { useGate } from "@/components/gates";
+import { localeNumber } from "@/lib/format";
 import { useCallQuota } from "@/hooks/useCallQuota";
 import { useI18n } from "@/lib/i18n";
+import { mockAnalysisData } from "@/lib/mockAnalysisData";
 import { cn } from "@/lib/utils";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 const ACCEPT = ".mp3,.wav,.m4a,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a";
 
-type Phase = "ready" | "processing" | "queued";
+type Phase = "ready" | "loading" | "report";
 
 function clock(totalSeconds: number) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -31,7 +34,7 @@ function acceptedFile(file: File) {
 }
 
 export function AudioUploader() {
-  const { copy } = useI18n();
+  const { copy, lang } = useI18n();
   const text = copy.auditor;
   const { canAnalyze, consumeQuota } = useCallQuota();
   const { openPaywall } = useGate();
@@ -143,12 +146,13 @@ export function AudioUploader() {
       return;
     }
     busy.current = true;
-    setPhase("processing");
-    window.setTimeout(() => {
-      busy.current = false;
-      setPhase("queued");
-    }, 1600);
+    setPhase("loading");
   }
+
+  const finishAnalysis = useCallback(() => {
+    busy.current = false;
+    setPhase("report");
+  }, []);
 
   return (
     <section
@@ -165,6 +169,36 @@ export function AudioUploader() {
         <QuotaBadge />
       </div>
 
+      {phase === "loading" ? <AnalysisLoading onComplete={finishAnalysis} /> : null}
+      {phase === "report" ? (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold">{text.reportTitle}</h3>
+          <p className="mt-3 text-4xl font-semibold text-[#8C7016] dark:text-[#F3E5AB]">
+            {localeNumber(mockAnalysisData.overallScore, lang)}
+          </p>
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+            {mockAnalysisData.subMetrics.map((metric) => (
+              <li key={metric.key} className="rounded-2xl border border-[#D4AF37]/30 px-3 py-3 text-sm">
+                <span className="block text-muted-foreground">{metric.label[lang]}</span>
+                <span className="mt-1 block text-lg font-semibold">
+                  {localeNumber(metric.score, lang)}
+                  {lang === "fa" ? "٪" : "%"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setPhase("ready")}
+            className="mt-5 h-11 rounded-2xl px-4 text-sm font-medium"
+            style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
+          >
+            {text.another}
+          </button>
+        </div>
+      ) : null}
+      {phase === "ready" ? (
+      <>
       <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#0B132B]/5 p-1 dark:bg-white/5">
         {([
           ["upload", text.uploadTab],
@@ -279,25 +313,16 @@ export function AudioUploader() {
         </div>
       )}
 
-      {phase === "processing" ? (
-        <div className="mt-4 space-y-2">
-          <p className="text-sm">{text.processing}</p>
-          <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10">
-            <div className="h-full w-2/3 animate-pulse bg-gradient-to-r from-rose-400 via-violet-400 to-[#D4AF37]" />
-          </div>
-        </div>
-      ) : null}
-      {phase === "queued" ? <p className="mt-4 text-sm leading-7 text-[#8C7016] dark:text-[#D4AF37]">{text.queued}</p> : null}
-
       <button
         type="button"
         onClick={analyze}
-        disabled={phase === "processing"}
-        className="mt-5 h-11 rounded-2xl px-4 text-sm font-medium disabled:opacity-60"
+        className="mt-5 h-11 rounded-2xl px-4 text-sm font-medium"
         style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
       >
         {text.analyze}
       </button>
+      </>
+      ) : null}
     </section>
   );
 }

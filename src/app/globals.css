@@ -167,6 +167,34 @@ html.dark .glass.call-auditor {
   background: rgba(11, 19, 43, 0.78);
 }
 
+@keyframes call-wave {
+  0%,
+  100% {
+    transform: scaleY(0.22);
+  }
+  35% {
+    transform: scaleY(0.72);
+  }
+  55% {
+    transform: scaleY(1);
+  }
+  75% {
+    transform: scaleY(0.48);
+  }
+}
+
+.call-wave-bar {
+  transform-origin: center;
+  animation: call-wave 1.05s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-wave-bar {
+    animation: none;
+    transform: scaleY(0.6);
+  }
+}
+
 html:not(.dark) :is(a, button).bg-\[\#D4AF37\] {
   background-color: #0f1c3f;
   color: #d4af37;

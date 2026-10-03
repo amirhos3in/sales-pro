@@ -244,6 +244,14 @@ const copy = {
       analyze: "شروع تحلیل هوشمند تماس",
       processing: "در حال تحلیل هوشمند تماس…",
       queued: "این تماس برای تحلیل ثبت شد.",
+      steps: [
+        "در حال تبدیل گفتار به متن",
+        "سنجش شاخص‌های رفتاری و لحن صدا",
+        "شناسایی اعتراضات مشتری و پاسخ‌های فروشنده",
+        "تدوین کارنامه عملکرد و طراحی تمرینات اختصاصی",
+      ],
+      reportTitle: "کارنامه عملکرد",
+      another: "تحلیل تماس دیگر",
       quotaExceeded:
         "سقف تحلیل رایگان روزانه (۳ تماس) تکمیل شد. برای تحلیل نامحدود و آرشیو تماس‌ها، پلن حرفه‌ای را ارتقا دهید.",
     },
@@ -487,6 +495,14 @@ const copy = {
       analyze: "Analyze Sales Call",
       processing: "Analyzing the sales call…",
       queued: "This call is in for analysis.",
+      steps: [
+        "Transcribing Call Audio...",
+        "Evaluating Tone & Confidence...",
+        "Detecting Objections & Closing...",
+        "Finalizing Coaching Report...",
+      ],
+      reportTitle: "Coaching report",
+      another: "Analyze another call",
       quotaExceeded:
         "The free daily analysis cap (3 calls) is used up. Upgrade to the professional plan for unlimited analysis and a call archive.",
     },
