@@ -3,22 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckoutModal } from "@/components/checkout/CheckoutModal";
 import { PricingSection } from "@/components/pricing/PricingSection";
+import { SubscriptionModal } from "@/components/pricing/SubscriptionModal";
 import { useGate } from "@/components/gates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/lib/i18n";
 import { toman } from "@/lib/format";
-import { subscriptionForPlan } from "@/lib/subscription";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export function SubscriptionScreen() {
   const router = useRouter();
-  const { ready, user, grantPlan } = useStore();
-  const { updateProfile } = useAuth();
+  const { ready, user } = useStore();
+  const { ready: authReady, currentUser } = useAuth();
   const { openPaywall } = useGate();
   const { copy } = useI18n();
   const [pending, setPending] = useState<PlanId | null>(null);
@@ -45,7 +44,7 @@ export function SubscriptionScreen() {
           {copy.sub.open}
         </Button>
       </section>
-      <header>
+      <header data-auth-ready={authReady ? "true" : "false"}>
         <h1 className="text-2xl font-semibold">خرید اشتراک</h1>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
           سه دوره اشتراک: ماهانه، ۳ ماهه و سالانه. هر سه دسترسی کامل به چهار دوره آکادمی را باز می‌کنند و ۵٪ مبلغ درگاه به کیف پول برمی‌گردد.
@@ -61,7 +60,7 @@ export function SubscriptionScreen() {
       </header>
       <PricingSection
         onSelect={(planId) => {
-          if (!user) {
+          if (!user && !currentUser) {
             sessionStorage.setItem("nexsell-next", "/subscription");
             router.push("/login");
             return;
@@ -77,17 +76,7 @@ export function SubscriptionScreen() {
         شارژ آزمایشی بگیرید.
       </p>
 
-      <CheckoutModal
-        open={Boolean(selected)}
-        onOpenChange={(open) => !open && setPending(null)}
-        itemName={selected ? `اشتراک ${selected.name}` : ""}
-        price={selected?.price ?? 0}
-        onPaid={() => {
-          if (!selected) return;
-          grantPlan(selected.id);
-          updateProfile({ plan: "vip", subscription: subscriptionForPlan(selected.id) });
-        }}
-      />
+      <SubscriptionModal open={Boolean(selected)} plan={selected} onOpenChange={(open) => !open && setPending(null)} />
     </div>
   );
 }

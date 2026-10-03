@@ -5,18 +5,12 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { useCurrencyRate } from "@/hooks/useCurrencyRate";
-import { calculateCashback, finalPayablePrice, quoteCashback } from "@/lib/cashback";
-import { cashbackToast, settleCheckout } from "@/lib/checkout";
-import { irrToUsdAmount } from "@/lib/currency-rate";
+import { useSplitCheckout, WalletSplitFields } from "@/components/pricing/SubscriptionModal";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { useWalletContext } from "@/lib/walletContext";
-import { subscriptionForPlan } from "@/lib/subscription";
 import { useStore, type PremiumTier } from "@/lib/store";
 
 type GateValue = {
@@ -234,16 +228,30 @@ function PaywallModal({
 }) {
   const { copy, lang } = useI18n();
   const { user, activatePremium } = useStore();
-  const { currentUser, updateProfile } = useAuth();
-  const { rate } = useCurrencyRate();
-  const { recordGatewayCashback } = useWalletContext();
+  const { currentUser } = useAuth();
+  const { quote, settle } = useSplitCheckout();
   const router = useRouter();
   const [tier, setTier] = useState<PremiumTier>("gold");
   const [useWallet, setUseWallet] = useState(true);
   const [phase, setPhase] = useState<"choose" | "working" | "done">("choose");
+  const [gatewayVisited, setGatewayVisited] = useState(false);
   const tierPrice = { gold: 4_728_000, vip: 5_942_000 } as const;
   const price = tierPrice[tier];
-  const quote = quoteCashback(finalPayablePrice(price, price), useWallet ? currentUser?.walletBalance ?? 0 : 0);
+  const split = quote(price, useWallet);
+  const planId = tier === "vip" ? "pro" : "plus";
+
+  function finish() {
+    const itemName = tier === "vip" ? copy.pay.vip : copy.pay.gold;
+    const result = settle(price, useWallet, itemName, planId);
+    if (!result.ok) {
+      toast.error(lang === "fa" ? "موجودی کیف پول کافی نیست." : "The wallet balance is not enough.");
+      setPhase("choose");
+      return;
+    }
+    if (user) activatePremium(tier);
+    toast.success(result.split.direct ? (lang === "fa" ? "اشتراک با موجودی کیف پول فعال شد." : "Activated from your wallet.") : copy.pay.done);
+    setPhase("done");
+  }
 
   function buy() {
     if (!currentUser) {
@@ -252,18 +260,13 @@ function PaywallModal({
       router.push("/login");
       return;
     }
-    const itemName = tier === "vip" ? copy.pay.vip : copy.pay.gold;
-    const result = settleCheckout(currentUser, itemName, price, useWallet);
-    recordGatewayCashback(irrToUsdAmount(result.quote.gatewayAmount * 10, rate.usdToIrr));
-    updateProfile({
-      ...result.patch,
-      plan: "vip",
-      subscription: subscriptionForPlan(tier === "vip" ? "pro" : "plus"),
-    });
-    if (user) activatePremium(tier);
-    if (result.quote.cashback > 0) toast.success(cashbackToast(localeNumber(result.quote.cashback, lang), lang));
-    else toast.success(copy.pay.done);
-    setPhase("done");
+    if (split.direct) {
+      finish();
+      return;
+    }
+    setGatewayVisited(true);
+    setPhase("working");
+    window.setTimeout(finish, 500);
   }
 
   return (
@@ -278,7 +281,7 @@ function PaywallModal({
         </button>
       </div>
       {phase === "working" ? (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-3" data-gateway-step="charge" data-gateway-visited={gatewayVisited ? "true" : "false"}>
           <p className="text-sm">{copy.pay.working}</p>
           <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
             <motion.div
@@ -325,19 +328,11 @@ function PaywallModal({
                 <span className="mt-1 block text-sm leading-6 text-muted-foreground">{body}</span>
                 <span className="mt-2 block text-sm font-medium">{localeNumber(tierPrice[id], lang)} {copy.dash.toman}</span>
               </button>
-              <CashbackBadge amount={calculateCashback(tierPrice[id])} className="mt-2" />
             </div>
           ))}
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={useWallet} onChange={(event) => setUseWallet(event.target.checked)} className="size-4 accent-[#D4AF37]" />
-            <span>{copy.pay.useWallet}</span>
-          </label>
-          <p className="text-sm">
-            {copy.pay.gatewayDue}: {localeNumber(quote.gatewayAmount, lang)} {copy.dash.toman}
-          </p>
-          <CashbackBadge amount={calculateCashback(quote.gatewayAmount)} />
-          <Button className="h-11 w-full bg-[#D4AF37] text-[#0B132B] hover:bg-[#E5C07B]" onClick={buy}>
-            {copy.pay.buy}
+          <WalletSplitFields planToman={price} useWallet={useWallet} onToggle={setUseWallet} split={split} />
+          <Button className="h-11 w-full bg-[#D4AF37] text-[#0B132B] hover:bg-[#E5C07B]" data-pay-cta onClick={buy}>
+            {split.direct ? (lang === "fa" ? "فعال‌سازی مستقیم با موجودی کیف پول" : "Activate directly with wallet balance") : copy.pay.buy}
           </Button>
         </div>
       ) : null}

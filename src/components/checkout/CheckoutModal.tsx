@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import { goldButtonStyle } from "@/components/dashboard/style";
 import {
   Dialog,
@@ -13,13 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/context/AuthContext";
-import { useCurrencyRate } from "@/hooks/useCurrencyRate";
-import { calculateCashback, quoteCashback, finalPayablePrice } from "@/lib/cashback";
-import { cashbackToast, settleCheckout } from "@/lib/checkout";
-import { irrToUsdAmount } from "@/lib/currency-rate";
-import { localeNumber } from "@/lib/format";
+import { useSplitCheckout, WalletSplitFields } from "@/components/pricing/SubscriptionModal";
 import { useI18n } from "@/lib/i18n";
-import { useWalletContext } from "@/lib/walletContext";
 
 export function CheckoutModal({
   open,
@@ -57,14 +51,13 @@ export function CheckoutForm({
   onClose?: () => void;
 }) {
   const { copy, lang } = useI18n();
-  const { currentUser, updateProfile } = useAuth();
-  const { rate } = useCurrencyRate();
-  const { recordGatewayCashback } = useWalletContext();
+  const { currentUser } = useAuth();
   const router = useRouter();
+  const { quote, settle } = useSplitCheckout();
   const [useWallet, setUseWallet] = useState(true);
-  const payable = finalPayablePrice(price, price);
-  const walletUsed = useWallet ? currentUser?.walletBalance ?? 0 : 0;
-  const quote = quoteCashback(payable, walletUsed);
+  const [charging, setCharging] = useState(false);
+  const split = quote(price, useWallet);
+  const fa = lang === "fa";
 
   function pay() {
     if (!currentUser) {
@@ -72,49 +65,57 @@ export function CheckoutForm({
       router.push("/login");
       return;
     }
-    const result = settleCheckout(currentUser, itemName, price, useWallet);
-    updateProfile(result.patch);
-    recordGatewayCashback(irrToUsdAmount(result.quote.gatewayAmount * 10, rate.usdToIrr));
-    onPaid?.();
-    if (result.quote.cashback > 0) {
-      const amountLabel = lang === "fa"
-        ? localeNumber(result.quote.cashback, "fa")
-        : localeNumber(result.quote.cashback, "en");
-      toast.success(cashbackToast(amountLabel, lang));
-    } else {
-      toast.success(copy.pay.done);
+    if (split.direct) {
+      const result = settle(price, useWallet, itemName);
+      if (!result.ok) {
+        toast.error(fa ? "موجودی کیف پول کافی نیست." : "The wallet balance is not enough.");
+        return;
+      }
+      onPaid?.();
+      toast.success(fa ? "با موجودی کیف پول فعال شد." : "Activated from your wallet.");
+      onClose?.();
+      return;
     }
-    onClose?.();
+    setCharging(true);
+    window.setTimeout(() => {
+      const result = settle(price, useWallet, itemName);
+      if (!result.ok) {
+        toast.error(fa ? "موجودی کیف پول کافی نیست." : "The wallet balance is not enough.");
+        setCharging(false);
+        return;
+      }
+      onPaid?.();
+      toast.success(copy.pay.done);
+      onClose?.();
+    }, 500);
   }
 
   return (
-    <>
+    <div data-gateway-visited={charging ? "true" : "false"}>
       <DialogHeader>
         <DialogTitle>{itemName}</DialogTitle>
         <DialogDescription>
-          {copy.sub.finalPrice}: {localeNumber(payable, lang)} {copy.dash.toman}
+          {fa ? "پرداخت ترکیبی از کیف پول دلاری و درگاه" : "Split the payment between your dollar wallet and the gateway."}
         </DialogDescription>
       </DialogHeader>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={useWallet}
-          onChange={(event) => setUseWallet(event.target.checked)}
-          className="size-4 accent-[#D4AF37]"
-        />
-        <span>{copy.pay.useWallet}</span>
-      </label>
-      <p className="text-sm text-muted-foreground">
-        {copy.sub.fromWallet}: {localeNumber(quote.walletAmount, lang)} {copy.dash.toman}
-      </p>
-      <p className="text-sm">
-        {copy.pay.gatewayDue}: {localeNumber(quote.gatewayAmount, lang)} {copy.dash.toman}
-      </p>
-      <CashbackBadge amount={calculateCashback(quote.gatewayAmount)} />
-      {quote.cashback === 0 ? <p className="text-sm text-muted-foreground">{copy.sub.noCashback}</p> : null}
-      <button type="button" className="h-11 rounded-2xl text-sm font-medium" style={goldButtonStyle} onClick={pay}>
-        {copy.pay.buy}
-      </button>
-    </>
+      {charging ? (
+        <p className="text-sm leading-7" data-gateway-step="charge">
+          {fa ? "در حال پرداخت باقی‌مانده در درگاه…" : "Paying the remainder at the gateway…"}
+        </p>
+      ) : (
+        <>
+          <WalletSplitFields planToman={price} useWallet={useWallet} onToggle={setUseWallet} split={split} />
+          <button type="button" className="mt-3 h-11 w-full rounded-2xl text-sm font-medium" style={goldButtonStyle} data-pay-cta onClick={pay}>
+            {split.direct
+              ? fa
+                ? "فعال‌سازی مستقیم با موجودی کیف پول"
+                : "Activate directly with wallet balance"
+              : fa
+                ? "پرداخت باقی‌مانده در درگاه"
+                : "Pay the remainder at the gateway"}
+          </button>
+        </>
+      )}
+    </div>
   );
 }
