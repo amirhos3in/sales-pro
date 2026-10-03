@@ -237,6 +237,10 @@ const copy = {
       luxury: "پرداخت آزمایشی طلایی و VIP",
       luxuryBody: "این مسیر درگاه را شبیه‌سازی می‌کند و دسترسی ویدیوهای ویژه را روشن می‌کند.",
       open: "خرید و ارتقای پلن",
+      finalPrice: "مبلغ نهایی",
+      fromWallet: "از کیف پول",
+      viaGateway: "از درگاه بانکی",
+      noCashback: "پرداخت کامل از کیف پول کش‌بک ندارد.",
     },
     articlesPage: {
       title: "مقالات",
@@ -600,6 +604,10 @@ const copy = {
       luxury: "Practice Gold and VIP checkout",
       luxuryBody: "This runs the simulated gateway and turns specialist videos on.",
       open: "Buy and upgrade",
+      finalPrice: "Final price",
+      fromWallet: "From wallet",
+      viaGateway: "Via bank gateway",
+      noCashback: "A wallet-only payment earns no cashback.",
     },
     articlesPage: {
       title: "Articles",

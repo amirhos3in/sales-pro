@@ -17,10 +17,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { finalPayablePrice, quoteCashback } from "@/lib/cashback";
 import { toman } from "@/lib/format";
 import { PLAN_RANK, PLANS, type PlanId } from "@/lib/plans";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+
+function SplitQuote({ price, wallet }: { price: number; wallet: number }) {
+  const { copy } = useI18n();
+  const quote = quoteCashback(finalPayablePrice(price, price), wallet);
+  return (
+    <div className="space-y-2 text-sm">
+      <p>
+        {copy.sub.finalPrice}: {toman(quote.finalPrice)}
+      </p>
+      <p>
+        {copy.sub.fromWallet}: {toman(quote.walletAmount)}
+      </p>
+      <p>
+        {copy.sub.viaGateway}: {toman(quote.gatewayAmount)}
+      </p>
+      <CashbackBadge amount={quote.cashback} />
+      {quote.cashback === 0 ? <p className="text-muted-foreground">{copy.sub.noCashback}</p> : null}
+    </div>
+  );
+}
 
 export function SubscriptionScreen() {
   const router = useRouter();
@@ -59,6 +80,8 @@ export function SubscriptionScreen() {
         {PLANS.map((plan) => {
           const active = user?.plan === plan.id;
           const ownedHigher = Boolean(user?.plan && PLAN_RANK[user.plan] > PLAN_RANK[plan.id]);
+          const payable = finalPayablePrice(plan.price, plan.price);
+          const quote = quoteCashback(payable, user?.wallet ?? 0);
           return (
             <article
               key={plan.id}
@@ -88,7 +111,7 @@ export function SubscriptionScreen() {
               <p className={cn("mt-1 text-xs", plan.id === "pro" ? "text-white/70" : "text-muted-foreground")}>
                 {toman(plan.price)}
               </p>
-              <CashbackBadge amount={Math.round(plan.price * 0.05)} className="mt-3" />
+              <CashbackBadge amount={quote.cashback} className="mt-3" />
               <ul className="mt-4 flex-1 space-y-2 text-sm leading-6">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
@@ -135,6 +158,9 @@ export function SubscriptionScreen() {
               {selected ? `${toman(selected.price)} از کیف پول کسر می‌شود و دسترسی درس‌های این سطح باز می‌شود.` : ""}
             </DialogDescription>
           </DialogHeader>
+          {selected ? (
+            <SplitQuote price={selected.price} wallet={user?.wallet ?? 0} />
+          ) : null}
           <DialogFooter>
             <Button variant="outline" onClick={() => setPending(null)}>
               انصراف
