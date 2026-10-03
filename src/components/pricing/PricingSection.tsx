@@ -5,11 +5,13 @@ import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/hooks/useWallet";
 import { PLANS, type PlanId } from "@/lib/plans";
+import type { Milestone } from "@/types/wallet";
 
 export function PricingSection({ onSelect }: { onSelect: (planId: PlanId) => void }) {
   const { ready, isAuthenticated } = useAuth();
-  const { unlockedPlans } = useWallet();
-  const best = [...unlockedPlans].sort((left, right) => right.price - left.price)[0];
+  const { milestones } = useWallet();
+  const ranked: Milestone[] = [...milestones].sort((left, right) => right.targetUsd - left.targetUsd);
+  const best = ranked.find((milestone) => milestone.unlocked);
 
   return (
     <div id="pricing-plans" className="scroll-mt-24 space-y-4">
@@ -17,7 +19,7 @@ export function PricingSection({ onSelect }: { onSelect: (planId: PlanId) => voi
         <section className="glass rounded-3xl p-4 shadow-xl">
           {best ? (
             <p className="text-sm font-medium leading-7">
-              شما با کیف پول خود می‌توانید {best.name} را رایگان فعال کنید.
+              شما با کیف پول خود می‌توانید {best.label} را رایگان فعال کنید.
             </p>
           ) : null}
           <CashbackGoalBar compact />

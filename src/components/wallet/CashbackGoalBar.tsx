@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { goldGlassButton } from "@/components/wallet/gold-glass";
 import { WalletRedeemDialog } from "@/components/wallet/WalletRedeemDialog";
 import { cn } from "@/lib/utils";
+import type { Milestone } from "@/types/wallet";
 
 const glass = {
   backgroundColor: "rgba(15, 28, 63, 0.4)",
@@ -23,8 +24,8 @@ export function CashbackGoalBar({ compact = false }: { compact?: boolean }) {
   const { currentUser } = useAuth();
   const redeem = useWalletRedeem();
   const [pendingId, setPendingId] = useState<PlanId | null>(null);
-  const { walletBalance, plans, maxTarget, progressPercent, unlockedPlans } = useWallet();
-  const unlockedIds = new Set(unlockedPlans.map((plan) => plan.id));
+  const { walletBalance, plans, maxTarget, progressPercent, milestones } = useWallet();
+  const milestoneById = new Map<string, Milestone>(milestones.map((milestone) => [milestone.id, milestone]));
   const fill = progressPercent;
   const [shown, setShown] = useState(0);
   const [hoverId, setHoverId] = useState<PlanId | null>(null);
@@ -61,16 +62,18 @@ export function CashbackGoalBar({ compact = false }: { compact?: boolean }) {
           <span className="absolute inset-0.5 rounded-full bg-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.9)]" />
         </span>
         {plans.map((plan) => {
+          const milestone = milestoneById.get(plan.id);
           const percent = maxTarget > 0 ? (plan.price / maxTarget) * 100 : 0;
-          const reached = unlockedIds.has(plan.id);
+          const reached = milestone?.unlocked ?? false;
+          const planLabel = milestone?.label ?? plan.name;
           const canRedeem = reached && !coveredPlan(currentUser, plan.id);
           const open = openId === plan.id;
           const remain = Math.max(0, plan.price - walletBalance);
           const remainLabel = localeNumber(remain, lang);
           const tip = reached
             ? lang === "fa"
-              ? `🎉 آماده فعال‌سازی پلن ${plan.name} بدون پرداخت ریالی!`
-              : `Ready to activate the ${plan.name} plan with no rial payment!`
+              ? `🎉 آماده فعال‌سازی پلن ${planLabel} بدون پرداخت ریالی!`
+              : `Ready to activate the ${planLabel} plan with no rial payment!`
             : lang === "fa"
               ? `مانده تا فعال‌سازی رایگان این پلن: ${remainLabel} تومان`
               : `${remainLabel} Toman left before this plan is free`;

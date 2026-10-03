@@ -16,6 +16,7 @@ import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/c
 import { useWallet } from "@/hooks/useWallet";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import type { RewardAction, Transaction, WalletBalance } from "@/types/wallet";
 
 const PRESETS = [200_000, 500_000, 1_000_000];
 
@@ -23,7 +24,17 @@ export function WalletTab({ user }: { user: AcademyUser }) {
   const { copy, lang } = useI18n();
   const text = copy.dash;
   const { updateProfile } = useAuth();
-  const { walletBalance, progressPercent } = useWallet();
+  const { progressPercent, balance, rewardTransactions } = useWallet();
+  const credit: WalletBalance = balance;
+  const rewards: Transaction[] = rewardTransactions;
+  const tomanCredit = credit.irr / 10;
+  const rewardById = new Map(rewards.map((entry) => [entry.id, entry]));
+  const rewardLabels: Record<RewardAction, string> = {
+    ai_first_audit: "پاداش اولین تحلیل هوش مصنوعی",
+    course_completion: "پاداش تکمیل دوره",
+    referral_bonus: "پاداش معرفی",
+    payment_cashback: text.txCashback,
+  };
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(PRESETS[0]);
   const rows = user.transactions ?? [];
@@ -77,7 +88,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
 
       <section className="glass rounded-[28px] p-5" style={frostStyle}>
         <p className="text-sm font-medium leading-7">
-          موجودی فعلی: {localeNumber(walletBalance, lang)} تومان | {localeNumber(progressPercent, lang)}% تا هدف اشتراک سالانه
+          موجودی فعلی: {localeNumber(tomanCredit, lang)} تومان | {localeNumber(progressPercent, lang)}% تا هدف اشتراک سالانه
         </p>
         <CashbackGoalBar />
       </section>
@@ -97,10 +108,12 @@ export function WalletTab({ user }: { user: AcademyUser }) {
               {rows.map((row) => {
                 const debit = row.type === "DEBIT";
                 const signed = debit ? -Math.abs(row.amount) : row.amount;
+                const reward = rewardById.get(row.id);
+                const title = row.title || (reward ? rewardLabels[reward.actionType] : labels[row.kind]);
                 return (
                 <tr key={row.id} className="border-t border-[#D4AF37]/20">
                   <td className="px-3 py-3">
-                    <span>{row.title || labels[row.kind]}</span>
+                    <span>{title}</span>
                     {row.status === "success" ? (
                       <span className="ms-2 rounded-full bg-[#D4AF37] px-2 py-0.5 text-[10px] font-medium text-[#0B132B]">
                         {copy.pay.txSuccess}

@@ -13,6 +13,7 @@ import { coveredPlan } from "@/lib/redeem";
 import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import type { Milestone } from "@/types/wallet";
 
 export function PlanCard({
   plan,
@@ -23,14 +24,15 @@ export function PlanCard({
 }) {
   const { currentUser } = useAuth();
   const { user } = useStore();
-  const { walletBalance } = useWallet();
+  const { milestones } = useWallet();
+  const milestone: Milestone | undefined = milestones.find((item) => item.id === plan.id);
   const redeem = useWalletRedeem();
   const [open, setOpen] = useState(false);
   const cashbackAmount = Math.round(plan.price * 0.05);
   const active = user?.plan === plan.id || coveredPlan(currentUser, plan.id);
   const ownedHigher = Boolean(user?.plan && PLAN_RANK[user.plan] > PLAN_RANK[plan.id]);
   const covered = active || ownedHigher;
-  const freeWithWallet = !covered && walletBalance >= plan.price;
+  const freeWithWallet = !covered && milestone?.unlocked === true;
 
   return (
     <article

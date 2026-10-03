@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { englishDigits, phoneKey, validPhone } from "@/lib/store";
 import { inactiveSubscription, normalizeSubscription, type SubscriptionStatus } from "@/lib/subscription";
+import type { RewardAction } from "@/types/wallet";
 
 const KEY = "academy_user_session";
 
@@ -19,6 +20,8 @@ export type WalletTx = {
   status?: "success";
   type?: "DEBIT";
   date?: string;
+  actionType?: RewardAction;
+  expiresAt?: string;
 };
 
 export type AcademyUser = {
@@ -67,7 +70,7 @@ const seedProfile = {
   cashbackEarned: 297_100,
   transactions: [
     { id: "tx-topup", kind: "topup" as const, amount: 1_000_000, at: "2026-09-28T09:00:00", title: "شارژ کیف پول", status: "success" as const },
-    { id: "tx-cash", kind: "cashback" as const, amount: 297_100, at: "2026-09-12T11:30:00", title: "هدیه ۵٪ کش‌بک خرید اشتراک سالانه", status: "success" as const },
+    { id: "tx-cash", kind: "cashback" as const, actionType: "payment_cashback" as const, amount: 297_100, at: "2026-09-12T11:30:00", title: "هدیه ۵٪ کش‌بک خرید اشتراک سالانه", status: "success" as const },
     { id: "tx-plan", kind: "plan" as const, amount: -4_728_000, at: "2026-09-12T11:20:00", title: "خرید اشتراک ۳ ماهه", status: "success" as const },
   ],
 };

@@ -1,5 +1,8 @@
 import type { AcademyUser, WalletTx } from "@/context/AuthContext";
 import { cashbackForPayment, finalPayablePrice, quoteCashback, type CashbackQuote } from "@/lib/cashback";
+import type { RewardAction } from "@/types/wallet";
+
+const PAYMENT_CASHBACK: RewardAction = "payment_cashback";
 
 export function settleCheckout(user: AcademyUser, itemName: string, price: number, useWallet: boolean) {
   const quote: CashbackQuote = quoteCashback(finalPayablePrice(price, price), useWallet ? user.walletBalance : 0);
@@ -10,6 +13,7 @@ export function settleCheckout(user: AcademyUser, itemName: string, price: numbe
     transactions.push({
       id: crypto.randomUUID(),
       kind: "cashback",
+      actionType: PAYMENT_CASHBACK,
       amount: cashback,
       at,
       title: `هدیه کش‌بک ۵٪ خرید ${itemName}`,
