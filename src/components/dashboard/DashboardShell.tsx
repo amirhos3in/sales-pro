@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { CallAuditsTab } from "@/components/dashboard/CallAuditsTab";
-import { CoursesTab } from "@/components/dashboard/CoursesTab";
+import { MyCoursesTab } from "@/components/dashboard/MyCoursesTab";
 import { OverviewTab } from "@/components/dashboard/OverviewTab";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { resolveTab, Sidebar } from "@/components/dashboard/Sidebar";
@@ -21,7 +21,7 @@ export function DashboardShell({ user }: { user: AcademyUser }) {
         {tab === "profile" ? <ProfileTab user={user} /> : null}
         {tab === "overview" ? <OverviewTab user={user} /> : null}
         {tab === "wallet" ? <WalletTab user={user} /> : null}
-        {tab === "courses" ? <CoursesTab /> : null}
+        {tab === "courses" ? <MyCoursesTab user={user} /> : null}
         {tab === "audits" ? <CallAuditsTab /> : null}
         {tab === "tickets" ? <TicketsTab /> : null}
       </div>
