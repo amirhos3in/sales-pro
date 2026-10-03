@@ -14,13 +14,21 @@ const ONE_TIME: readonly RewardAction[] = ["ai_first_audit", "course_completion"
 
 export type WalletEntry = Transaction;
 
+export type WalletDebit = {
+  id: string;
+  amountUsd: number;
+  createdAt: string;
+  label: string;
+};
+
 export type WalletPersist = {
   transactions: WalletEntry[];
   claimedActions: RewardAction[];
+  debits: WalletDebit[];
 };
 
 export function emptyWallet(): WalletPersist {
-  return { transactions: [], claimedActions: [] };
+  return { transactions: [], claimedActions: [], debits: [] };
 }
 
 export function roundUsd(value: number) {
@@ -53,8 +61,25 @@ export function gcWallet(state: WalletPersist, now = Date.now()): WalletPersist 
 
 export function walletUsdOf(state: WalletPersist, now = Date.now()) {
   const current = gcWallet(state, now);
-  const total = current.transactions.reduce((sum, entry) => (entry.expired ? sum : sum + entry.amountUsd), 0);
-  return roundUsd(total);
+  const credits = current.transactions.reduce((sum, entry) => (entry.expired ? sum : sum + entry.amountUsd), 0);
+  const spent = (current.debits ?? []).reduce((sum, debit) => sum + debit.amountUsd, 0);
+  return roundUsd(Math.max(0, credits - spent));
+}
+
+export function spendUsd(state: WalletPersist, amountUsd: number, label: string, now = Date.now()) {
+  const current = gcWallet({ ...state, debits: state.debits ?? [] }, now);
+  const price = roundUsd(amountUsd);
+  if (price <= 0 || walletUsdOf(current, now) < price) return { state: current, ok: false as const };
+  const debit: WalletDebit = {
+    id: crypto.randomUUID(),
+    amountUsd: price,
+    createdAt: new Date(now).toISOString(),
+    label,
+  };
+  return {
+    ok: true as const,
+    state: { ...current, debits: [...current.debits, debit] },
+  };
 }
 
 function rewardAmount(actionType: RewardAction) {
@@ -78,6 +103,7 @@ export function claimReward(state: WalletPersist, actionType: RewardAction, now 
   return {
     ok: true as const,
     state: {
+      ...current,
       transactions: [entry, ...current.transactions],
       claimedActions: [...current.claimedActions, actionType],
     },
@@ -122,6 +148,20 @@ function isEntry(value: unknown): value is WalletEntry {
   );
 }
 
+function isDebit(value: unknown): value is WalletDebit {
+  if (!value || typeof value !== "object") return false;
+  const debit = value as Partial<WalletDebit>;
+  return (
+    typeof debit.id === "string" &&
+    debit.id.length > 0 &&
+    typeof debit.amountUsd === "number" &&
+    Number.isFinite(debit.amountUsd) &&
+    debit.amountUsd > 0 &&
+    typeof debit.createdAt === "string" &&
+    typeof debit.label === "string"
+  );
+}
+
 export function readWallet(raw: string | null, now = Date.now()): WalletPersist {
   if (!raw) return emptyWallet();
   try {
@@ -130,7 +170,8 @@ export function readWallet(raw: string | null, now = Date.now()): WalletPersist 
     const claimedActions = Array.isArray(parsed.claimedActions)
       ? parsed.claimedActions.filter((action): action is RewardAction => typeof action === "string" && (ONE_TIME as readonly string[]).includes(action))
       : [];
-    return gcWallet({ transactions, claimedActions: [...new Set(claimedActions)] }, now);
+    const debits = Array.isArray(parsed.debits) ? parsed.debits.filter(isDebit) : [];
+    return gcWallet({ transactions, claimedActions: [...new Set(claimedActions)], debits }, now);
   } catch {
     return emptyWallet();
   }

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CashbackMilestoneBar } from "@/components/dashboard/CashbackMilestoneBar";
 import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { UsdWalletCard } from "@/components/wallet/UsdWalletCard";
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
@@ -102,6 +103,8 @@ export function WalletTab({ user }: { user: AcademyUser }) {
         </p>
         <CashbackGoalBar />
       </section>
+
+      <CashbackMilestoneBar />
 
       <UsdWalletCard />
 

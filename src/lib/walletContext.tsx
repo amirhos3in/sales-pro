@@ -8,6 +8,7 @@ import {
   gcWallet,
   grantGatewayCashback,
   readWallet,
+  spendUsd,
   walletUsdOf,
   type WalletEntry,
   type WalletPersist,
@@ -21,6 +22,7 @@ type WalletContextValue = {
   claimedActions: RewardAction[];
   claimActionReward: (actionType: RewardAction) => boolean;
   recordGatewayCashback: (gatewayUsd: number) => boolean;
+  payFromWallet: (amountUsd: number, label: string) => boolean;
 };
 
 const WalletContext = createContext<WalletContextValue | null>(null);
@@ -59,6 +61,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     return result.ok;
   }, []);
 
+  const payFromWallet = useCallback((amountUsd: number, label: string) => {
+    const result = spendUsd(stateRef.current, amountUsd, label);
+    stateRef.current = result.state;
+    setState(result.state);
+    return result.ok;
+  }, []);
+
   const value = useMemo<WalletContextValue>(() => {
     const collected = gcWallet(state);
     return {
@@ -68,8 +77,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       claimedActions: collected.claimedActions,
       claimActionReward,
       recordGatewayCashback,
+      payFromWallet,
     };
-  }, [claimActionReward, ready, recordGatewayCashback, state]);
+  }, [claimActionReward, payFromWallet, ready, recordGatewayCashback, state]);
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
