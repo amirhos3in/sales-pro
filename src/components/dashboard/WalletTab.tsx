@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
+import { useCurrencyRate } from "@/hooks/useCurrencyRate";
 import { useWallet } from "@/hooks/useWallet";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -25,6 +26,11 @@ export function WalletTab({ user }: { user: AcademyUser }) {
   const text = copy.dash;
   const { updateProfile } = useAuth();
   const { progressPercent, balance, rewardTransactions } = useWallet();
+  const { rate, source, usdToIrr, formatFa } = useCurrencyRate();
+  const dollarIrr = usdToIrr(1);
+  function money(value: number) {
+    return lang === "fa" ? formatFa(value) : localeNumber(value, "en");
+  }
   const credit: WalletBalance = balance;
   const rewards: Transaction[] = rewardTransactions;
   const tomanCredit = credit.irr / 10;
@@ -70,10 +76,10 @@ export function WalletTab({ user }: { user: AcademyUser }) {
         <h1 className="mt-2 text-2xl font-semibold">{copy.session.wallet}</h1>
         <p className="mt-6 text-sm text-muted-foreground">{text.statWallet}</p>
         <p className="mt-1 text-4xl font-semibold">
-          {localeNumber(user.walletBalance, lang)} <span className="text-lg font-medium">{text.toman}</span>
+          {money(user.walletBalance)} <span className="text-lg font-medium">{text.toman}</span>
         </p>
         <p className="mt-3 text-sm text-muted-foreground">
-          {text.cashbackEarned}: {localeNumber(user.cashbackEarned, lang)} {text.toman}
+          {text.cashbackEarned}: {money(user.cashbackEarned)} {text.toman}
         </p>
         <CashbackBadge amount={user.cashbackEarned} className="mt-3" />
         <button type="button" className="mt-6 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
@@ -88,7 +94,10 @@ export function WalletTab({ user }: { user: AcademyUser }) {
 
       <section className="glass rounded-[28px] p-5" style={frostStyle}>
         <p className="text-sm font-medium leading-7">
-          موجودی فعلی: {localeNumber(tomanCredit, lang)} تومان | {localeNumber(progressPercent, lang)}% تا هدف اشتراک سالانه
+          موجودی فعلی: {money(tomanCredit)} تومان | {localeNumber(progressPercent, lang)}% تا هدف اشتراک سالانه
+        </p>
+        <p className="mt-1 text-sm font-medium leading-7" data-currency-rate={rate.usdToIrr} data-currency-source={source}>
+          {lang === "fa" ? `نرخ دلار: ${formatFa(dollarIrr)} ریال` : `Dollar rate: ${localeNumber(dollarIrr, "en")} rials`}
         </p>
         <CashbackGoalBar />
       </section>
@@ -122,7 +131,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
                   </td>
                   <td className={`px-3 py-3 font-medium ${signed < 0 ? "text-rose-600 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
                     {signed > 0 ? "+" : ""}
-                    {localeNumber(signed, lang)} {text.toman}
+                    {money(signed)} {text.toman}
                   </td>
                   <td className="px-3 py-3 text-muted-foreground">{stamp(row.date ?? row.at)}</td>
                 </tr>
@@ -149,7 +158,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
                 className="h-11 rounded-2xl border border-[#D4AF37]/40 text-sm"
                 style={amount === preset ? goldButtonStyle : undefined}
               >
-                {localeNumber(preset, lang)} {text.toman}
+                {money(preset)} {text.toman}
               </button>
             ))}
           </div>

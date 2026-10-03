@@ -7,18 +7,17 @@ import { useAuth, type WalletTx } from "@/context/AuthContext";
 import { cashbackForPayment } from "@/lib/cashback";
 import { PLANS, planById, type Plan, type PlanId } from "@/lib/plans";
 import { coveredPlan, redeemWithWallet } from "@/lib/redeem";
+import { FALLBACK_RATE } from "@/lib/currency-rate";
 import { useStore } from "@/lib/store";
 import type { LiveCurrencyRate, Milestone, Transaction, WalletBalance } from "@/types/wallet";
+import { useCurrencyRate } from "@/hooks/useCurrencyRate";
 
 export type WalletPlan = Pick<Plan, "id" | "name" | "price">;
 
-/** 1 تومان = 10 ریال. نرخ ثابت تا اتصال نرخ زنده. */
+/** 1 تومان = 10 ریال. */
 const TOMAN_TO_IRR = 10;
 
-export const LIVE_RATE: LiveCurrencyRate = {
-  usdToIrr: 1_000_000,
-  lastUpdated: "2026-10-03T00:00:00.000Z",
-};
+export const LIVE_RATE: LiveCurrencyRate = FALLBACK_RATE;
 
 const EMPTY_TX: readonly WalletTx[] = [];
 
@@ -87,9 +86,10 @@ export function walletSnapshot(
 
 export function useWallet() {
   const { currentUser } = useAuth();
+  const { rate } = useCurrencyRate();
   const walletBalance = currentUser?.walletBalance ?? 0;
   const transactions = currentUser?.transactions ?? EMPTY_TX;
-  return useMemo(() => walletSnapshot(walletBalance, PLANS, transactions), [walletBalance, transactions]);
+  return useMemo(() => walletSnapshot(walletBalance, PLANS, transactions, rate), [walletBalance, transactions, rate]);
 }
 
 export function useWalletRedeem() {

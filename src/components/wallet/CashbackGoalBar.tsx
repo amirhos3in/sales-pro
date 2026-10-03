@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { Check, Lock } from "lucide-react";
+import { useCurrencyRate } from "@/hooks/useCurrencyRate";
 import { useWallet, useWalletRedeem } from "@/hooks/useWallet";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -24,6 +25,7 @@ export function CashbackGoalBar({ compact = false }: { compact?: boolean }) {
   const { currentUser } = useAuth();
   const redeem = useWalletRedeem();
   const [pendingId, setPendingId] = useState<PlanId | null>(null);
+  const { formatFa } = useCurrencyRate();
   const { walletBalance, plans, maxTarget, progressPercent, milestones } = useWallet();
   const milestoneById = new Map<string, Milestone>(milestones.map((milestone) => [milestone.id, milestone]));
   const fill = progressPercent;
@@ -69,7 +71,7 @@ export function CashbackGoalBar({ compact = false }: { compact?: boolean }) {
           const canRedeem = reached && !coveredPlan(currentUser, plan.id);
           const open = openId === plan.id;
           const remain = Math.max(0, plan.price - walletBalance);
-          const remainLabel = localeNumber(remain, lang);
+          const remainLabel = lang === "fa" ? formatFa(remain) : localeNumber(remain, lang);
           const tip = reached
             ? lang === "fa"
               ? `🎉 آماده فعال‌سازی پلن ${planLabel} بدون پرداخت ریالی!`
