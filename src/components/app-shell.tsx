@@ -93,7 +93,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "shrink-0 rounded-xl px-2.5 py-2 text-sm text-muted-foreground transition hover:bg-foreground/5 hover:text-foreground",
+                  "shrink-0 rounded-xl px-2 py-2 text-sm text-muted-foreground transition hover:bg-foreground/5 hover:text-foreground",
                   isActive(pathname, item.href) && "bg-[#D4AF37] text-[#0B132B] hover:bg-[#D4AF37] hover:text-[#0B132B]",
                 )}
               >
