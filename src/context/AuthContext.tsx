@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthValue>(() => {
     function checkOtp(phone: string, otp: string): AuthError {
       if (!validPhone(phoneKey(phone))) return "phone";
-      if (!/^\d{4,6}$/.test(otpCode(otp))) return "otp";
+      if (!/^\d{5}$/.test(otpCode(otp))) return "otp";
       return null;
     }
 

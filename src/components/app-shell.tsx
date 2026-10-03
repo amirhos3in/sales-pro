@@ -293,7 +293,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </SheetContent>
       </Sheet>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 pb-28">{children}</main>
+      <main
+        className={cn(
+          pathname === "/login" || pathname === "/register"
+            ? "flex w-full flex-1 flex-col bg-[#0B132B]"
+            : "mx-auto w-full max-w-6xl flex-1 px-4 py-8 pb-28",
+        )}
+      >
+        {children}
+      </main>
       <footer className="print-hide border-t border-[color:var(--glass-border)]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs leading-6 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>{copy.footer.left}</p>

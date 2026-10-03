@@ -1,5 +1,5 @@
-import { SessionAuthScreen } from "@/components/session-auth-screen";
+import { LoginScreen } from "@/components/auth/login-screen";
 
 export default function LoginPage() {
-  return <SessionAuthScreen />;
+  return <LoginScreen />;
 }
