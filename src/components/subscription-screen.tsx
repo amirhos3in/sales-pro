@@ -7,6 +7,7 @@ import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { useGate } from "@/components/gates";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import { useI18n } from "@/lib/i18n";
 import {
   Dialog,
@@ -87,6 +88,7 @@ export function SubscriptionScreen() {
               <p className={cn("mt-1 text-xs", plan.id === "pro" ? "text-white/70" : "text-muted-foreground")}>
                 {toman(plan.price)}
               </p>
+              <CashbackBadge amount={Math.round(plan.price * 0.05)} className="mt-3" />
               <ul className="mt-4 flex-1 space-y-2 text-sm leading-6">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">

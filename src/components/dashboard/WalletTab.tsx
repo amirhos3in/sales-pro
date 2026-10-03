@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { frostStyle, goldButtonStyle } from "@/components/dashboard/style";
+import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +61,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
         <p className="mt-3 text-sm text-muted-foreground">
           {text.cashbackEarned}: {localeNumber(user.cashbackEarned, lang)} {text.toman}
         </p>
+        <CashbackBadge amount={user.cashbackEarned} className="mt-3" />
         <button type="button" className="mt-6 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
           {text.deposit}
         </button>
