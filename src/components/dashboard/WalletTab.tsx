@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
+import { UsdWalletCard } from "@/components/wallet/UsdWalletCard";
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
 import { useCurrencyRate } from "@/hooks/useCurrencyRate";
 import { useWallet } from "@/hooks/useWallet";
@@ -101,6 +102,8 @@ export function WalletTab({ user }: { user: AcademyUser }) {
         </p>
         <CashbackGoalBar />
       </section>
+
+      <UsdWalletCard />
 
       <section className="glass overflow-hidden rounded-[28px]" style={frostStyle}>
         <h2 className="px-5 pt-5 text-lg font-semibold">{text.txTitle}</h2>

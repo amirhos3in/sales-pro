@@ -13,10 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrencyRate } from "@/hooks/useCurrencyRate";
 import { calculateCashback, quoteCashback, finalPayablePrice } from "@/lib/cashback";
 import { cashbackToast, settleCheckout } from "@/lib/checkout";
+import { irrToUsdAmount } from "@/lib/currency-rate";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { useWalletContext } from "@/lib/walletContext";
 
 export function CheckoutModal({
   open,
@@ -55,6 +58,8 @@ export function CheckoutForm({
 }) {
   const { copy, lang } = useI18n();
   const { currentUser, updateProfile } = useAuth();
+  const { rate } = useCurrencyRate();
+  const { recordGatewayCashback } = useWalletContext();
   const router = useRouter();
   const [useWallet, setUseWallet] = useState(true);
   const payable = finalPayablePrice(price, price);
@@ -69,6 +74,7 @@ export function CheckoutForm({
     }
     const result = settleCheckout(currentUser, itemName, price, useWallet);
     updateProfile(result.patch);
+    recordGatewayCashback(irrToUsdAmount(result.quote.gatewayAmount * 10, rate.usdToIrr));
     onPaid?.();
     if (result.quote.cashback > 0) {
       const amountLabel = lang === "fa"

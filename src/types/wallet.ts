@@ -32,6 +32,8 @@ export type Transaction = {
   amountUsd: number;
   createdAt: string;
   expiresAt?: string;
+  /** Set by expiry collection. Expired rows stay for the report and do not count toward balance. */
+  expired?: boolean;
 };
 
 export function isRewardAction(value: string): value is RewardAction {

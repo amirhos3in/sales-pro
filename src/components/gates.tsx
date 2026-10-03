@@ -9,10 +9,13 @@ import { CashbackBadge } from "@/components/ui/CashbackBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrencyRate } from "@/hooks/useCurrencyRate";
 import { calculateCashback, finalPayablePrice, quoteCashback } from "@/lib/cashback";
 import { cashbackToast, settleCheckout } from "@/lib/checkout";
+import { irrToUsdAmount } from "@/lib/currency-rate";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { useWalletContext } from "@/lib/walletContext";
 import { subscriptionForPlan } from "@/lib/subscription";
 import { useStore, type PremiumTier } from "@/lib/store";
 
@@ -232,6 +235,8 @@ function PaywallModal({
   const { copy, lang } = useI18n();
   const { user, activatePremium } = useStore();
   const { currentUser, updateProfile } = useAuth();
+  const { rate } = useCurrencyRate();
+  const { recordGatewayCashback } = useWalletContext();
   const router = useRouter();
   const [tier, setTier] = useState<PremiumTier>("gold");
   const [useWallet, setUseWallet] = useState(true);
@@ -249,6 +254,7 @@ function PaywallModal({
     }
     const itemName = tier === "vip" ? copy.pay.vip : copy.pay.gold;
     const result = settleCheckout(currentUser, itemName, price, useWallet);
+    recordGatewayCashback(irrToUsdAmount(result.quote.gatewayAmount * 10, rate.usdToIrr));
     updateProfile({
       ...result.patch,
       plan: "vip",
