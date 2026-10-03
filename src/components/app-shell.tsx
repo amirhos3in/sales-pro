@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-background/70 backdrop-blur-xl">
+      <header className="print-hide sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4">
           <Link href="/" className="flex items-center gap-2">
             <span className="grid size-9 place-items-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-[#0B132B]">
@@ -218,7 +218,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sheet>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 pb-28">{children}</main>
-      <footer className="border-t border-[color:var(--glass-border)]">
+      <footer className="print-hide border-t border-[color:var(--glass-border)]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs leading-6 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>{copy.footer.left}</p>
           <p>{copy.footer.right}</p>

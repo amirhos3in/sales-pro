@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { AudioUploader } from "@/components/services/call-analyzer/AudioUploader";
+import { CallAnalyzer } from "@/components/services/call-analyzer/CallAnalyzer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,14 +48,14 @@ export function ServicesScreen() {
 
   return (
     <div className="space-y-8">
-      <header>
+      <header className="print-hide">
         <h1 className="text-2xl font-semibold">خدمات</h1>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
           برای تیم‌ها و فروشگاه‌هایی که به‌جای دورهٔ عمومی، اسکریپت، قیف و آموزش نیروی خودشان را می‌خواهند.
         </p>
       </header>
-      <AudioUploader />
-      <div className="grid gap-3 md:grid-cols-2">
+      <CallAnalyzer />
+      <div className="print-hide grid gap-3 md:grid-cols-2">
         {services.map((service) => (
           <article key={service.title} className="rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
             <h2 className="font-semibold">{service.title}</h2>
@@ -63,7 +63,7 @@ export function ServicesScreen() {
           </article>
         ))}
       </div>
-      <form onSubmit={submit} className="max-w-xl space-y-3 rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
+      <form onSubmit={submit} className="print-hide max-w-xl space-y-3 rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
         <h2 className="text-lg font-semibold">درخواست بررسی تیم فروش</h2>
         {sent ? (
           <p className="text-sm leading-7">

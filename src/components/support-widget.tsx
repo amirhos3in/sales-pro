@@ -96,7 +96,7 @@ export function SupportWidget() {
   const eta = user?.premiumTier === "vip" ? copy.support.etaVip : copy.support.eta;
 
   return (
-    <div className="fixed bottom-6 left-6 z-50">
+    <div className="print-hide fixed bottom-6 left-6 z-50">
       <AnimatePresence>
         {open ? (
           <motion.section

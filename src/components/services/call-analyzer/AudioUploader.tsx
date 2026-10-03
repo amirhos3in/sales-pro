@@ -1,21 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Upload, X } from "lucide-react";
 import { toast } from "sonner";
-import { AnalysisLoading } from "@/components/services/call-analyzer/AnalysisLoading";
-import { QuotaBadge } from "@/components/QuotaBadge";
 import { useGate } from "@/components/gates";
-import { localeNumber } from "@/lib/format";
 import { useCallQuota } from "@/hooks/useCallQuota";
 import { useI18n } from "@/lib/i18n";
-import { mockAnalysisData } from "@/lib/mockAnalysisData";
 import { cn } from "@/lib/utils";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 const ACCEPT = ".mp3,.wav,.m4a,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a";
-
-type Phase = "ready" | "loading" | "report";
 
 function clock(totalSeconds: number) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -33,8 +27,8 @@ function acceptedFile(file: File) {
   return name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".m4a");
 }
 
-export function AudioUploader() {
-  const { copy, lang } = useI18n();
+export function AudioUploader({ onAnalyzed }: { onAnalyzed: () => void }) {
+  const { copy } = useI18n();
   const text = copy.auditor;
   const { canAnalyze, consumeQuota } = useCallQuota();
   const { openPaywall } = useGate();
@@ -50,7 +44,6 @@ export function AudioUploader() {
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [take, setTake] = useState<{ seconds: number; url: string } | null>(null);
-  const [phase, setPhase] = useState<Phase>("ready");
 
   useEffect(() => {
     return () => {
@@ -71,7 +64,6 @@ export function AudioUploader() {
       return;
     }
     setFile(next);
-    setPhase("ready");
   }
 
   async function startRecording() {
@@ -100,7 +92,6 @@ export function AudioUploader() {
         });
         setElapsed(seconds);
         setRecording(false);
-        setPhase("ready");
       };
       recorderRef.current = recorder;
       startedAt.current = Date.now();
@@ -127,7 +118,6 @@ export function AudioUploader() {
       return null;
     });
     setElapsed(0);
-    setPhase("ready");
   }
 
   function analyze() {
@@ -146,59 +136,11 @@ export function AudioUploader() {
       return;
     }
     busy.current = true;
-    setPhase("loading");
+    onAnalyzed();
   }
 
-  const finishAnalysis = useCallback(() => {
-    busy.current = false;
-    setPhase("report");
-  }, []);
-
   return (
-    <section
-      className="glass call-auditor relative overflow-hidden rounded-[2rem] p-5 shadow-2xl sm:p-7"
-      style={{ backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
-    >
-      <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="max-w-xl">
-          <p className="text-xs tracking-[0.16em] text-[#D4AF37]">{text.kicker}</p>
-          <h2 className="mt-2 text-xl font-semibold">{text.title}</h2>
-          <p className="mt-2 text-sm leading-7 text-muted-foreground">{text.intro}</p>
-        </div>
-        <QuotaBadge />
-      </div>
-
-      {phase === "loading" ? <AnalysisLoading onComplete={finishAnalysis} /> : null}
-      {phase === "report" ? (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold">{text.reportTitle}</h3>
-          <p className="mt-3 text-4xl font-semibold text-[#8C7016] dark:text-[#F3E5AB]">
-            {localeNumber(mockAnalysisData.overallScore, lang)}
-          </p>
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {mockAnalysisData.subMetrics.map((metric) => (
-              <li key={metric.key} className="rounded-2xl border border-[#D4AF37]/30 px-3 py-3 text-sm">
-                <span className="block text-muted-foreground">{metric.label[lang]}</span>
-                <span className="mt-1 block text-lg font-semibold">
-                  {localeNumber(metric.score, lang)}
-                  {lang === "fa" ? "٪" : "%"}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <button
-            type="button"
-            onClick={() => setPhase("ready")}
-            className="mt-5 h-11 rounded-2xl px-4 text-sm font-medium"
-            style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
-          >
-            {text.another}
-          </button>
-        </div>
-      ) : null}
-      {phase === "ready" ? (
-      <>
+    <>
       <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#0B132B]/5 p-1 dark:bg-white/5">
         {([
           ["upload", text.uploadTab],
@@ -321,8 +263,6 @@ export function AudioUploader() {
       >
         {text.analyze}
       </button>
-      </>
-      ) : null}
-    </section>
+    </>
   );
 }

@@ -195,6 +195,31 @@ html.dark .glass.call-auditor {
   }
 }
 
+@media print {
+  header,
+  footer,
+  .print-hide {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: #0b132b !important;
+  }
+  .call-report {
+    background: white !important;
+    color: #0b132b !important;
+    box-shadow: none !important;
+    border-color: #d4af37 !important;
+  }
+  .call-report p,
+  .call-report li,
+  .call-report h2,
+  .call-report h3,
+  .call-report span {
+    color: #0b132b !important;
+  }
+}
+
 html:not(.dark) :is(a, button).bg-\[\#D4AF37\] {
   background-color: #0f1c3f;
   color: #d4af37;
