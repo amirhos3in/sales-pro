@@ -1,21 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { CheckoutModal } from "@/components/checkout/CheckoutModal";
-import { categories, lessonsOf, pickText, type Category } from "@/lib/courses-data";
+import { useEffect, useRef } from "react";
+import { CourseCard } from "@/components/courses/CourseCard";
+import { categories, lessonsOf } from "@/lib/courses-data";
 import { useGate } from "@/components/gates";
-import { calculateCashback } from "@/lib/cashback";
 import { localeNumber } from "@/lib/format";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
-import { CashbackBadge } from "@/components/ui/CashbackBadge";
 
 export function HomeScreen() {
-  const { copy, lang } = useI18n();
+  const { copy } = useI18n();
   const { ready, user } = useStore();
   const { openAuth, openPaywall } = useGate();
-  const [buying, setBuying] = useState<Category | null>(null);
   const total = categories.reduce((sum, category) => sum + lessonsOf(category).length, 0);
   const passed = user?.passed.length ?? 0;
   const percent = total ? Math.round((passed / total) * 100) : 0;
@@ -72,48 +69,9 @@ export function HomeScreen() {
 
       <section className="grid gap-4 md:grid-cols-2">
         {categories.map((category) => (
-          <article key={category.id} className="glass rounded-3xl p-5 shadow-xl">
-            <Link href={`/learn/${category.id}`} className="block transition hover:-translate-y-0.5">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold">{pickText(category.title, lang)}</h2>
-                <span className="rounded-full border border-[#D4AF37]/40 px-2 py-1 text-[11px] text-[#D4AF37]">
-                  {category.premium ? copy.home.premiumBadge : copy.home.freeBadge}
-                </span>
-              </div>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                {pickText(category.description, lang)}
-              </p>
-              <p className="mt-3 text-xs text-muted-foreground">
-                {lessonsOf(category).length} {copy.home.lessons}
-              </p>
-            </Link>
-            {category.price > 0 ? (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold">
-                    {localeNumber(category.price, lang)} {copy.dash.toman}
-                  </p>
-                  <CashbackBadge amount={calculateCashback(category.price)} className="mt-2" />
-                </div>
-                <button
-                  type="button"
-                  className="h-10 rounded-2xl px-4 text-sm font-medium"
-                  style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
-                  onClick={() => setBuying(category)}
-                >
-                  {copy.pay.buyCourse}
-                </button>
-              </div>
-            ) : null}
-          </article>
+          <CourseCard key={category.id} category={category} />
         ))}
       </section>
-      <CheckoutModal
-        open={Boolean(buying)}
-        onOpenChange={(open) => !open && setBuying(null)}
-        itemName={buying ? pickText(buying.title, lang) : ""}
-        price={buying?.price ?? 0}
-      />
 
       <section className="glass rounded-3xl p-6">
         <h2 className="text-lg font-semibold">{copy.home.rulesTitle}</h2>

@@ -1,28 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Check, Lock, Play } from "lucide-react";
-import { CheckoutModal } from "@/components/checkout/CheckoutModal";
-import { CashbackBadge } from "@/components/ui/CashbackBadge";
+import { CourseCta, CourseStatusBadge, useCourseAccess } from "@/components/courses/CourseCard";
 import {
   findCategory,
   lessonGate,
   lessonsOf,
   pickText,
 } from "@/lib/courses-data";
-import { calculateCashback } from "@/lib/cashback";
-import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { useStore } from "@/lib/store";
 
 export function CategoryScreen({ categoryId }: { categoryId: string }) {
   const { copy, lang } = useI18n();
-  const { user } = useStore();
-  const [open, setOpen] = useState(false);
+  const { user, subscribed, passed } = useCourseAccess();
   const category = findCategory(categoryId);
   if (!category) return null;
-  const passed = user?.passed ?? [];
 
   return (
     <div className="space-y-6">
@@ -30,44 +23,21 @@ export function CategoryScreen({ categoryId }: { categoryId: string }) {
         {copy.learn.back}
       </Link>
       <header className="glass rounded-3xl p-6 shadow-2xl">
-        <p className="text-xs tracking-wide text-[#D4AF37]">
-          {category.premium ? copy.home.premiumBadge : copy.home.freeBadge}
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold">{pickText(category.title, lang)}</h1>
+        <CourseStatusBadge tier={category.tierRequired} />
+        <h1 className="mt-3 text-3xl font-semibold">{pickText(category.title, lang)}</h1>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
           {pickText(category.description, lang)}
         </p>
-        {category.price > 0 ? (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold">
-                {localeNumber(category.price, lang)} {copy.dash.toman}
-              </p>
-              <CashbackBadge amount={calculateCashback(category.price)} className="mt-2" />
-            </div>
-            <button
-              type="button"
-              className="h-10 rounded-2xl px-4 text-sm font-medium"
-              style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
-              onClick={() => setOpen(true)}
-            >
-              {copy.pay.buyCourse}
-            </button>
-          </div>
-        ) : null}
+        <div className="mt-4">
+          <CourseCta category={category} />
+        </div>
       </header>
-      <CheckoutModal
-        open={open}
-        onOpenChange={setOpen}
-        itemName={pickText(category.title, lang)}
-        price={category.price}
-      />
       {category.subtopics.map((subtopic) => (
         <section key={subtopic.id} className="space-y-3">
           <h2 className="text-lg font-semibold">{pickText(subtopic.title, lang)}</h2>
           <div className="grid gap-3">
             {subtopic.lessons.map((lesson) => {
-              const gate = lessonGate(category, lesson.id, user, passed);
+              const gate = lessonGate(category, lesson.id, user, passed, subscribed);
               const done = passed.includes(lesson.id);
               return (
                 <Link

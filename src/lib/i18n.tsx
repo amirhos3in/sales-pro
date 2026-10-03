@@ -142,6 +142,10 @@ const copy = {
       premiumOff: "هنوز پلن پولی فعال نیست",
       freeBadge: "رایگان",
       premiumBadge: "ویژه",
+      freeTrack: "آموزش رایگان",
+      memberTrack: "اشتراک ویژه",
+      watchContinue: "مشاهده و ادامه دوره",
+      upgradeUnlock: "ارتقا و بازگشایی با اشتراک",
       lessons: "درس",
       rulesTitle: "قفل ویدیو چطور باز می‌شود",
       rules: [
@@ -513,6 +517,10 @@ const copy = {
       premiumOff: "No paid plan yet",
       freeBadge: "Free",
       premiumBadge: "Premium",
+      freeTrack: "Free training",
+      memberTrack: "Member access",
+      watchContinue: "Watch and continue",
+      upgradeUnlock: "Upgrade to unlock",
       lessons: "lessons",
       rulesTitle: "How a video unlocks",
       rules: [

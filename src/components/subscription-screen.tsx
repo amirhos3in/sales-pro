@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -22,6 +22,16 @@ export function SubscriptionScreen() {
   const { copy } = useI18n();
   const [pending, setPending] = useState<PlanId | null>(null);
   const selected = PLANS.find((plan) => plan.id === pending) ?? null;
+
+  useEffect(() => {
+    function scrollToPlans() {
+      if (window.location.hash !== "#pricing-plans") return;
+      document.getElementById("pricing-plans")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    scrollToPlans();
+    window.addEventListener("hashchange", scrollToPlans);
+    return () => window.removeEventListener("hashchange", scrollToPlans);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -48,7 +58,7 @@ export function SubscriptionScreen() {
           <p className="mt-2 text-sm text-muted-foreground">برای خرید، اول وارد شوید.</p>
         )}
       </header>
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div id="pricing-plans" className="grid scroll-mt-24 gap-4 lg:grid-cols-3">
         {PLANS.map((plan) => {
           const active = user?.plan === plan.id;
           const ownedHigher = Boolean(user?.plan && PLAN_RANK[user.plan] > PLAN_RANK[plan.id]);

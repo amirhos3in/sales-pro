@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useCourseAccess } from "@/components/courses/CourseCard";
 import { useGate } from "@/components/gates";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ export function LessonPlayer({
 }) {
   const { copy, lang } = useI18n();
   const { ready, user, markWatched, passQuiz } = useStore();
+  const { subscribed } = useCourseAccess();
   const { openAuth, openPaywall } = useGate();
   const [quizOpen, setQuizOpen] = useState(false);
   const [answers, setAnswers] = useState<number[]>([-1, -1, -1]);
@@ -46,7 +48,7 @@ export function LessonPlayer({
   }
 
   const { category, subtopic, lesson } = found;
-  const gate = lessonGate(category, lesson.id, user, user?.passed ?? []);
+  const gate = lessonGate(category, lesson.id, user, user?.passed ?? [], subscribed);
   const watched = Boolean(user?.watched.includes(lesson.id));
   const passed = Boolean(user?.passed.includes(lesson.id));
   const upcoming = nextLessonId(category, lesson.id);

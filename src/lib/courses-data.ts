@@ -21,12 +21,13 @@ export type Subtopic = {
   lessons: VideoLesson[];
 };
 
+export type CourseTier = "pro" | "free";
+
 export type Category = {
   id: string;
   title: Localized;
   description: Localized;
-  premium: boolean;
-  price: number;
+  tierRequired: CourseTier;
   subtopics: Subtopic[];
 };
 
@@ -76,13 +77,12 @@ function lesson(
 export const categories: Category[] = [
   {
     id: "online",
-    price: 1_800_000,
+    tierRequired: "pro",
     title: text("آموزش فروش آنلاین", "Online Sales Mastery"),
     description: text(
       "قیف، اعتماد در اینستاگرام و تبدیل توجه به گفتگوی خرید.",
       "Funnels, Instagram trust, and turning attention into a buying conversation.",
     ),
-    premium: true,
     subtopics: [
       {
         id: "funnel",
@@ -216,13 +216,12 @@ export const categories: Category[] = [
   },
   {
     id: "hozuri",
-    price: 2_000_000,
+    tierRequired: "pro",
     title: text("آموزش فروش حضوری", "In-Person Sales Mastery"),
     description: text(
       "زبان بدن، ورود به جلسه و بستن رو در رو بدون فشار مصنوعی.",
       "Body language, the live meeting, and closing face to face without fake pressure.",
     ),
-    premium: true,
     subtopics: [
       {
         id: "body",
@@ -356,13 +355,12 @@ export const categories: Category[] = [
   },
   {
     id: "telefoni",
-    price: 1_500_000,
+    tierRequired: "pro",
     title: text("آموزش فروش تلفنی", "Telesales Mastery"),
     description: text(
       "برخورد اول، مکالمه بیمه و نقشه راه تماس سرد تا قرار بعدی.",
       "The first contact, a real call sample, and a path from cold call to the next step.",
     ),
-    premium: true,
     subtopics: [
       {
         id: "first-call",
@@ -496,13 +494,12 @@ export const categories: Category[] = [
   },
   {
     id: "mozakerah",
-    price: 2_400_000,
+    tierRequired: "pro",
     title: text("آموزش مذاکره", "Negotiation Mastery"),
     description: text(
       "اصول امتیاز، مخالفت مشتری و استراتژی قبل از اینکه تخفیف تنها ابزار شود.",
       "Trading concessions, handling objections, and strategy before discount becomes the only tool.",
     ),
-    premium: true,
     subtopics: [
       {
         id: "principles",
@@ -636,13 +633,12 @@ export const categories: Category[] = [
   },
   {
     id: "free",
-    price: 0,
+    tierRequired: "free",
     title: text("آموزش‌های رایگان", "Free Training Hub"),
     description: text(
       "برای همه کاربران واردشده باز است و فقط با رد کردن چالش درس قبل جلو می‌رود.",
       "Open to every signed-in learner. Each film unlocks only after the previous challenge.",
     ),
-    premium: false,
     subtopics: [
       {
         id: "starter",
@@ -774,9 +770,11 @@ export function lessonGate(
   lessonId: string,
   user: { isPremium: boolean } | null,
   passed: string[],
+  subscribed = false,
 ): Gate {
-  if (!user) return { state: "auth" };
-  if (category.premium && !user.isPremium) return { state: "plan" };
+  const unlocked = Boolean(user?.isPremium) || subscribed;
+  if (!user && !subscribed) return { state: "auth" };
+  if (category.tierRequired === "pro" && !unlocked) return { state: "plan" };
   const list = lessonsOf(category);
   const index = list.findIndex((item) => item.lesson.id === lessonId);
   if (index > 0) {
