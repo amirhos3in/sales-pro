@@ -60,9 +60,9 @@ function HumanForm() {
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    const error = addTicket(subject, body);
-    if (error) {
-      toast.error(error);
+    const result = addTicket(subject, body);
+    if (result.error) {
+      toast.error(result.error);
       return;
     }
     setSubject("");

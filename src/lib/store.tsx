@@ -24,10 +24,15 @@ export type Ticket = {
   body: string;
   reply: string;
   at: string;
+  status: "review";
 };
+
+export type PremiumTier = "gold" | "vip";
 
 export type UserState = {
   name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   city: string;
@@ -35,9 +40,13 @@ export type UserState = {
   bio: string;
   goals: string[];
   plan: PlanId | null;
+  isPremium: boolean;
+  premiumTier: PremiumTier | null;
   wallet: number;
   transactions: Tx[];
   completed: string[];
+  watched: string[];
+  passed: string[];
   lastLessonId: string | null;
   tickets: Ticket[];
 };
@@ -45,6 +54,14 @@ export type UserState = {
 type DB = {
   session: string | null;
   users: Record<string, UserState>;
+};
+
+export type OtpInput = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  code: string;
 };
 
 type StoreValue = {
@@ -55,6 +72,7 @@ type StoreValue = {
     password: string,
     profile?: Partial<Pick<UserState, "name" | "role" | "city">>,
   ) => string | null;
+  verifyOtp: (input: OtpInput) => string | null;
   logout: () => void;
   updateProfile: (
     patch: Partial<
@@ -63,26 +81,86 @@ type StoreValue = {
   ) => void;
   topUp: (amount: number) => void;
   purchase: (plan: PlanId) => { ok: boolean; message: string };
+  activatePremium: (tier: PremiumTier) => string | null;
   setLessonDone: (id: string, done: boolean) => void;
+  markWatched: (id: string) => void;
+  passQuiz: (id: string) => void;
   rememberLesson: (id: string) => void;
-  addTicket: (subject: string, body: string) => string | null;
+  addTicket: (subject: string, body: string) => { error: string | null; id: string | null };
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
 
 const emptyDb: DB = { session: null, users: {} };
 
-function freshUser(email: string, name: string): UserState {
-  const now = new Date().toISOString();
+export function englishDigits(value: string) {
+  return value
+    .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
+}
+
+export function phoneKey(value: string) {
+  const digits = englishDigits(value).replace(/\D/g, "");
+  if (digits.startsWith("98") && digits.length >= 12) return `0${digits.slice(2)}`;
+  if (digits.length === 10 && digits.startsWith("9")) return `0${digits}`;
+  return digits;
+}
+
+export function validPhone(value: string) {
+  return /^09\d{9}$/.test(phoneKey(value));
+}
+
+function fullName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`.trim();
+}
+
+function normalizeUser(raw: Partial<UserState>): UserState {
+  const firstName = raw.firstName?.trim() || raw.name?.trim().split(/\s+/)[0] || "کاربر";
+  const lastName =
+    raw.lastName?.trim() ||
+    raw.name?.trim().split(/\s+/).slice(1).join(" ") ||
+    "";
+  const plan = raw.plan ?? null;
   return {
-    name,
+    name: fullName(firstName, lastName) || raw.name || "کاربر",
+    firstName,
+    lastName,
+    email: raw.email ?? "",
+    phone: raw.phone ?? "",
+    city: raw.city ?? "تهران",
+    role: raw.role ?? "کارشناس فروش",
+    bio: raw.bio ?? "",
+    goals: raw.goals ?? [],
+    plan,
+    isPremium: raw.isPremium ?? Boolean(plan),
+    premiumTier: raw.premiumTier ?? (plan === "pro" ? "vip" : plan ? "gold" : null),
+    wallet: raw.wallet ?? 10_000_000,
+    transactions: raw.transactions ?? [],
+    completed: raw.completed ?? [],
+    watched: raw.watched ?? [],
+    passed: raw.passed ?? [],
+    lastLessonId: raw.lastLessonId ?? null,
+    tickets: (raw.tickets ?? []).map((ticket) => ({
+      ...ticket,
+      status: "review" as const,
+    })),
+  };
+}
+
+function freshUser(phone: string, firstName: string, lastName: string, email: string): UserState {
+  const now = new Date().toISOString();
+  return normalizeUser({
+    firstName,
+    lastName,
     email,
-    phone: "۰۹۱۲۰۰۰۰۰۰۰",
+    phone,
     city: "تهران",
     role: "کارشناس فروش",
-    bio: "فروش را بیشتر تجربی یاد گرفته‌ام و می‌خواهم مکالمه، مذاکره و دایرکت را سناریومحور و قابل تمرین جلو ببرم.",
-    goals: ["افزایش پورسانت", "تبدیل دایرکت به خرید"],
+    bio: "",
+    goals: [],
     plan: null,
+    isPremium: false,
+    premiumTier: null,
     wallet: 10_000_000,
     transactions: [
       {
@@ -93,9 +171,11 @@ function freshUser(email: string, name: string): UserState {
       },
     ],
     completed: [],
+    watched: [],
+    passed: [],
     lastLessonId: null,
     tickets: [],
-  };
+  });
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -109,7 +189,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (raw) {
           const parsed = JSON.parse(raw) as DB;
           if (parsed && typeof parsed === "object" && parsed.users) {
-            setDb({ session: parsed.session ?? null, users: parsed.users });
+            const users = Object.fromEntries(
+              Object.entries(parsed.users).map(([key, user]) => [key, normalizeUser(user)]),
+            );
+            setDb({ session: parsed.session ?? null, users });
           }
         }
       } catch {
@@ -128,13 +211,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const user = db.session ? (db.users[db.session] ?? null) : null;
 
   const value = useMemo<StoreValue>(() => {
-    const patchUser = (email: string, fn: (current: UserState) => UserState) => {
+    const patchUser = (key: string, fn: (current: UserState) => UserState) => {
       setDb((prev) => {
-        const current = prev.users[email];
+        const current = prev.users[key];
         if (!current) return prev;
         return {
           ...prev,
-          users: { ...prev.users, [email]: fn(current) },
+          users: { ...prev.users, [key]: fn(current) },
         };
       });
     };
@@ -149,15 +232,45 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }
         setDb((prev) => {
           if (prev.users[email]) return { ...prev, session: email };
-          const created = freshUser(
-            email,
-            profile?.name?.trim() || "امیرحسین قاری",
-          );
+          const created = freshUser("", profile?.name?.trim() || "امیرحسین", "قاری", email);
           created.role = profile?.role?.trim() || created.role;
           created.city = profile?.city?.trim() || created.city;
+          created.name = profile?.name?.trim() || created.name;
           return {
             session: email,
             users: { ...prev.users, [email]: created },
+          };
+        });
+        return null;
+      },
+      verifyOtp: (input) => {
+        const firstName = input.firstName.trim();
+        const lastName = input.lastName.trim();
+        const phone = phoneKey(input.phone);
+        const email = input.email.trim().toLowerCase();
+        const code = englishDigits(input.code).replace(/\D/g, "");
+        if (firstName.length < 2 || lastName.length < 2) return "name";
+        if (!validPhone(phone)) return "phone";
+        if (!/^\d{4,6}$/.test(code)) return "otp";
+        setDb((prev) => {
+          const existing = prev.users[phone];
+          if (existing) {
+            const next = normalizeUser({
+              ...existing,
+              firstName,
+              lastName,
+              name: fullName(firstName, lastName),
+              email: email || existing.email,
+              phone,
+            });
+            return { session: phone, users: { ...prev.users, [phone]: next } };
+          }
+          return {
+            session: phone,
+            users: {
+              ...prev.users,
+              [phone]: freshUser(phone, firstName, lastName, email),
+            },
           };
         });
         return null;
@@ -200,6 +313,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         patchUser(db.session, (current) => ({
           ...current,
           plan,
+          isPremium: true,
+          premiumTier: plan === "pro" ? "vip" : "gold",
           wallet: current.wallet - selected.price,
           transactions: [
             {
@@ -213,6 +328,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }));
         return { ok: true, message: `پلن ${selected.name} فعال شد.` };
       },
+      activatePremium: (tier) => {
+        if (!db.session || !user) return "auth";
+        patchUser(db.session, (current) => ({
+          ...current,
+          isPremium: true,
+          premiumTier: tier,
+          plan: tier === "vip" ? "pro" : current.plan === "pro" ? "pro" : "plus",
+          transactions: [
+            {
+              id: crypto.randomUUID(),
+              title: tier === "vip" ? "فعال‌سازی آزمایشی VIP" : "فعال‌سازی آزمایشی پلن طلایی",
+              amount: 0,
+              at: new Date().toISOString(),
+            },
+            ...current.transactions,
+          ],
+        }));
+        return null;
+      },
       setLessonDone: (id, done) => {
         if (!db.session) return;
         patchUser(db.session, (current) => ({
@@ -223,6 +357,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             : current.completed.filter((item) => item !== id),
         }));
       },
+      markWatched: (id) => {
+        if (!db.session) return;
+        patchUser(db.session, (current) => ({
+          ...current,
+          lastLessonId: id,
+          watched: Array.from(new Set([...current.watched, id])),
+        }));
+      },
+      passQuiz: (id) => {
+        if (!db.session) return;
+        patchUser(db.session, (current) => ({
+          ...current,
+          lastLessonId: id,
+          watched: Array.from(new Set([...current.watched, id])),
+          passed: Array.from(new Set([...current.passed, id])),
+          completed: Array.from(new Set([...current.completed, id])),
+        }));
+      },
       rememberLesson: (id) => {
         if (!db.session) return;
         patchUser(db.session, (current) =>
@@ -230,27 +382,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         );
       },
       addTicket: (subject, body) => {
-        if (!user || !db.session) return "برای ثبت درخواست اول وارد شوید.";
+        if (!user || !db.session) {
+          return { error: "برای ثبت درخواست اول وارد شوید.", id: null };
+        }
         const cleanSubject = subject.trim();
         const cleanBody = body.trim();
         if (cleanSubject.length < 3 || cleanBody.length < 8) {
-          return "موضوع و شرح را کامل‌تر بنویسید.";
+          return { error: "موضوع و شرح را کامل‌تر بنویسید.", id: null };
         }
-        const reply = `درخواست شما ثبت شد. ${supportSla(user.plan)} در این پروتوتایپ یک پاسخ نمونه هم کنار درخواست می‌ماند: روی همان سناریو یک جملهٔ جایگزین آماده کنید و در پاسخ بعدی بفرستید.`;
+        const id = `TK-${Math.floor(1000 + Math.random() * 9000)}`;
+        const reply = `درخواست شما ثبت شد. ${supportSla(user.plan)} شناسه: #${id}`;
         patchUser(db.session, (current) => ({
           ...current,
           tickets: [
             {
-              id: crypto.randomUUID(),
+              id,
               subject: cleanSubject,
               body: cleanBody,
               reply,
               at: new Date().toISOString(),
+              status: "review",
             },
             ...current.tickets,
           ],
         }));
-        return null;
+        return { error: null, id };
       },
     };
   }, [db.session, ready, user]);

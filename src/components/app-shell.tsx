@@ -8,10 +8,13 @@ import {
   ChartNoAxesCombined,
   LogOut,
   Menu,
+  Moon,
   Newspaper,
+  Sun,
   UserRound,
   Wallet,
 } from "lucide-react";
+import { useGate } from "@/components/gates";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,63 +32,56 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { allLessons, lessonKey } from "@/lib/curriculum";
-import { faPercent } from "@/lib/format";
+import { allVideoLessons } from "@/lib/courses-data";
+import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
+import { useThemeMode } from "@/lib/theme";
 import { cn } from "@/lib/utils";
-
-const nav = [
-  { href: "/", label: "خانه" },
-  { href: "/services", label: "خدمات" },
-  { href: "/support", label: "پشتیبانی" },
-  { href: "/subscription", label: "اشتراک" },
-];
-
-const menu = [
-  { href: "/profile", label: "اطلاعات من", icon: UserRound },
-  { href: "/about", label: "درباره من", icon: UserRound },
-  { href: "/articles", label: "مقالات", icon: Newspaper },
-  { href: "/subscription", label: "خرید اشتراک", icon: BadgeCheck },
-  { href: "/wallet", label: "کیف پول", icon: Wallet },
-  { href: "/progress", label: "درصد پیشرفت", icon: ChartNoAxesCombined },
-];
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function progressOf(completed: string[]) {
-  const lessons = allLessons();
-  const known = new Set(
-    lessons.map(({ track, module, lesson }) =>
-      lessonKey(track.slug, module.slug, lesson.slug),
-    ),
-  );
-  const done = completed.filter((id) => known.has(id)).length;
-  const percent = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
-  return { done, total: lessons.length, percent };
-}
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { ready, user, logout } = useStore();
+  const { copy, lang, setLang, dir } = useI18n();
+  const { theme, toggle } = useThemeMode();
+  const { openAuth } = useGate();
   const [open, setOpen] = useState(false);
-  const progress = progressOf(user?.completed ?? []);
+  const total = allVideoLessons().length;
+  const passed = user?.passed.length ?? 0;
+  const percent = total ? Math.round((passed / total) * 100) : 0;
+
+  const nav = [
+    { href: "/", label: copy.nav.home },
+    { href: "/services", label: copy.nav.services },
+    { href: "/support", label: copy.nav.support },
+    { href: "/subscription", label: copy.nav.plans },
+  ];
+  const menu = [
+    { href: "/profile", label: copy.menu.profile, icon: UserRound },
+    { href: "/about", label: copy.menu.about, icon: UserRound },
+    { href: "/articles", label: copy.menu.articles, icon: Newspaper },
+    { href: "/subscription", label: copy.menu.buy, icon: BadgeCheck },
+    { href: "/wallet", label: copy.menu.wallet, icon: Wallet },
+    { href: "/progress", label: copy.menu.progress, icon: ChartNoAxesCombined },
+  ];
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="grid size-9 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-              ن
+            <span className="grid size-9 place-items-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-[#0B132B]">
+              {lang === "en" ? "N" : "ن"}
             </span>
             <span className="leading-tight">
-              <span className="block text-sm font-bold">نکس‌سل</span>
+              <span className="block text-sm font-bold">{copy.brand}</span>
               <span className="hidden text-[11px] text-muted-foreground sm:block">
-                آکادمی مهارت‌های فروش
+                {copy.brandLine}
               </span>
             </span>
           </Link>
@@ -96,9 +92,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground",
-                  isActive(pathname, item.href) &&
-                    "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                  "rounded-xl px-3 py-2 text-sm text-muted-foreground transition hover:bg-foreground/5 hover:text-foreground",
+                  isActive(pathname, item.href) && "bg-[#D4AF37] text-[#0B132B] hover:bg-[#D4AF37] hover:text-[#0B132B]",
                 )}
               >
                 {item.label}
@@ -107,13 +102,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="ms-auto flex items-center gap-2">
+            <div className="flex rounded-full p-0.5 ring-1 ring-[color:var(--glass-border)]">
+              {(["fa", "en"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setLang(item)}
+                  className={cn(
+                    "rounded-full px-2.5 py-1 text-xs",
+                    lang === item && "bg-[#D4AF37] text-[#0B132B]",
+                  )}
+                >
+                  {item === "fa" ? "فا" : "EN"}
+                </button>
+              ))}
+            </div>
+            <Button variant="outline" size="icon" className="rounded-full" onClick={toggle} aria-label={theme}>
+              {theme === "dark" ? <Sun /> : <Moon />}
+            </Button>
             {ready && user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="flex items-center gap-2 rounded-full py-1 ps-1 pe-3 ring-1 ring-foreground/10 hover:bg-muted"
-                >
+                <DropdownMenuTrigger className="flex items-center gap-2 rounded-full py-1 ps-1 pe-3 ring-1 ring-[color:var(--glass-border)] hover:bg-foreground/5">
                   <Avatar>
-                    <AvatarFallback>{user.name.slice(0, 1)}</AvatarFallback>
+                    <AvatarFallback>{user.firstName.slice(0, 1)}</AvatarFallback>
                   </Avatar>
                   <span className="hidden max-w-28 truncate text-sm sm:inline">
                     {user.name}
@@ -121,16 +132,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                    <DropdownMenuLabel>{user.email || user.phone}</DropdownMenuLabel>
                     {menu.map((item) => (
-                      <DropdownMenuItem
-                        key={item.href}
-                        onClick={() => router.push(item.href)}
-                      >
+                      <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)}>
                         <item.icon />
-                        {item.href === "/progress"
-                          ? `درصد پیشرفت · ${faPercent(progress.percent)}`
-                          : item.label}
+                        {item.href === "/progress" ? `${item.label} · ${percent}%` : item.label}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuGroup>
@@ -139,20 +145,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     variant="destructive"
                     onClick={() => {
                       logout();
-                      router.push("/login");
+                      router.push("/");
                     }}
                   >
                     <LogOut />
-                    خروج
+                    {copy.menu.logout}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button
-                className="h-9 px-3"
-                onClick={() => router.push("/login")}
-              >
-                ورود
+              <Button className="h-9 bg-[#D4AF37] px-3 text-[#0B132B] hover:bg-[#E5C07B]" onClick={openAuth}>
+                {copy.menu.login}
               </Button>
             )}
             <Button
@@ -160,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               size="icon"
               className="md:hidden"
               onClick={() => setOpen(true)}
-              aria-label="منو"
+              aria-label={copy.menu.menu}
             >
               <Menu />
             </Button>
@@ -169,9 +172,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-72">
+        <SheetContent side={dir === "rtl" ? "right" : "left"} className="w-72">
           <SheetHeader>
-            <SheetTitle>نکس‌سل</SheetTitle>
+            <SheetTitle>{copy.brand}</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-1 px-4">
             {nav.map((item) => (
@@ -180,47 +183,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm",
-                  isActive(pathname, item.href)
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted",
+                  "rounded-xl px-3 py-2 text-sm",
+                  isActive(pathname, item.href) ? "bg-[#D4AF37] text-[#0B132B]" : "hover:bg-foreground/5",
                 )}
               >
                 {item.label}
               </Link>
             ))}
-            <p className="mt-4 px-3 text-xs text-muted-foreground">حساب</p>
+            <p className="mt-4 px-3 text-xs text-muted-foreground">{copy.menu.account}</p>
             {menu.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm hover:bg-muted"
+                className="rounded-xl px-3 py-2 text-sm hover:bg-foreground/5"
               >
-                {item.label}
+                {item.href === "/progress" ? `${item.label} · ${percent}%` : item.label}
               </Link>
             ))}
             {user ? (
               <button
-                className="rounded-lg px-3 py-2 text-start text-sm text-destructive hover:bg-destructive/10"
+                className="rounded-xl px-3 py-2 text-start text-sm text-destructive hover:bg-destructive/10"
                 onClick={() => {
                   logout();
                   setOpen(false);
-                  router.push("/login");
                 }}
               >
-                خروج
+                {copy.menu.logout}
               </button>
             ) : null}
           </div>
         </SheetContent>
       </Sheet>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-      <footer className="border-t border-foreground/10">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 pb-28">{children}</main>
+      <footer className="border-t border-[color:var(--glass-border)]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs leading-6 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>نکس‌سل، آکادمی تخصصی مهارت‌های فروش. سناریومحور، از تماس تا دایرکت.</p>
-          <p>پشتیبانی انسانی و دستیار هوش مصنوعی در یک‌جا.</p>
+          <p>{copy.footer.left}</p>
+          <p>{copy.footer.right}</p>
         </div>
       </footer>
     </div>

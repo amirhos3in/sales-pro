@@ -4,15 +4,14 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { AccountGate } from "@/components/account-gate";
-import { progressOf } from "@/components/app-shell";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { allLessons, lessonKey, tracks } from "@/lib/curriculum";
+import { categories, lessonsOf, pickText } from "@/lib/courses-data";
+import { useI18n } from "@/lib/i18n";
 import { faDate, faNumber, faPercent, toman } from "@/lib/format";
-import { planById } from "@/lib/plans";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -224,87 +223,51 @@ export function ProgressScreen() {
 
 function ProgressBody() {
   const { user } = useStore();
+  const { lang } = useI18n();
   if (!user) return null;
-  const progress = progressOf(user.completed);
+  const total = categories.reduce((sum, category) => sum + lessonsOf(category).length, 0);
+  const done = user.passed.length;
+  const percent = total ? Math.round((done / total) * 100) : 0;
   return (
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">درصد پیشرفت</h1>
-        <p className="mt-2 text-4xl font-semibold">{faPercent(progress.percent)}</p>
+        <p className="mt-2 text-4xl font-semibold">{faPercent(percent)}</p>
         <p className="text-sm text-muted-foreground">
-          {faNumber(progress.done)} درس از {faNumber(progress.total)}
-          {user.plan ? ` · پلن ${planById(user.plan).name}` : " · بدون اشتراک فعال"}
+          {faNumber(done)} درس از {faNumber(total)}
+          {user.isPremium ? ` · ${user.premiumTier === "vip" ? "VIP" : "Gold"}` : " · بدون اشتراک فعال"}
         </p>
       </header>
       <div className="[&_[data-slot=progress-track]]:h-2">
-        <Progress value={progress.percent}>
-          <ProgressLabel>کل مسیرها</ProgressLabel>
+        <Progress value={percent}>
+          <ProgressLabel>چالش‌های قبول‌شده</ProgressLabel>
           <ProgressValue />
         </Progress>
       </div>
       <div className="grid gap-3">
-        {tracks.map((track) => {
-          const lessons = track.modules.flatMap((module) =>
-            module.lessons.map((lesson) => lessonKey(track.slug, module.slug, lesson.slug)),
-          );
-          const done = lessons.filter((id) => user.completed.includes(id)).length;
-          const percent = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
+        {categories.map((category) => {
+          const lessons = lessonsOf(category).map((item) => item.lesson.id);
+          const passed = lessons.filter((id) => user.passed.includes(id)).length;
+          const share = lessons.length ? Math.round((passed / lessons.length) * 100) : 0;
           return (
             <Link
-              key={track.slug}
-              href={`/courses/${track.slug}`}
-              className="rounded-3xl bg-card p-4 ring-1 ring-foreground/10"
+              key={category.id}
+              href={`/learn/${category.id}`}
+              className="glass rounded-3xl p-4"
             >
               <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="font-medium">{track.title}</span>
+                <span className="font-medium">{pickText(category.title, lang)}</span>
                 <span className="text-sm text-muted-foreground">
-                  {faNumber(done)} / {faNumber(lessons.length)}
+                  {faNumber(passed)} / {faNumber(lessons.length)}
                 </span>
               </div>
               <div className="[&_[data-slot=progress-track]]:h-2">
-                <Progress value={percent} />
+                <Progress value={share} />
               </div>
             </Link>
           );
         })}
       </div>
-      {progress.done === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          هنوز درسی تمام نشده. از{" "}
-          <Link href="/login" className="text-primary">
-            آیکون‌های مسیر
-          </Link>{" "}
-          شروع کنید و در پایان درس علامت تکمیل بزنید.
-        </p>
-      ) : (
-        <RecentDone completed={user.completed} />
-      )}
-    </div>
-  );
-}
-
-function RecentDone({ completed }: { completed: string[] }) {
-  const items = allLessons()
-    .filter(({ track, module, lesson }) =>
-      completed.includes(lessonKey(track.slug, module.slug, lesson.slug)),
-    )
-    .slice(0, 6);
-  return (
-    <div>
-      <h2 className="font-medium">درس‌های تمام‌شده</h2>
-      <ul className="mt-2 space-y-2">
-        {items.map(({ track, module, lesson }) => (
-          <li key={lesson.slug}>
-            <Link
-              href={`/courses/${track.slug}/${module.slug}/${lesson.slug}`}
-              className="block rounded-2xl bg-card px-4 py-3 text-sm ring-1 ring-foreground/10"
-            >
-              <span className="text-muted-foreground">{track.title} · </span>
-              {lesson.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

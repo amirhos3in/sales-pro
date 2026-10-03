@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
+import { useGate } from "@/components/gates";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +24,22 @@ import { cn } from "@/lib/utils";
 export function SubscriptionScreen() {
   const router = useRouter();
   const { ready, user, purchase } = useStore();
+  const { openPaywall } = useGate();
+  const { copy } = useI18n();
   const [pending, setPending] = useState<PlanId | null>(null);
   const selected = PLANS.find((plan) => plan.id === pending) ?? null;
 
   return (
     <div className="space-y-6">
+      <section className="glass flex flex-col gap-3 rounded-3xl p-5 shadow-xl sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">{copy.sub.luxury}</h2>
+          <p className="mt-1 text-sm leading-7 text-muted-foreground">{copy.sub.luxuryBody}</p>
+        </div>
+        <Button className="h-11 bg-[#D4AF37] px-4 text-[#0B132B] hover:bg-[#E5C07B]" onClick={openPaywall}>
+          {copy.sub.open}
+        </Button>
+      </section>
       <header>
         <h1 className="text-2xl font-semibold">خرید اشتراک</h1>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">

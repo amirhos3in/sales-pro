@@ -974,6 +974,18 @@ export function allLessons() {
   );
 }
 
+export function progressOf(completed: string[]) {
+  const lessons = allLessons();
+  const known = new Set(
+    lessons.map(({ track, module, lesson }) =>
+      lessonKey(track.slug, module.slug, lesson.slug),
+    ),
+  );
+  const done = completed.filter((id) => known.has(id)).length;
+  const percent = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
+  return { done, total: lessons.length, percent };
+}
+
 export function trackLessons(track: Track) {
   return track.modules.flatMap((module) =>
     module.lessons.map((lesson) => ({ module, lesson })),
