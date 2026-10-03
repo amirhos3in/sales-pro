@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export type Lang = "fa" | "en";
 
@@ -460,9 +460,12 @@ const I18nContext = createContext<I18nValue | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("fa");
+  const hydrated = useRef(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
+      if (hydrated.current) return;
+      hydrated.current = true;
       const stored = localStorage.getItem("nexsell-lang");
       if (stored === "en" || stored === "fa") setLangState(stored);
     }, 0);
@@ -470,6 +473,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!hydrated.current) return;
     const root = document.documentElement;
     root.lang = lang === "en" ? "en" : "fa";
     root.dir = lang === "en" ? "ltr" : "rtl";
@@ -482,7 +486,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       lang,
       dir: lang === "en" ? "ltr" : "rtl",
       copy: copy[lang] as Copy,
-      setLang: setLangState,
+      setLang: (next) => {
+        hydrated.current = true;
+        setLangState(next);
+      },
     }),
     [lang],
   );

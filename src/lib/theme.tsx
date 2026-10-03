@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type ThemeName = "dark" | "light";
 
@@ -14,9 +14,12 @@ const ThemeContext = createContext<ThemeValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>("dark");
+  const hydrated = useRef(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
+      if (hydrated.current) return;
+      hydrated.current = true;
       const stored = localStorage.getItem("nexsell-theme");
       if (stored === "light" || stored === "dark") setThemeState(stored);
     }, 0);
@@ -24,15 +27,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!hydrated.current) return;
     document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("nexsell-theme", theme);
   }, [theme]);
 
+  const setTheme = (next: ThemeName) => {
+    hydrated.current = true;
+    setThemeState(next);
+  };
+
   const value = useMemo<ThemeValue>(
     () => ({
       theme,
-      setTheme: setThemeState,
-      toggle: () => setThemeState((current) => (current === "dark" ? "light" : "dark")),
+      setTheme,
+      toggle: () => setTheme(theme === "dark" ? "light" : "dark"),
     }),
     [theme],
   );
