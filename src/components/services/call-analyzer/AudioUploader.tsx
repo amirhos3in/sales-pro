@@ -293,7 +293,8 @@ export function AudioUploader() {
         type="button"
         onClick={analyze}
         disabled={phase === "processing"}
-        className="mt-5 h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-medium text-[#0B132B] disabled:opacity-60"
+        className="mt-5 h-11 rounded-2xl px-4 text-sm font-medium disabled:opacity-60"
+        style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
       >
         {text.analyze}
       </button>
