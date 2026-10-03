@@ -11,9 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
+import { settleCheckout } from "@/lib/checkout";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { PLAN_RANK, planById, type PlanId } from "@/lib/plans";
+import { subscriptionForPlan } from "@/lib/subscription";
+import { useStore } from "@/lib/store";
 
 const PRESETS = [200_000, 500_000, 1_000_000];
 
@@ -21,6 +26,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
   const { copy, lang } = useI18n();
   const text = copy.dash;
   const { updateProfile } = useAuth();
+  const { grantPlan, user: learner } = useStore();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(PRESETS[0]);
   const rows = user.transactions ?? [];
@@ -32,6 +38,25 @@ export function WalletTab({ user }: { user: AcademyUser }) {
 
   function stamp(value: string) {
     return new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(value));
+  }
+
+  function activateFromBalance(planId: PlanId) {
+    const plan = planById(planId);
+    if (user.walletBalance < plan.price) return;
+    const currentType = user.subscription?.isActive ? user.subscription.planType : null;
+    const currentRank = currentType ? PLAN_RANK[currentType === "monthly" ? "eco" : currentType === "quarterly" ? "plus" : "pro"] : 0;
+    if (currentRank >= PLAN_RANK[planId]) {
+      toast.success(lang === "fa" ? "این پلن همین حالا فعال است." : "This plan is already active.");
+      return;
+    }
+    const result = settleCheckout(user, `اشتراک ${plan.name}`, plan.price, true);
+    updateProfile({
+      ...result.patch,
+      plan: "vip",
+      subscription: subscriptionForPlan(plan.id),
+    });
+    if (learner) grantPlan(plan.id);
+    toast.success(lang === "fa" ? `اشتراک ${plan.name} با موجودی کیف پول فعال شد.` : `${plan.name} is now active from your wallet.`);
   }
 
   function deposit() {
@@ -62,7 +87,10 @@ export function WalletTab({ user }: { user: AcademyUser }) {
           {text.cashbackEarned}: {localeNumber(user.cashbackEarned, lang)} {text.toman}
         </p>
         <CashbackBadge amount={user.cashbackEarned} className="mt-3" />
-        <button type="button" className="mt-6 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
+        <div className="mt-6">
+          <CashbackGoalBar balance={user.walletBalance} onActivate={activateFromBalance} />
+        </div>
+        <button type="button" className="mt-2 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
           {text.deposit}
         </button>
       </section>
