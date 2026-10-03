@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Headphones, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
+
+export const OPEN_SUPPORT_EVENT = "nexsell-open-support";
+
+export function openSupportWidget() {
+  window.dispatchEvent(new CustomEvent(OPEN_SUPPORT_EVENT));
+}
 
 type Chat = { id: string; role: "user" | "assistant"; text: string };
 type TicketNote = { id: string; text: string };
@@ -94,6 +100,15 @@ export function SupportWidget() {
   }
 
   const eta = user?.premiumTier === "vip" ? copy.support.etaVip : copy.support.eta;
+
+  useEffect(() => {
+    const openPanel = () => {
+      setOpen(true);
+      setTab("human");
+    };
+    window.addEventListener(OPEN_SUPPORT_EVENT, openPanel);
+    return () => window.removeEventListener(OPEN_SUPPORT_EVENT, openPanel);
+  }, []);
 
   return (
     <div className="print-hide fixed bottom-6 left-6 z-50">

@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, LayoutDashboard, UserRound, Wallet } from "lucide-react";
+import { BookOpen, Headset, LayoutDashboard, PhoneCall, UserRound, Wallet } from "lucide-react";
 import { avatarChoice, frostStyle } from "@/components/dashboard/style";
 import type { AcademyUser } from "@/context/AuthContext";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-export type DashTab = "overview" | "profile" | "courses" | "wallet";
+export type DashTab = "overview" | "profile" | "courses" | "wallet" | "audits" | "tickets";
 
 export function resolveTab(value: string | null): DashTab {
-  if (value === "profile" || value === "courses" || value === "wallet" || value === "overview") return value;
+  if (value === "profile" || value === "courses" || value === "wallet" || value === "overview" || value === "audits" || value === "tickets") return value;
   return "overview";
 }
 
@@ -22,6 +22,8 @@ export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
     { id: "profile" as const, href: "/dashboard?tab=profile", label: copy.dash.profile, icon: UserRound },
     { id: "courses" as const, href: "/dashboard?tab=courses", label: copy.session.courses, icon: BookOpen },
     { id: "wallet" as const, href: "/dashboard?tab=wallet", label: copy.session.wallet, icon: Wallet },
+    { id: "audits" as const, href: "/dashboard?tab=audits", label: copy.dash.audits, icon: PhoneCall },
+    { id: "tickets" as const, href: "/dashboard?tab=tickets", label: copy.dash.tickets, icon: Headset },
   ];
 
   const links = (pill: boolean) =>

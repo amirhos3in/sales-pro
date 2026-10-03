@@ -7,6 +7,15 @@ const KEY = "academy_user_session";
 
 export type AcademyPlan = "free" | "vip";
 
+export type WalletTxKind = "plan" | "cashback" | "topup";
+
+export type WalletTx = {
+  id: string;
+  kind: WalletTxKind;
+  amount: number;
+  at: string;
+};
+
 export type AcademyUser = {
   name: string;
   phone: string;
@@ -17,6 +26,7 @@ export type AcademyUser = {
   walletBalance: number;
   cashbackEarned: number;
   avatarId?: string;
+  transactions?: WalletTx[];
 };
 
 export type AcademySession = {
@@ -44,6 +54,11 @@ const seedProfile = {
   plan: "vip" as const,
   walletBalance: 2_450_000,
   cashbackEarned: 180_000,
+  transactions: [
+    { id: "tx-topup", kind: "topup" as const, amount: 1_000_000, at: "2026-09-28T09:00:00" },
+    { id: "tx-cash", kind: "cashback" as const, amount: 180_000, at: "2026-09-12T11:30:00" },
+    { id: "tx-plan", kind: "plan" as const, amount: -4_728_000, at: "2026-09-12T11:20:00" },
+  ],
 };
 
 const AuthContext = createContext<AuthValue | null>(null);
