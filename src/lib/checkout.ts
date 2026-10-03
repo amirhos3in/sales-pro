@@ -1,15 +1,16 @@
 import type { AcademyUser, WalletTx } from "@/context/AuthContext";
-import { finalPayablePrice, quoteCashback, type CashbackQuote } from "@/lib/cashback";
+import { cashbackForPayment, finalPayablePrice, quoteCashback, type CashbackQuote } from "@/lib/cashback";
 
 export function settleCheckout(user: AcademyUser, itemName: string, price: number, useWallet: boolean) {
   const quote: CashbackQuote = quoteCashback(finalPayablePrice(price, price), useWallet ? user.walletBalance : 0);
+  const cashback = cashbackForPayment(quote.gatewayAmount, quote.walletAmount);
   const at = new Date().toISOString();
   const transactions: WalletTx[] = [];
-  if (quote.cashback > 0) {
+  if (cashback > 0) {
     transactions.push({
       id: crypto.randomUUID(),
       kind: "cashback",
-      amount: quote.cashback,
+      amount: cashback,
       at,
       title: `هدیه کش‌بک ۵٪ خرید ${itemName}`,
       status: "success",
@@ -28,8 +29,8 @@ export function settleCheckout(user: AcademyUser, itemName: string, price: numbe
   return {
     quote,
     patch: {
-      walletBalance: user.walletBalance - quote.walletAmount + quote.cashback,
-      cashbackEarned: user.cashbackEarned + quote.cashback,
+      walletBalance: user.walletBalance - quote.walletAmount + cashback,
+      cashbackEarned: user.cashbackEarned + cashback,
       transactions: [...transactions, ...(user.transactions ?? [])],
     },
   };

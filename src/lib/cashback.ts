@@ -10,10 +10,19 @@ function toman(value: number) {
   return Math.floor(value);
 }
 
+/**
+ * Five percent cashback is earned only on money paid through the gateway.
+ * Wallet credit never generates cashback, even when it covers the whole price.
+ */
+export function cashbackForPayment(gatewayPayment: number, walletPayment = 0): number {
+  void walletPayment;
+  if (!Number.isFinite(gatewayPayment) || gatewayPayment <= 0) return 0;
+  return Math.floor(gatewayPayment * 0.05);
+}
+
 /** Five percent of the bank-gateway amount, rounded down. Wallet-only payments return 0. */
 export function calculateCashback(payableGatewayAmount: number): number {
-  if (!Number.isFinite(payableGatewayAmount) || payableGatewayAmount <= 0) return 0;
-  return Math.floor(payableGatewayAmount * 0.05);
+  return cashbackForPayment(payableGatewayAmount, 0);
 }
 
 /**
@@ -34,6 +43,6 @@ export function quoteCashback(discountedPrice: number, walletUsed: number): Cash
     finalPrice,
     walletAmount,
     gatewayAmount,
-    cashback: calculateCashback(gatewayAmount),
+    cashback: cashbackForPayment(gatewayAmount, walletAmount),
   };
 }

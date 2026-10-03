@@ -88,7 +88,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
         </p>
         <CashbackBadge amount={user.cashbackEarned} className="mt-3" />
         <div className="mt-6">
-          <CashbackGoalBar balance={user.walletBalance} onActivate={activateFromBalance} />
+          <CashbackGoalBar onActivate={activateFromBalance} />
         </div>
         <button type="button" className="mt-2 h-11 rounded-2xl px-5 text-sm font-medium" style={goldButtonStyle} onClick={() => setOpen(true)}>
           {text.deposit}

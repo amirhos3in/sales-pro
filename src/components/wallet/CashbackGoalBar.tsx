@@ -2,9 +2,10 @@
 
 import { useEffect, useId, useState } from "react";
 import { Check, Lock } from "lucide-react";
+import { useWallet } from "@/hooks/useWallet";
 import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { PLANS, type PlanId } from "@/lib/plans";
+import type { PlanId } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 const glass = {
@@ -13,16 +14,11 @@ const glass = {
   WebkitBackdropFilter: "blur(12px)",
 };
 
-export function CashbackGoalBar({
-  balance,
-  onActivate,
-}: {
-  balance: number;
-  onActivate: (planId: PlanId) => void;
-}) {
+export function CashbackGoalBar({ onActivate }: { onActivate: (planId: PlanId) => void }) {
   const { lang } = useI18n();
-  const maxPrice = Math.max(...PLANS.map((plan) => plan.price));
-  const fill = maxPrice > 0 ? Math.min(100, (Math.max(0, balance) / maxPrice) * 100) : 0;
+  const { walletBalance, plans, maxTarget, progressPercent, unlockedPlans } = useWallet();
+  const unlockedIds = new Set(unlockedPlans.map((plan) => plan.id));
+  const fill = progressPercent;
   const [shown, setShown] = useState(0);
   const [hoverId, setHoverId] = useState<PlanId | null>(null);
   const [pinnedId, setPinnedId] = useState<PlanId | null>(null);
@@ -57,11 +53,11 @@ export function CashbackGoalBar({
           <span className="absolute inset-0 animate-ping rounded-full bg-[#D4AF37]/70" />
           <span className="absolute inset-0.5 rounded-full bg-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.9)]" />
         </span>
-        {PLANS.map((plan) => {
-          const percent = (plan.price / maxPrice) * 100;
-          const reached = balance >= plan.price;
+        {plans.map((plan) => {
+          const percent = maxTarget > 0 ? (plan.price / maxTarget) * 100 : 0;
+          const reached = unlockedIds.has(plan.id);
           const open = openId === plan.id;
-          const remain = Math.max(0, plan.price - balance);
+          const remain = Math.max(0, plan.price - walletBalance);
           const remainLabel = localeNumber(remain, lang);
           const tip = reached
             ? lang === "fa"
