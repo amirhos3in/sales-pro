@@ -25,7 +25,7 @@ import {
 import { usePricing } from "@/lib/use-pricing";
 import { useI18n } from "@/lib/i18n";
 
-export function PricingTracks() {
+export function PricingTracks({ showCourses = true }: { showCourses?: boolean }) {
   const { lang } = useI18n();
   const state = usePricing();
   const fa = lang === "fa";
@@ -70,7 +70,7 @@ export function PricingTracks() {
 
   return (
     <div className="space-y-8" data-pricing-tracks>
-      <section id="courses" className="scroll-mt-24 space-y-4">
+      {showCourses ? <section id="courses" className="scroll-mt-24 space-y-4">
         <div>
           <p className="text-xs tracking-[0.16em] text-[#D4AF37]">{fa ? "مسیر دوره‌ها" : "Course track"}</p>
           <h2 className="mt-2 text-2xl font-semibold">{fa ? "دوره‌های تخصصی و باندل کامل" : "Specialist courses and the full bundle"}</h2>
@@ -135,7 +135,7 @@ export function PricingTracks() {
             );
           })}
         </div>
-      </section>
+      </section> : null}
 
       <section id="copilot-minutes" className="scroll-mt-24 rounded-[28px] border border-[#D4AF37]/40 bg-[#0B132B] p-5 text-[#F8F1DE] sm:p-6" data-offer="minutes">
         <p className="text-xs tracking-[0.16em] text-[#D4AF37]">{fa ? "مسیر کوپایلوت" : "Copilot track"}</p>

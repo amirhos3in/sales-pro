@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { LiveDemo } from "@/components/copilot/LiveDemo";
-import { CourseCard } from "@/components/courses/CourseCard";
+import { BundleBanner, CourseCard } from "@/components/courses/CourseCard";
 import { PricingTracks } from "@/components/pricing/PricingTracks";
 import { categories, lessonsOf } from "@/lib/courses-data";
 import { useGate } from "@/components/gates";
@@ -68,13 +68,16 @@ export function HomeScreen() {
       </section>
 
       <LiveDemo />
-      <PricingTracks />
+      <PricingTracks showCourses={false} />
       <MetricsStrip />
 
-      <section className="grid gap-4 md:grid-cols-2">
-        {categories.map((category) => (
-          <CourseCard key={category.id} category={category} />
-        ))}
+      <section id="courses" className="scroll-mt-24 space-y-4">
+        <BundleBanner />
+        <div className="grid gap-4 md:grid-cols-2">
+          {categories.map((category) => (
+            <CourseCard key={category.id} category={category} />
+          ))}
+        </div>
       </section>
 
       <section className="glass rounded-3xl p-6">
