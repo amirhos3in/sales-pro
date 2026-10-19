@@ -58,6 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const nav = [
     { href: "/", label: copy.nav.home },
+    { href: "/academy", label: lang === "fa" ? "آموزش" : "Academy" },
     { href: "/articles", label: copy.nav.articles },
     { href: "/services", label: copy.nav.services },
     { href: "/support", label: copy.nav.support },

@@ -35,6 +35,9 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
         <p className="text-xs tracking-[0.16em] text-[#D4AF37]">{copy.session.courses}</p>
         <h1 className="mt-2 text-2xl font-semibold">{copy.session.courses}</h1>
         <p className="mt-2 text-sm leading-7 text-muted-foreground">{text.coursesLead}</p>
+        <Link href="/academy" className="mt-3 inline-flex text-sm font-medium text-[#D4AF37] underline-offset-4 hover:underline">
+          {lang === "fa" ? "مسیر مرحله‌به‌مرحلهٔ آموزش" : "Step-by-step academy path"}
+        </Link>
       </div>
 
       {subscription.isActive ? (
