@@ -11,7 +11,7 @@ npm install
 npm run dev -- -p 43123
 ```
 
-سپس در مرورگر [http://127.0.0.1:43123](http://127.0.0.1:43123) را باز کنید.
+سپس در مرورگر [http://127.0.0.1:43123](http://127.0.0.1:43123) را باز کنید. مسیر مرحله‌به‌مرحله با قفل پلن و آزمون در [http://127.0.0.1:43123/academy](http://127.0.0.1:43123/academy) است.
 
 نسخهٔ عمومی: [https://amirhos3in.github.io/sales-pro/](https://amirhos3in.github.io/sales-pro/)
 
