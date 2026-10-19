@@ -89,7 +89,7 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
           <h2 className="text-lg font-semibold">{text.renewTitle}</h2>
           <p className="mt-2 text-sm leading-7">{text.renewBody}</p>
           <Link
-            href="/subscription#pricing-plans"
+            href="/#courses"
             className="mt-5 inline-flex h-11 items-center justify-center rounded-2xl bg-[#0B132B] px-4 text-sm font-medium text-[#F3E5AB]"
           >
             {text.renewCta}

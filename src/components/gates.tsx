@@ -1,17 +1,14 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/AuthContext";
-import { useSplitCheckout, WalletSplitFields } from "@/components/pricing/SubscriptionModal";
-import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { useStore, type PremiumTier } from "@/lib/store";
+import { useStore } from "@/lib/store";
 
 type GateValue = {
   openAuth: () => void;
@@ -227,115 +224,53 @@ function PaywallModal({
   onClose: () => void;
 }) {
   const { copy, lang } = useI18n();
-  const { user, activatePremium } = useStore();
-  const { currentUser } = useAuth();
-  const { quote, settle } = useSplitCheckout();
-  const router = useRouter();
-  const [tier, setTier] = useState<PremiumTier>("gold");
-  const [useWallet, setUseWallet] = useState(true);
-  const [phase, setPhase] = useState<"choose" | "working" | "done">("choose");
-  const [gatewayVisited, setGatewayVisited] = useState(false);
-  const tierPrice = { gold: 4_728_000, vip: 5_942_000 } as const;
-  const price = tierPrice[tier];
-  const split = quote(price, useWallet);
-  const planId = tier === "vip" ? "pro" : "plus";
-
-  function finish() {
-    const itemName = tier === "vip" ? copy.pay.vip : copy.pay.gold;
-    const result = settle(price, useWallet, itemName, planId);
-    if (!result.ok) {
-      toast.error(lang === "fa" ? "موجودی کیف پول کافی نیست." : "The wallet balance is not enough.");
-      setPhase("choose");
-      return;
-    }
-    if (user) activatePremium(tier);
-    toast.success(result.split.direct ? (lang === "fa" ? "اشتراک با موجودی کیف پول فعال شد." : "Activated from your wallet.") : copy.pay.done);
-    setPhase("done");
-  }
-
-  function buy() {
-    if (!currentUser) {
-      toast.error(copy.pay.needAuth);
-      onClose();
-      router.push("/login");
-      return;
-    }
-    if (split.direct) {
-      finish();
-      return;
-    }
-    setGatewayVisited(true);
-    setPhase("working");
-    window.setTimeout(finish, 500);
-  }
+  const fa = lang === "fa";
+  const tracks = [
+    {
+      href: "/#courses",
+      title: fa ? "دوره‌ها و باندل کامل" : "Courses and the full bundle",
+      body: fa
+        ? "هر دوره ۵ میلیون تومان. باندل چهار دوره ۱۶ میلیون تومان، با هدیهٔ ۵۰۰ دقیقه کوپایلوت."
+        : "Each course is 5,000,000 Tomans. The four-course bundle is 16,000,000, with 500 gifted copilot minutes.",
+    },
+    {
+      href: "/#copilot-minutes",
+      title: fa ? "دقیقهٔ کوپایلوت" : "Copilot minutes",
+      body: fa
+        ? "جدا از قیمت دوره. با اسلایدر، از ۱٬۰۰۰ تا ۲۰٬۰۰۰ دقیقه، هر هزار دقیقه ۳ میلیون تومان."
+        : "Separate from course prices. The slider runs from 1,000 to 20,000 minutes at 3,000,000 Tomans per thousand.",
+    },
+  ];
 
   return (
     <Overlay open={open} onClose={onClose}>
       <div className="mb-2 flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">{copy.pay.title}</h2>
-          <p className="mt-1 text-sm leading-7 text-muted-foreground">{notice || copy.pay.body}</p>
+          <h2 className="text-xl font-semibold">{fa ? "خرید را از کدام مسیر شروع کنیم؟" : "Which purchase track?"}</h2>
+          <p className="mt-1 text-sm leading-7 text-muted-foreground">
+            {notice ||
+              (fa
+                ? "دوره و دقیقهٔ هوش مصنوعی دو خرید جدا هستند. یکی را انتخاب کنید."
+                : "Courses and AI minutes are two separate purchases. Pick one.")}
+          </p>
         </div>
         <button type="button" onClick={onClose} aria-label={copy.pay.close}>
           <X className="size-4 text-muted-foreground" />
         </button>
       </div>
-      {phase === "working" ? (
-        <div className="mt-6 space-y-3" data-gateway-step="charge" data-gateway-visited={gatewayVisited ? "true" : "false"}>
-          <p className="text-sm">{copy.pay.working}</p>
-          <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
-            <motion.div
-              className="h-full bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#D4AF37]"
-              initial={{ width: "8%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 1.3 }}
-            />
-          </div>
-        </div>
-      ) : null}
-      {phase === "done" ? (
-        <div className="mt-6 space-y-4 text-center">
-          <motion.div
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mx-auto grid size-16 place-items-center rounded-full bg-[#D4AF37] text-2xl text-[#0B132B]"
+      <div className="mt-4 space-y-3">
+        {tracks.map((track) => (
+          <Link
+            key={track.href}
+            href={track.href}
+            onClick={onClose}
+            className="block rounded-2xl border border-[#D4AF37]/50 bg-[#0B132B] p-4 text-[#F8F1DE]"
           >
-            ✓
-          </motion.div>
-          <p className="text-sm leading-7">{copy.pay.done}</p>
-          <Button className="h-11 bg-[#D4AF37] text-[#0B132B] hover:bg-[#E5C07B]" onClick={onClose}>
-            {copy.pay.close}
-          </Button>
-        </div>
-      ) : null}
-      {phase === "choose" ? (
-        <div className="mt-4 space-y-3">
-          {([
-            ["gold", copy.pay.gold, copy.pay.goldText],
-            ["vip", copy.pay.vip, copy.pay.vipText],
-          ] as const).map(([id, title, body]) => (
-            <div key={id}>
-              <button
-                type="button"
-                onClick={() => setTier(id)}
-                className={`w-full rounded-2xl border p-4 text-start transition ${
-                  tier === id
-                    ? "border-[#D4AF37] bg-[#D4AF37]/10"
-                    : "border-[color:var(--glass-border)]"
-                }`}
-              >
-                <span className="block font-semibold">{title}</span>
-                <span className="mt-1 block text-sm leading-6 text-muted-foreground">{body}</span>
-                <span className="mt-2 block text-sm font-medium">{localeNumber(tierPrice[id], lang)} {copy.dash.toman}</span>
-              </button>
-            </div>
-          ))}
-          <WalletSplitFields planToman={price} useWallet={useWallet} onToggle={setUseWallet} split={split} />
-          <Button className="h-11 w-full bg-[#D4AF37] text-[#0B132B] hover:bg-[#E5C07B]" data-pay-cta onClick={buy}>
-            {split.direct ? (lang === "fa" ? "فعال‌سازی مستقیم با موجودی کیف پول" : "Activate directly with wallet balance") : copy.pay.buy}
-          </Button>
-        </div>
-      ) : null}
+            <span className="block font-semibold">{track.title}</span>
+            <span className="mt-1 block text-sm leading-6 text-white/70">{track.body}</span>
+          </Link>
+        ))}
+      </div>
     </Overlay>
   );
 }

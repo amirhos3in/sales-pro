@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { Check, Lock } from "lucide-react";
+import { useCourseAccess } from "@/components/courses/CourseCard";
 import { findCategory, lessonGate, lessonsOf, pickText } from "@/lib/courses-data";
 import { useI18n } from "@/lib/i18n";
-import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export function CurriculumSidebar({ categoryId, lessonId }: { categoryId: string; lessonId: string }) {
   const { lang } = useI18n();
-  const { user } = useStore();
+  const { user, courseOpen, authenticated } = useCourseAccess();
   const category = findCategory(categoryId);
   if (!category) return null;
   const rows = lessonsOf(category);
@@ -21,8 +21,8 @@ export function CurriculumSidebar({ categoryId, lessonId }: { categoryId: string
       <ol className="mt-3 space-y-1">
         {rows.map((row, index) => {
           const gate = lessonGate(category, row.lesson.id, user, passed, {
-            authenticated: Boolean(user),
-            subscriptionActive: Boolean(user?.isPremium),
+            authenticated,
+            subscriptionActive: courseOpen(category.id),
           });
           const done = passed.includes(row.lesson.id);
           const status = done ? "completed" : row.lesson.id === lessonId ? "active" : gate.state === "open" ? "ready" : "locked";

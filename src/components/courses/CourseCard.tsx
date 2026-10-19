@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { lessonsOf, pickText, type Category, type CourseTier } from "@/lib/courses-data";
 import { useI18n } from "@/lib/i18n";
+import { ownsCourse, readPricing, type PricingState, emptyPricing } from "@/lib/pricing";
 import { normalizeSubscription } from "@/lib/subscription";
 import { useStore } from "@/lib/store";
 
@@ -15,11 +17,27 @@ const goldButton = { backgroundColor: "#D4AF37", color: "#0B132B" };
 export function useCourseAccess() {
   const { user } = useStore();
   const { currentUser, isAuthenticated } = useAuth();
+  const [pricing, setPricing] = useState<PricingState>(emptyPricing);
   const academy = normalizeSubscription(currentUser?.subscription);
   const learner = normalizeSubscription(user?.subscription);
+  const legacyOpen = academy.isActive || learner.isActive;
+
+  useEffect(() => {
+    const load = () => setPricing(readPricing());
+    load();
+    window.addEventListener("salespro-pricing", load);
+    window.addEventListener("storage", load);
+    return () => {
+      window.removeEventListener("salespro-pricing", load);
+      window.removeEventListener("storage", load);
+    };
+  }, []);
+
   return {
     user,
-    subscribed: academy.isActive || learner.isActive,
+    pricing,
+    subscribed: legacyOpen,
+    courseOpen: (courseId: string) => courseId === "free" || legacyOpen || ownsCourse(pricing, courseId),
     authenticated: isAuthenticated || Boolean(user),
     passed: user?.passed ?? [],
   };
@@ -63,8 +81,8 @@ export function CourseStatusBadge({ tier }: { tier: CourseTier }) {
 export function CourseCta({ category }: { category: Category }) {
   const { copy } = useI18n();
   const router = useRouter();
-  const { subscribed, passed } = useCourseAccess();
-  const open = category.tierRequired === "free" || subscribed;
+  const { courseOpen, passed } = useCourseAccess();
+  const open = courseOpen(category.id);
 
   if (open) {
     return (
@@ -84,12 +102,12 @@ export function CourseCta({ category }: { category: Category }) {
       className="inline-flex h-10 items-center justify-center rounded-2xl px-4 text-sm font-medium"
       style={goldButton}
       onClick={() => {
-        const node = document.getElementById("pricing-plans");
+        const node = document.getElementById("courses");
         if (node) {
           node.scrollIntoView({ behavior: "smooth", block: "start" });
           return;
         }
-        router.push("/subscription#pricing-plans");
+        router.push("/#courses");
       }}
     >
       {copy.home.upgradeUnlock}

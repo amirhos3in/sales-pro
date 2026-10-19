@@ -143,7 +143,7 @@ export function AcademyPath() {
             </p>
           </div>
           <Link
-            href="/subscription#pricing-plans"
+            href="/#courses"
             data-upgrade
             className="inline-flex h-11 shrink-0 items-center justify-center rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]"
           >
@@ -298,7 +298,7 @@ function TrackCard({
           </div>
         </div>
         <Link
-          href="/subscription#pricing-plans"
+          href="/#courses"
           data-track-upgrade={track.id}
           className="mt-4 inline-flex h-10 items-center justify-center rounded-2xl bg-[#0B132B] px-4 text-sm font-medium text-[#F3E5AB]"
         >

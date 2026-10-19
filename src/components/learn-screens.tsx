@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/i18n";
 
 export function CategoryScreen({ categoryId }: { categoryId: string }) {
   const { copy, lang } = useI18n();
-  const { user, subscribed, authenticated, passed } = useCourseAccess();
+  const { user, courseOpen, authenticated, passed } = useCourseAccess();
   const category = findCategory(categoryId);
   if (!category) return null;
 
@@ -39,7 +39,7 @@ export function CategoryScreen({ categoryId }: { categoryId: string }) {
             {subtopic.lessons.map((lesson) => {
               const gate = lessonGate(category, lesson.id, user, passed, {
                 authenticated,
-                subscriptionActive: subscribed,
+                subscriptionActive: courseOpen(category.id),
               });
               const done = passed.includes(lesson.id);
               return (

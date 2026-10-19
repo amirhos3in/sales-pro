@@ -27,7 +27,7 @@ export function CopilotPaywall({ onClose }: { onClose: () => void }) {
           <li>سازمانی: ۲۰۰۰ دقیقه و چند کاربر</li>
         </ul>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Link href="/subscription#pricing-plans" className="inline-flex h-11 items-center rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">
+          <Link href="/#copilot-minutes" className="inline-flex h-11 items-center rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">
             مشاهده پلن‌ها
           </Link>
           <Link href="/dashboard/copilot" className="inline-flex h-11 items-center rounded-2xl bg-white/10 px-4 text-sm">

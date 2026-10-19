@@ -32,7 +32,7 @@ export function LessonPlayer({
 }) {
   const { copy, lang } = useI18n();
   const { ready, user, markWatched, passQuiz } = useStore();
-  const { subscribed, authenticated } = useCourseAccess();
+  const { courseOpen, authenticated } = useCourseAccess();
   const { openAuth } = useGate();
   const [quizOpen, setQuizOpen] = useState(false);
   const [paywall, setPaywall] = useState(false);
@@ -58,7 +58,7 @@ export function LessonPlayer({
   const { category, subtopic, lesson } = found;
   const gate = lessonGate(category, lesson.id, user, user?.passed ?? [], {
     authenticated,
-    subscriptionActive: subscribed,
+    subscriptionActive: courseOpen(category.id),
   });
   const watched = Boolean(user?.watched.includes(lesson.id));
   const passed = Boolean(user?.passed.includes(lesson.id));
