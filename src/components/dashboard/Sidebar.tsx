@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Headset, LayoutDashboard, PhoneCall, UserRound, Wallet } from "lucide-react";
+import { AudioLines, BookOpen, Headset, LayoutDashboard, PhoneCall, UserRound, Wallet } from "lucide-react";
 import { avatarChoice, frostStyle } from "@/components/dashboard/style";
 import type { AcademyUser } from "@/context/AuthContext";
 import { useI18n } from "@/lib/i18n";
@@ -15,7 +15,7 @@ export function resolveTab(value: string | null): DashTab {
 }
 
 export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
-  const { copy } = useI18n();
+  const { copy, lang } = useI18n();
   const portrait = avatarChoice(user.avatarId);
   const items = [
     { id: "overview" as const, href: "/dashboard?tab=overview", label: copy.dash.overview, icon: LayoutDashboard },
@@ -51,6 +51,10 @@ export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
     <>
       <div className="glass -mx-4 flex gap-2 overflow-x-auto px-4 py-2 lg:hidden" style={frostStyle}>
         {links(true)}
+        <Link href="/dashboard/copilot" className="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2 text-sm hover:bg-foreground/5">
+          <AudioLines className="size-4" />
+          {lang === "fa" ? "دستیار" : "Copilot"}
+        </Link>
       </div>
       <aside className="glass hidden w-64 shrink-0 rounded-[28px] p-4 lg:block" style={frostStyle}>
         <div className="flex items-center gap-3">
@@ -68,7 +72,13 @@ export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
         <p className="mt-3 inline-flex rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-medium text-[#0B132B]">
           {user.subscription?.isActive ? copy.dash.vipPlan : copy.dash.freePlan}
         </p>
-        <nav className="mt-5 flex flex-col gap-1">{links(false)}</nav>
+        <nav className="mt-5 flex flex-col gap-1">
+          {links(false)}
+          <Link href="/dashboard/copilot" className="mt-2 flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm hover:bg-foreground/5">
+            <AudioLines className="size-4" />
+            {lang === "fa" ? "دستیار زنده" : "Live copilot"}
+          </Link>
+        </nav>
       </aside>
     </>
   );

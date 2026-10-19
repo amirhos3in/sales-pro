@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { LiveDemo } from "@/components/copilot/LiveDemo";
 import { CourseCard } from "@/components/courses/CourseCard";
+import { PricingCompare } from "@/components/home/PricingCompare";
 import { categories, lessonsOf } from "@/lib/courses-data";
 import { useGate } from "@/components/gates";
 import { localeNumber } from "@/lib/format";
@@ -65,6 +67,8 @@ export function HomeScreen() {
         ) : null}
       </section>
 
+      <LiveDemo />
+      <PricingCompare />
       <MetricsStrip />
 
       <section className="grid gap-4 md:grid-cols-2">

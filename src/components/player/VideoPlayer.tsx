@@ -8,10 +8,12 @@ export function VideoPlayer({
   title,
   src,
   locked,
+  onPlans,
 }: {
   title: string;
   src: string;
   locked: boolean;
+  onPlans?: () => void;
 }) {
   const router = useRouter();
   const { copy } = useI18n();
@@ -46,7 +48,7 @@ export function VideoPlayer({
               type="button"
               className="mt-5 inline-flex h-11 items-center justify-center rounded-2xl px-4 text-sm font-medium"
               style={{ backgroundColor: "#D4AF37", color: "#0B132B" }}
-              onClick={() => router.push("/subscription#pricing-plans")}
+              onClick={() => (onPlans ? onPlans() : router.push("/subscription#pricing-plans"))}
             >
               {copy.learn.viewPlans}
             </button>

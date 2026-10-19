@@ -6,9 +6,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useCourseAccess } from "@/components/courses/CourseCard";
+import { CopilotPaywall } from "@/components/lms/CopilotPaywall";
+import { CurriculumSidebar } from "@/components/lms/CurriculumSidebar";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { useGate } from "@/components/gates";
 import { Button } from "@/components/ui/button";
+import { platformHttp, readPlatformToken } from "@/lib/copilot/endpoint";
+import { quizPassed } from "@/lib/lms/rules";
+import { burstConfetti } from "@/components/wallet/confetti";
 import {
   findVideoLesson,
   lessonGate,
@@ -30,7 +35,9 @@ export function LessonPlayer({
   const { subscribed, authenticated } = useCourseAccess();
   const { openAuth } = useGate();
   const [quizOpen, setQuizOpen] = useState(false);
+  const [paywall, setPaywall] = useState(false);
   const [answers, setAnswers] = useState<number[]>([-1, -1, -1]);
+  const [correctCount, setCorrectCount] = useState(0);
   const [result, setResult] = useState<"pass" | "fail" | null>(null);
   const found = findVideoLesson(categoryId, lessonId);
 
@@ -62,10 +69,21 @@ export function LessonPlayer({
       toast.error(copy.quiz.need);
       return;
     }
-    const ok = lesson.quiz.every((question, index) => question.answer === answers[index]);
+    const correct = lesson.quiz.filter((question, index) => question.answer === answers[index]).length;
+    setCorrectCount(correct);
+    const ok = quizPassed(correct);
+    const token = readPlatformToken();
+    if (token) {
+      void fetch(platformHttp("/api/platform/quiz"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ lessonId, answers }),
+      }).catch(() => undefined);
+    }
     if (ok) {
       passQuiz(lesson.id);
       setResult("pass");
+      burstConfetti();
       navigator.vibrate?.(18);
       return;
     }
@@ -73,6 +91,7 @@ export function LessonPlayer({
   }
 
   return (
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
     <div className="space-y-5">
       <Link href={`/learn/${category.id}`} className="text-sm text-[#D4AF37]">
         {copy.learn.backCategory}
@@ -100,6 +119,7 @@ export function LessonPlayer({
           title={pickText(lesson.title, lang)}
           src={`https://www.aparat.com/video/video/embed/videohash/${lesson.aparat}/vt/frame`}
           locked
+          onPlans={() => setPaywall(true)}
         />
       ) : null}
 
@@ -179,6 +199,9 @@ export function LessonPlayer({
                 <div className="mt-6 space-y-4 text-center">
                   <div className="mx-auto grid size-16 place-items-center rounded-full bg-[#D4AF37] text-2xl text-[#0B132B]">✓</div>
                   <p>{copy.quiz.pass}</p>
+                  <p className="text-sm text-muted-foreground" data-quiz-result="pass" data-correct-count={correctCount}>
+                    {correctCount.toLocaleString("fa-IR")} از {lesson.quiz.length.toLocaleString("fa-IR")}
+                  </p>
                   <Button className="h-10 bg-[#D4AF37] text-[#0B132B]" onClick={() => setQuizOpen(false)}>
                     {copy.quiz.close}
                   </Button>
@@ -207,7 +230,11 @@ export function LessonPlayer({
                       ))}
                     </fieldset>
                   ))}
-                  {result === "fail" ? <p className="text-sm text-destructive">{copy.quiz.fail}</p> : null}
+                  {result === "fail" ? (
+                    <p className="text-sm text-destructive" data-quiz-result="fail" data-correct-count={correctCount}>
+                      {copy.quiz.fail}
+                    </p>
+                  ) : null}
                   <div className="flex flex-wrap gap-2">
                     <Button className="h-10 bg-[#D4AF37] text-[#0B132B]" onClick={submitQuiz}>
                       {result === "fail" ? copy.quiz.retry : copy.quiz.submit}
@@ -222,6 +249,9 @@ export function LessonPlayer({
           </motion.div>
         ) : null}
       </AnimatePresence>
+      {paywall ? <CopilotPaywall onClose={() => setPaywall(false)} /> : null}
+    </div>
+    <CurriculumSidebar categoryId={categoryId} lessonId={lessonId} />
     </div>
   );
 }
