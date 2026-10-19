@@ -26,7 +26,6 @@ import { normalizeSubscription } from "@/lib/subscription";
 import { useStore } from "@/lib/store";
 
 const frost = { backdropFilter: "blur(16px) saturate(1.6)" };
-const goldButton = { backgroundColor: "#D4AF37", color: "#0B132B" };
 
 export function useCourseAccess() {
   const { user } = useStore();
@@ -91,8 +90,7 @@ export function CourseCta({ category }: { category: Category }) {
     return (
       <Link
         href={continueHref(category, passed)}
-        className="inline-flex h-11 w-full items-center justify-center rounded-2xl px-4 text-sm font-semibold"
-        style={goldButton}
+        className="inline-flex h-11 w-full items-center justify-center rounded-2xl border-2 border-[#D4AF37] bg-[#0B132B] px-4 text-sm font-semibold text-[#D4AF37]"
         data-course-action="enter"
       >
         {paid ? (fa ? "ورود به دوره و مشاهده ویدیوها" : "Enter the course and watch") : fa ? "مشاهده ویدیوها" : "Watch the videos"}
@@ -110,7 +108,7 @@ export function CourseCta({ category }: { category: Category }) {
         toast.success(fa ? `«${pickText(category.title, lang)}» ثبت شد و روی همین مرورگر باز است.` : "This course is now open in this browser.");
       }}
     >
-      {fa ? "ثبت‌نام این دوره" : "Enroll in this course"}
+      {fa ? `ثبت‌نام این دوره (${toman(COURSE_PRICE)})` : `Enroll in this course (${toman(COURSE_PRICE)})`}
     </button>
   );
 }
@@ -123,9 +121,9 @@ export function BundleBanner() {
   return (
     <article id="bundle" className="rounded-[28px] bg-[#0B132B] p-5 text-[#F8F1DE] shadow-xl sm:p-7" data-offer="bundle">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-xl font-semibold sm:text-2xl">{fa ? "باندل کامل چهار دوره تخصصی" : "Full bundle of the four specialist courses"}</h2>
+        <h2 className="text-xl font-semibold sm:text-2xl">{fa ? "پکیج جامع ۴ دوره تخصصی فروش و مذاکره" : "Full bundle of the four specialist courses"}</h2>
         <span className="rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-semibold text-[#0B132B]">
-          {fa ? `هدیه: ${BUNDLE_GIFT_MINUTES.toLocaleString("fa-IR")} دقیقه رایگان کوپایلوت` : `Gift: ${BUNDLE_GIFT_MINUTES.toLocaleString("en-US")} free copilot minutes`}
+          {fa ? "۵۰۰ دقیقه کوپایلوت هوش مصنوعی هدیه رایگان" : `Gift: ${BUNDLE_GIFT_MINUTES.toLocaleString("en-US")} free copilot minutes`}
         </span>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
@@ -138,7 +136,7 @@ export function BundleBanner() {
           {toman(BUNDLE_PRICE)}
         </p>
         <p className="pb-1 text-sm text-white/50 line-through">{toman(BUNDLE_LIST_PRICE)}</p>
-        <p className="pb-1 text-sm text-[#D4AF37]">{fa ? `${toman(BUNDLE_SAVE)} تخفیف` : `${toman(BUNDLE_SAVE)} off`}</p>
+        <p className="pb-1 text-sm text-[#D4AF37]">{fa ? "۴ میلیون تومان سود خرید یکجا" : `${toman(BUNDLE_SAVE)} off`}</p>
       </div>
       <button
         type="button"
@@ -150,7 +148,7 @@ export function BundleBanner() {
         }}
         className="mt-5 inline-flex h-12 items-center rounded-2xl bg-[#D4AF37] px-5 text-sm font-semibold text-[#0B132B] disabled:opacity-60"
       >
-        {pricing.bundle ? (fa ? "باندل فعال است" : "Bundle active") : fa ? "خرید باندل کامل" : "Buy the full bundle"}
+        {pricing.bundle ? (fa ? "باندل فعال است" : "Bundle active") : fa ? "خرید یکجای تمام دوره‌ها" : "Buy the full bundle"}
       </button>
     </article>
   );

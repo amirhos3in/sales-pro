@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { frostStyle, goldButtonStyle } from "@/components/dashboard/style";
+import { frostStyle } from "@/components/dashboard/style";
 import { continueHref } from "@/components/courses/CourseCard";
 import type { AcademyUser } from "@/context/AuthContext";
 import { categories, lessonsOf, pickText } from "@/lib/courses-data";
@@ -17,6 +17,7 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
   const pricing = usePricing();
   const { user: learner } = useStore();
   const passed = learner?.passed ?? [];
+  const watched = learner?.watched ?? [];
   const tracks = PAID_COURSES.flatMap((course) => {
     const category = categories.find((item) => item.id === course.id);
     return category ? [{ course, category }] : [];
@@ -61,8 +62,10 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
         {tracks.map(({ course, category }) => {
           const owned = ownsCourse(pricing, course.id);
           const lessons = lessonsOf(category);
-          const done = lessons.filter((row) => passed.includes(row.lesson.id)).length;
-          const percent = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
+          const videos = lessons.filter((row) => watched.includes(row.lesson.id)).length;
+          const quizzes = lessons.filter((row) => passed.includes(row.lesson.id)).length;
+          const videoPercent = lessons.length ? Math.round((videos / lessons.length) * 100) : 0;
+          const quizPercent = lessons.length ? Math.round((quizzes / lessons.length) * 100) : 0;
           return (
             <article key={course.id} className="glass flex flex-col rounded-[28px] p-5" style={frostStyle} data-course={course.id} data-owned={owned ? "yes" : "no"}>
               <div className="flex items-start justify-between gap-3">
@@ -74,17 +77,25 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
               <p className="mt-2 text-sm text-muted-foreground">{toman(COURSE_PRICE)}</p>
               {owned ? (
                 <>
-                  <p className="mt-4 text-sm text-muted-foreground">{fa ? "پیشرفت درس‌ها" : "Lesson progress"}</p>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#0B132B]/10 dark:bg-white/10">
-                    <div className="h-full rounded-full bg-[#D4AF37]" style={{ width: `${percent}%` }} />
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    {fa ? `ویدیوهای دیده‌شده: ${localeNumber(videos, lang)} از ${localeNumber(lessons.length, lang)}` : `Videos watched: ${localeNumber(videos, lang)} of ${localeNumber(lessons.length, lang)}`}
+                  </p>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#0B132B]/10 dark:bg-white/10" data-video-progress={videoPercent}>
+                    <div className="h-full rounded-full bg-[#D4AF37]" style={{ width: `${videoPercent}%` }} />
                   </div>
-                  <Link href={continueHref(category, passed)} className="mt-5 inline-flex h-10 items-center justify-center rounded-2xl px-4 text-sm font-medium" style={goldButtonStyle}>
-                    {fa ? "ادامه یادگیری" : "Continue learning"}
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {fa ? `چالش‌های قبول‌شده: ${localeNumber(quizzes, lang)} از ${localeNumber(lessons.length, lang)}` : `Quizzes passed: ${localeNumber(quizzes, lang)} of ${localeNumber(lessons.length, lang)}`}
+                  </p>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#0B132B]/10 dark:bg-white/10" data-quiz-progress={quizPercent}>
+                    <div className="h-full rounded-full bg-[#F3E5AB]" style={{ width: `${quizPercent}%` }} />
+                  </div>
+                  <Link href={continueHref(category, passed)} className="mt-5 inline-flex h-10 items-center justify-center rounded-2xl border-2 border-[#D4AF37] bg-[#0B132B] px-4 text-sm font-medium text-[#D4AF37]">
+                    {fa ? "ورود به دوره و مشاهده ویدیوها" : "Enter the course and watch"}
                   </Link>
                 </>
               ) : (
                 <Link href="/#courses" className="mt-5 inline-flex h-10 items-center justify-center rounded-2xl bg-[#0B132B] px-4 text-sm font-medium text-[#F3E5AB]">
-                  {fa ? "خرید این دوره" : "Buy this course"}
+                  {fa ? `ثبت‌نام این دوره (${toman(COURSE_PRICE)})` : "Buy this course"}
                 </Link>
               )}
             </article>

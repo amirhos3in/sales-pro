@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
 import { frostStyle, goldButtonStyle } from "@/components/dashboard/style";
 import {
@@ -14,7 +13,17 @@ import {
 import { useAuth, type AcademyUser, type WalletTx, type WalletTxKind } from "@/context/AuthContext";
 import { localeNumber, toman } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { ensureReferralCode, recordReferral, REFERRAL_REWARD } from "@/lib/pricing";
+import {
+  buyMinutes,
+  clampMinutes,
+  ensureReferralCode,
+  MAX_MINUTES,
+  MIN_MINUTES,
+  MINUTE_STEP,
+  minutesPrice,
+  recordReferral,
+  REFERRAL_REWARD,
+} from "@/lib/pricing";
 import { usePricing } from "@/lib/use-pricing";
 
 const PRESETS = [200_000, 500_000, 1_000_000];
@@ -27,6 +36,8 @@ export function WalletTab({ user }: { user: AcademyUser }) {
   const pricing = usePricing();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(PRESETS[0]);
+  const [selectedMinutes, setSelectedMinutes] = useState(MIN_MINUTES);
+  const minuteTotal = minutesPrice(selectedMinutes);
   const rows = user.transactions ?? [];
   const labels: Record<WalletTxKind, string> = {
     plan: text.txPlan,
@@ -71,7 +82,7 @@ export function WalletTab({ user }: { user: AcademyUser }) {
     <div className="space-y-4" data-dashboard="wallet">
       <section className="rounded-[28px] bg-[#0B132B] p-6 text-[#F8F1DE]">
         <p className="text-xs tracking-[0.16em] text-[#D4AF37]">{fa ? "کیف دقیقه" : "Minutes wallet"}</p>
-        <h1 className="mt-2 text-2xl font-semibold">{fa ? "دقیقهٔ باقی‌مانده کوپایلوت" : "Remaining copilot minutes"}</h1>
+        <h1 className="mt-2 text-2xl font-semibold">{fa ? "کیف پول دقایق کوپایلوت هوش مصنوعی" : "Remaining copilot minutes"}</h1>
         <p className="mt-6 text-4xl font-semibold text-[#D4AF37]" data-minute-balance={pricing.minutes}>
           {money(pricing.minutes)} <span className="text-lg font-medium text-[#F8F1DE]">{fa ? "دقیقه" : "min"}</span>
         </p>
@@ -84,9 +95,42 @@ export function WalletTab({ user }: { user: AcademyUser }) {
               ? "دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط با خرید باندل اضافه می‌شود."
               : "Minutes are separate from courses. The 500-minute gift is added only with the bundle."}
         </p>
-        <Link href="/#copilot-minutes" className="mt-5 inline-flex h-11 items-center rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">
-          {fa ? "خرید دقیقه با اسلایدر" : "Buy minutes with the slider"}
-        </Link>
+        <div className="mt-6">
+          <div className="flex items-end justify-between gap-3">
+            <p className="text-2xl font-semibold" data-selected-minutes={selectedMinutes}>
+              {fa ? `${selectedMinutes.toLocaleString("fa-IR")} دقیقه` : `${selectedMinutes.toLocaleString("en-US")} min`}
+            </p>
+            <p className="text-lg font-semibold text-[#D4AF37]" data-minute-price={minuteTotal}>
+              {toman(minuteTotal)}
+            </p>
+          </div>
+          <input
+            id="minute-slider"
+            type="range"
+            min={MIN_MINUTES}
+            max={MAX_MINUTES}
+            step={MINUTE_STEP}
+            value={selectedMinutes}
+            aria-label={fa ? "انتخاب دقیقه کوپایلوت" : "Choose copilot minutes"}
+            onChange={(event) => setSelectedMinutes(clampMinutes(Number(event.target.value)))}
+            className="mt-4 h-2 w-full cursor-pointer accent-[#D4AF37]"
+          />
+          <div className="mt-2 flex justify-between text-xs text-white/50">
+            <span>{fa ? "۱٬۰۰۰ دقیقه" : "1,000 min"}</span>
+            <span>{fa ? "۲۰٬۰۰۰ دقیقه" : "20,000 min"}</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="mt-5 inline-flex h-12 items-center rounded-2xl bg-[#D4AF37] px-5 text-sm font-semibold text-[#0B132B]"
+          onClick={() => {
+            const picked = clampMinutes(selectedMinutes);
+            buyMinutes(picked);
+            toast.success(fa ? `${picked.toLocaleString("fa-IR")} دقیقه به کیف کوپایلوت اضافه شد.` : `${picked.toLocaleString("en-US")} copilot minutes were added.`);
+          }}
+        >
+          {fa ? "خرید اعتبار هوش مصنوعی" : "Buy AI credit"}
+        </button>
       </section>
 
       <section className="glass rounded-[28px] p-6" style={frostStyle}>

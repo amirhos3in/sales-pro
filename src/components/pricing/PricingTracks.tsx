@@ -83,9 +83,9 @@ export function PricingTracks({ showCourses = true }: { showCourses?: boolean })
 
         <article className="rounded-[28px] bg-[#0B132B] p-5 text-[#F8F1DE] shadow-xl sm:p-6" data-offer="bundle">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold">{fa ? "باندل کامل چهار دوره" : "Full bundle of all four courses"}</h3>
+            <h3 className="text-lg font-semibold">{fa ? "پکیج جامع ۴ دوره تخصصی فروش و مذاکره" : "Full bundle of all four courses"}</h3>
             <span className="rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-semibold text-[#0B132B]">
-              {fa ? `هدیه: ${BUNDLE_GIFT_MINUTES.toLocaleString("fa-IR")} دقیقه کوپایلوت رایگان` : `Gift: ${BUNDLE_GIFT_MINUTES.toLocaleString("en-US")} free copilot minutes`}
+              {fa ? "۵۰۰ دقیقه کوپایلوت هوش مصنوعی هدیه رایگان" : `Gift: ${BUNDLE_GIFT_MINUTES.toLocaleString("en-US")} free copilot minutes`}
             </span>
           </div>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
@@ -98,7 +98,7 @@ export function PricingTracks({ showCourses = true }: { showCourses?: boolean })
               {toman(BUNDLE_PRICE)}
             </p>
             <p className="pb-1 text-sm text-white/50 line-through">{toman(BUNDLE_LIST_PRICE)}</p>
-            <p className="pb-1 text-sm text-[#D4AF37]">{fa ? `${toman(BUNDLE_SAVE)} تخفیف` : `${toman(BUNDLE_SAVE)} off`}</p>
+            <p className="pb-1 text-sm text-[#D4AF37]">{fa ? "۴ میلیون تومان سود خرید یکجا" : `${toman(BUNDLE_SAVE)} off`}</p>
           </div>
           <button
             type="button"
@@ -106,7 +106,7 @@ export function PricingTracks({ showCourses = true }: { showCourses?: boolean })
             onClick={purchaseBundle}
             className="mt-5 inline-flex h-12 items-center rounded-2xl bg-[#D4AF37] px-5 text-sm font-semibold text-[#0B132B] disabled:opacity-60"
           >
-            {state.bundle ? (fa ? "باندل فعال است" : "Bundle active") : fa ? "خرید باندل و دریافت هدیه" : "Buy the bundle and claim the gift"}
+            {state.bundle ? (fa ? "باندل فعال است" : "Bundle active") : fa ? "خرید یکجای تمام دوره‌ها" : "Buy the bundle and claim the gift"}
           </button>
         </article>
 
@@ -177,7 +177,7 @@ export function PricingTracks({ showCourses = true }: { showCourses?: boolean })
           onClick={purchaseMinutes}
           className="mt-5 inline-flex h-12 items-center rounded-2xl bg-[#D4AF37] px-5 text-sm font-semibold text-[#0B132B]"
         >
-          {fa ? "افزودن این دقیقه‌ها به موجودی" : "Add these minutes to the balance"}
+          {fa ? "خرید اعتبار هوش مصنوعی" : "Buy AI credit"}
         </button>
       </section>
     </div>
