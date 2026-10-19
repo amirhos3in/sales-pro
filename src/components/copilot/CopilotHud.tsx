@@ -162,7 +162,7 @@ export function CopilotHud() {
       streamRef.current = stream;
       const audio = new AudioContext();
       audioRef.current = audio;
-      await audio.audioWorklet.addModule("/pcm-worklet.js");
+      await audio.audioWorklet.addModule(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/pcm-worklet.js`);
       const node = new AudioWorkletNode(audio, "pcm-downsampler");
       const mic = audio.createMediaStreamSource(stream);
       node.port.onmessage = (event: MessageEvent<Float32Array>) => {

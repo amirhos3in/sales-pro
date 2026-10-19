@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     ? {
         output: "export",
         basePath: "/sales-pro",
+        env: { NEXT_PUBLIC_BASE_PATH: "/sales-pro" },
         trailingSlash: true,
       }
     : {}),
