@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>سیلز پرو | آکادمی گیمیفای‌شده فروش</title>
+  <meta name="description" content="یادگیری تکنیک‌های فروش با ویدیوهای کوتاه آپارات و چالش سه‌سؤالی. درس بعدی فقط بعد از دو پاسخ درست باز می‌شود." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Vazirmatn", "sans-serif"] },
+          colors: { navy: "#0B132B", gold: "#D4AF37", cream: "#F8F1DE" }
+        }
+      }
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .modal { transition: opacity .2s ease; }
+    .lift { transition: transform .2s ease, border-color .2s ease; }
+    .lift:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-navy font-sans text-cream antialiased">
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-navy/80 backdrop-blur-xl">
+    <div class="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3">
+      <a href="#top" class="text-sm font-bold sm:text-base">سیلز پرو <span class="font-normal text-gold">| Sales Pro</span></a>
+      <nav class="ms-4 hidden gap-4 text-sm text-white/70 sm:flex">
+        <a href="#tracks" class="hover:text-cream">سرفصل‌ها</a>
+        <a href="#pricing" class="hover:text-cream">پلن‌ها</a>
+      </nav>
+      <div id="nav-user" class="ms-auto flex items-center gap-2"></div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="relative overflow-hidden">
+      <div class="pointer-events-none absolute -top-24 end-0 size-72 rounded-full bg-gold/20 blur-3xl"></div>
+      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:py-24">
+        <p class="text-xs tracking-[0.18em] text-gold">مسیر مرحله‌به‌مرحله</p>
+        <h1 class="max-w-3xl text-3xl font-bold leading-[1.45] sm:text-5xl">آکادمی گیمیفای‌شده فروش و مذاکره حرفه‌ای</h1>
+        <p class="max-w-2xl text-base leading-8 text-white/70 sm:text-lg">یادگیری تکنیک‌های فروش با ویدیوهای کوتاه کاربردی و چالش‌های تعاملی مرحله‌به‌مرحله.</p>
+        <div class="flex flex-wrap gap-3">
+          <button id="cta-start" type="button" class="h-12 rounded-2xl bg-gold px-5 text-sm font-bold text-navy">ورود و شروع دوره رایگان</button>
+          <a href="#tracks" class="inline-flex h-12 items-center rounded-2xl px-5 text-sm ring-1 ring-white/20">مشاهده سرفصل‌ها و پلن‌ها</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto grid max-w-6xl gap-3 px-4 pb-12 sm:grid-cols-3" id="stats">
+      <article class="rounded-3xl border border-white/10 bg-white/5 p-5">
+        <p class="text-3xl font-bold text-gold" data-count="5000" data-prefix="+">۰</p>
+        <p class="mt-1 text-sm text-white/70">دانش‌پذیر فعال</p>
+      </article>
+      <article class="rounded-3xl border border-white/10 bg-white/5 p-5">
+        <p class="text-3xl font-bold text-gold" data-count="120" data-prefix="+">۰</p>
+        <p class="mt-1 text-sm text-white/70">ساعت آموزش</p>
+      </article>
+      <article class="rounded-3xl border border-white/10 bg-white/5 p-5">
+        <p class="text-3xl font-bold text-gold" data-count="98" data-suffix="٪">۰</p>
+        <p class="mt-1 text-sm text-white/70">رضایت</p>
+      </article>
+    </section>
+
+    <section id="tracks" class="mx-auto max-w-6xl space-y-4 px-4 py-8"></section>
+
+    <section id="pricing" class="mx-auto grid max-w-6xl gap-4 px-4 py-12 md:grid-cols-2">
+      <article class="rounded-[28px] border border-white/10 bg-white/5 p-6">
+        <h2 class="text-xl font-bold">پلن پایه (رایگان)</h2>
+        <p class="mt-2 text-sm leading-7 text-white/70">دسترسی همیشگی به دوره مقدماتی و آزمون‌ها. هر درس بعد از دو پاسخ درست از سه سؤال باز می‌شود.</p>
+        <button id="start-free" type="button" class="mt-6 h-11 rounded-2xl bg-white/10 px-4 text-sm">شروع دوره رایگان</button>
+      </article>
+      <article class="rounded-[28px] border border-gold bg-gold/10 p-6">
+        <h2 class="text-xl font-bold">اشتراک ویژه ماهانه</h2>
+        <p class="mt-2 text-sm leading-7 text-white/80">دسترسی نامحدود به هر ۴ مسیر تخصصی، تمام ویدیوها و چالش‌های گیمیفای‌شده.</p>
+        <button id="buy-plan" type="button" class="mt-6 h-11 rounded-2xl bg-gold px-4 text-sm font-bold text-navy">شبیه‌سازی خرید موفق</button>
+        <p id="plan-note" class="mt-3 text-xs text-white/60"></p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 px-4 py-8 text-center text-xs text-white/50">سیلز پرو · پیشرفت فقط روی همین مرورگر ذخیره می‌شود.</footer>
+
+  <div id="auth-modal" class="modal fixed inset-0 z-50 hidden place-items-center bg-black/60 p-4">
+    <form id="auth-form" class="w-full max-w-md rounded-[28px] bg-cream p-6 text-navy">
+      <h2 class="text-xl font-bold">ورود / ثبت‌نام سریع</h2>
+      <p class="mt-2 text-sm leading-7 text-navy/70">شماره موبایل و یک کد چهاررقمی آزمایشی. هر کد چهاررقمی قبول است، مثلاً ۱۲۳۴.</p>
+      <label class="mt-4 block text-sm">شماره موبایل
+        <input id="auth-phone" inputmode="numeric" autocomplete="tel" class="mt-1 h-11 w-full rounded-2xl border border-navy/15 px-3" placeholder="0912xxxxxxx" />
+      </label>
+      <label class="mt-3 block text-sm">کد تایید
+        <input id="auth-otp" inputmode="numeric" maxlength="4" autocomplete="one-time-code" class="mt-1 h-11 w-full rounded-2xl border border-navy/15 px-3" placeholder="1234" />
+      </label>
+      <p id="auth-error" class="mt-2 hidden text-sm text-red-700"></p>
+      <div class="mt-5 flex gap-2">
+        <button type="submit" class="h-11 flex-1 rounded-2xl bg-navy text-sm font-bold text-gold">تایید و ورود</button>
+        <button type="button" data-close="auth-modal" class="h-11 rounded-2xl px-4 text-sm">بستن</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="player-modal" class="modal fixed inset-0 z-50 hidden place-items-center bg-black/70 p-3 sm:p-6">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-navy p-4 ring-1 ring-white/10 sm:p-6">
+      <div class="flex items-start justify-between gap-3">
+        <h2 id="player-title" class="text-lg font-bold"></h2>
+        <button type="button" data-close="player-modal" class="text-sm text-white/60">بستن</button>
+      </div>
+      <p id="player-summary" class="mt-2 text-sm leading-7 text-white/70"></p>
+      <div class="mt-4 aspect-video overflow-hidden rounded-2xl bg-black">
+        <iframe id="player-frame" class="h-full w-full" title="پخش آپارات" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+      <label class="mt-4 flex items-center gap-2 text-sm">
+        <input id="player-done" type="checkbox" />
+        ویدیو را تا پایان دیدم
+      </label>
+      <button id="open-quiz" type="button" disabled class="mt-4 h-11 rounded-2xl bg-gold px-4 text-sm font-bold text-navy disabled:cursor-not-allowed disabled:opacity-40">شروع چالش سه‌سؤالی (آزمون)</button>
+    </div>
+  </div>
+
+  <div id="quiz-modal" class="modal fixed inset-0 z-[60] hidden place-items-center bg-black/70 p-4">
+    <div id="quiz-card" class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[28px] bg-cream p-6 text-navy"></div>
+  </div>
+
+  <div id="paywall-modal" class="modal fixed inset-0 z-50 hidden place-items-center bg-black/70 p-4">
+    <div class="w-full max-w-lg rounded-[28px] bg-cream p-6 text-navy">
+      <h2 class="text-2xl font-bold">ارتقا به اشتراک ویژه</h2>
+      <p class="mt-3 text-sm leading-8 text-navy/75">این درس داخل یکی از چهار مسیر تخصصی است. با اشتراک ویژه هر چهار مسیر، ویدیوها و چالش‌ها باز می‌شوند. دوره مقدماتی روی پلن رایگان می‌ماند.</p>
+      <ul class="mt-4 space-y-2 text-sm leading-7">
+        <li>فروش آنلاین، حضوری، تلفنی و مذاکره</li>
+        <li>باز شدن مرحله‌به‌مرحله بعد از آزمون</li>
+        <li>مرور درس‌های تکمیل‌شده</li>
+      </ul>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <button id="paywall-buy" type="button" class="h-11 rounded-2xl bg-navy px-4 text-sm font-bold text-gold">شبیه‌سازی خرید موفق</button>
+        <a href="#pricing" data-close="paywall-modal" class="inline-flex h-11 items-center rounded-2xl px-4 text-sm">مشاهده پلن‌ها</a>
+        <button type="button" data-close="paywall-modal" class="h-11 px-3 text-sm">بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confetti" class="pointer-events-none fixed inset-0 z-[70] hidden h-full w-full"></canvas>
+  <script src="app.js"></script>
+</body>
+</html>
