@@ -4,7 +4,10 @@ import Link from "next/link";
 import { AudioLines, BookOpen, Headset, LayoutDashboard, PhoneCall, UserRound, Wallet } from "lucide-react";
 import { avatarChoice, frostStyle } from "@/components/dashboard/style";
 import type { AcademyUser } from "@/context/AuthContext";
+import { localeNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { ownsCourse, PAID_COURSES } from "@/lib/pricing";
+import { usePricing } from "@/lib/use-pricing";
 import { cn } from "@/lib/utils";
 
 export type DashTab = "overview" | "profile" | "courses" | "wallet" | "audits" | "tickets";
@@ -16,7 +19,21 @@ export function resolveTab(value: string | null): DashTab {
 
 export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
   const { copy, lang } = useI18n();
+  const pricing = usePricing();
+  const fa = lang === "fa";
+  const ownedCount = PAID_COURSES.filter((course) => ownsCourse(pricing, course.id)).length;
   const portrait = avatarChoice(user.avatarId);
+  const status = pricing.bundle
+    ? fa
+      ? "باندل کامل"
+      : "Full bundle"
+    : ownedCount
+      ? fa
+        ? `${localeNumber(ownedCount, lang)} دوره`
+        : `${ownedCount} courses`
+      : fa
+        ? "بدون دوره"
+        : "No course";
   const items = [
     { id: "overview" as const, href: "/dashboard?tab=overview", label: copy.dash.overview, icon: LayoutDashboard },
     { id: "profile" as const, href: "/dashboard?tab=profile", label: copy.dash.profile, icon: UserRound },
@@ -66,11 +83,14 @@ export function Sidebar({ user, tab }: { user: AcademyUser; tab: DashTab }) {
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{user.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{user.jobTitle}</p>
+            <p className="truncate text-xs text-muted-foreground" dir="ltr">
+              {user.phone}
+            </p>
           </div>
         </div>
-        <p className="mt-3 inline-flex rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-medium text-[#0B132B]">
-          {user.subscription?.isActive ? copy.dash.vipPlan : copy.dash.freePlan}
+        <p className="mt-3 inline-flex rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-medium text-[#0B132B]">{status}</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {fa ? `${localeNumber(pricing.minutes, lang)} دقیقه کوپایلوت` : `${localeNumber(pricing.minutes, lang)} copilot minutes`}
         </p>
         <nav className="mt-5 flex flex-col gap-1">
           {links(false)}

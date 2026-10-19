@@ -7,6 +7,8 @@ export const MINUTE_STEP = 1_000;
 export const MIN_MINUTES = 1_000;
 export const MAX_MINUTES = 20_000;
 export const PRICE_PER_THOUSAND = 3_000_000;
+export const CASHBACK_RATE = 0.05;
+export const REFERRAL_REWARD = 200_000;
 
 export const PAID_COURSES = [
   { id: "online", fa: "فروش آنلاین", en: "Online Sales" },
@@ -21,9 +23,19 @@ export type PricingState = {
   courses: PaidCourseId[];
   bundle: boolean;
   minutes: number;
+  cashbackToman: number;
+  referrals: number;
+  referralCode: string;
 };
 
-export const emptyPricing: PricingState = { courses: [], bundle: false, minutes: 0 };
+export const emptyPricing: PricingState = {
+  courses: [],
+  bundle: false,
+  minutes: 0,
+  cashbackToman: 0,
+  referrals: 0,
+  referralCode: "",
+};
 
 const KEY = "salespro-pricing-v1";
 
@@ -54,6 +66,9 @@ export function readPricing(): PricingState {
       courses,
       bundle: Boolean(parsed.bundle),
       minutes: Number.isFinite(parsed.minutes) ? Math.max(0, Math.round(Number(parsed.minutes))) : 0,
+      cashbackToman: Number.isFinite(parsed.cashbackToman) ? Math.max(0, Math.round(Number(parsed.cashbackToman))) : 0,
+      referrals: Number.isFinite(parsed.referrals) ? Math.max(0, Math.round(Number(parsed.referrals))) : 0,
+      referralCode: typeof parsed.referralCode === "string" ? parsed.referralCode : "",
     };
   } catch {
     return emptyPricing;
@@ -71,20 +86,31 @@ export function ownsCourse(state: PricingState, courseId: string) {
   return isCourseId(courseId) && state.courses.includes(courseId);
 }
 
+function addCashback(state: PricingState, price: number) {
+  return state.cashbackToman + Math.round(price * CASHBACK_RATE);
+}
+
 export function buyCourse(courseId: PaidCourseId) {
   const state = readPricing();
   if (state.bundle || state.courses.includes(courseId)) return state;
-  const next = { ...state, courses: [...state.courses, courseId] };
+  const next = {
+    ...state,
+    courses: [...state.courses, courseId],
+    cashbackToman: addCashback(state, COURSE_PRICE),
+  };
   writePricing(next);
   return next;
 }
 
 export function buyBundle() {
   const state = readPricing();
+  if (state.bundle) return state;
   const next: PricingState = {
+    ...state,
     courses: PAID_COURSES.map((course) => course.id),
     bundle: true,
-    minutes: state.bundle ? state.minutes : state.minutes + BUNDLE_GIFT_MINUTES,
+    minutes: state.minutes + BUNDLE_GIFT_MINUTES,
+    cashbackToman: addCashback(state, BUNDLE_PRICE),
   };
   writePricing(next);
   return next;
@@ -92,7 +118,31 @@ export function buyBundle() {
 
 export function buyMinutes(amount: number) {
   const state = readPricing();
-  const next = { ...state, minutes: state.minutes + clampMinutes(amount) };
+  const bought = clampMinutes(amount);
+  const next = {
+    ...state,
+    minutes: state.minutes + bought,
+    cashbackToman: addCashback(state, minutesPrice(bought)),
+  };
+  writePricing(next);
+  return next;
+}
+
+export function ensureReferralCode() {
+  const state = readPricing();
+  if (state.referralCode) return state;
+  const next = { ...state, referralCode: `NX${Math.floor(1000 + Math.random() * 9000)}` };
+  writePricing(next);
+  return next;
+}
+
+export function recordReferral() {
+  const state = ensureReferralCode();
+  const next = {
+    ...state,
+    referrals: state.referrals + 1,
+    cashbackToman: state.cashbackToman + REFERRAL_REWARD,
+  };
   writePricing(next);
   return next;
 }

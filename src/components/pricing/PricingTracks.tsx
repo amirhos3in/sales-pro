@@ -13,7 +13,6 @@ import {
   buyMinutes,
   clampMinutes,
   COURSE_PRICE,
-  emptyPricing,
   MAX_MINUTES,
   MIN_MINUTES,
   MINUTE_STEP,
@@ -22,26 +21,9 @@ import {
   PAID_COURSES,
   readPricing,
   type PaidCourseId,
-  type PricingState,
 } from "@/lib/pricing";
+import { usePricing } from "@/lib/use-pricing";
 import { useI18n } from "@/lib/i18n";
-
-function usePricing() {
-  const [state, setState] = useState<PricingState>(emptyPricing);
-
-  useEffect(() => {
-    const load = () => setState(readPricing());
-    load();
-    window.addEventListener("salespro-pricing", load);
-    window.addEventListener("storage", load);
-    return () => {
-      window.removeEventListener("salespro-pricing", load);
-      window.removeEventListener("storage", load);
-    };
-  }, []);
-
-  return state;
-}
 
 export function PricingTracks() {
   const { lang } = useI18n();
