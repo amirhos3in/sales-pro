@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Mic, Square } from "lucide-react";
 import { counterFor, type CounterCard } from "@/lib/copilot/playbook";
 import { platformHttp } from "@/lib/copilot/endpoint";
+import { faNumber } from "@/lib/format";
+import { remainingCopilotMinutes } from "@/lib/pricing";
+import { usePricing } from "@/lib/use-pricing";
 
 const samples = ["قیمت بالاست", "تخفیف بدید", "باید فکر کنم"];
 
@@ -23,6 +26,8 @@ type SpeechHandle = {
 };
 
 export function LiveDemo() {
+  const pricing = usePricing();
+  const minutesLeft = remainingCopilotMinutes(pricing);
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState("");
   const [card, setCard] = useState<CounterCard | null>(null);
@@ -72,6 +77,9 @@ export function LiveDemo() {
   return (
     <section dir="rtl" className="glass rounded-[2rem] p-6 shadow-2xl sm:p-8" data-live-demo>
       <p className="text-xs tracking-[0.16em] text-[#D4AF37]">دموی زنده، بدون ورود</p>
+      <p className="mt-3 inline-flex rounded-2xl border border-[#D4AF37]/50 bg-[#0B132B] px-4 py-2 text-sm font-semibold text-[#F8F1DE]" data-ai-minutes={minutesLeft}>
+        دقایق باقی‌مانده: {faNumber(minutesLeft)} دقیقه
+      </p>
       <h2 className="mt-2 text-2xl font-semibold">یک اعتراض بگویید، جواب پشت‌خط را ببینید</h2>
       <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
         میکروفن را روشن کنید یا یکی از اعتراض‌های رایج را بزنید. فیلتر قصد فقط روی اعتراض و سؤال خرید جواب می‌سازد.

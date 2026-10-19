@@ -57,15 +57,25 @@ export function readPricing(): PricingState {
   if (typeof window === "undefined") return emptyPricing;
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return emptyPricing;
+    if (!raw) {
+      const extra = Number(localStorage.getItem("aiMinutes"));
+      if (Number.isFinite(extra) && extra > 0) return { ...emptyPricing, minutes: Math.round(extra) };
+      return emptyPricing;
+    }
     const parsed = JSON.parse(raw) as Partial<PricingState>;
     const courses = Array.isArray(parsed.courses)
       ? parsed.courses.filter((id): id is PaidCourseId => typeof id === "string" && isCourseId(id))
       : [];
+    let minutes = Number.isFinite(parsed.minutes) ? Math.max(0, Math.round(Number(parsed.minutes))) : 0;
+    if (minutes === 0) {
+      const extra = localStorage.getItem("aiMinutes");
+      const parsedExtra = extra == null || extra === "" ? Number.NaN : Number(extra);
+      if (Number.isFinite(parsedExtra)) minutes = Math.max(0, Math.round(parsedExtra));
+    }
     return {
       courses,
       bundle: Boolean(parsed.bundle),
-      minutes: Number.isFinite(parsed.minutes) ? Math.max(0, Math.round(Number(parsed.minutes))) : 0,
+      minutes,
       cashbackToman: Number.isFinite(parsed.cashbackToman) ? Math.max(0, Math.round(Number(parsed.cashbackToman))) : 0,
       referrals: Number.isFinite(parsed.referrals) ? Math.max(0, Math.round(Number(parsed.referrals))) : 0,
       referralCode: typeof parsed.referralCode === "string" ? parsed.referralCode : "",
@@ -77,7 +87,14 @@ export function readPricing(): PricingState {
 
 export function writePricing(next: PricingState) {
   localStorage.setItem(KEY, JSON.stringify(next));
+  localStorage.setItem("aiMinutes", String(next.minutes));
   window.dispatchEvent(new Event("salespro-pricing"));
+}
+
+export function remainingCopilotMinutes(state: PricingState) {
+  const minutes = Number.isFinite(state.minutes) ? Math.max(0, Math.round(state.minutes)) : 0;
+  if (minutes === 0 && state.bundle) return BUNDLE_GIFT_MINUTES;
+  return minutes;
 }
 
 export function ownsCourse(state: PricingState, courseId: string) {

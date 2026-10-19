@@ -6,7 +6,9 @@ import { downsampleTo16k, openCallStream, pcmToBase64 } from "@/lib/copilot/capt
 import { ensurePlatformSession, platformWs, readPlatformToken } from "@/lib/copilot/endpoint";
 import { counterFor, type CounterCard } from "@/lib/copilot/playbook";
 import { useAuth } from "@/context/AuthContext";
-import { tierFromPlan } from "@/lib/lms/rules";
+import { faNumber } from "@/lib/format";
+import { remainingCopilotMinutes } from "@/lib/pricing";
+import { usePricing } from "@/lib/use-pricing";
 
 type Phase = "idle" | "listening" | "analyzing" | "ready";
 type Source = "voip" | "ambient";
@@ -46,6 +48,8 @@ function clock(total: number) {
 
 export function CopilotHud() {
   const { currentUser } = useAuth();
+  const pricing = usePricing();
+  const minutesLeft = remainingCopilotMinutes(pricing);
   const [source, setSource] = useState<Source>("ambient");
   const [phase, setPhase] = useState<Phase>("idle");
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -214,13 +218,6 @@ export function CopilotHud() {
     setCard(counterFor(text, (card?.variant ?? 0) + 1));
   }
 
-  const tier = currentUser?.subscription?.isActive
-    ? tierFromPlan(
-        currentUser.subscription.planType === "monthly" ? "eco" : currentUser.subscription.planType === "quarterly" ? "plus" : "pro",
-        true,
-      )
-    : "free";
-
   return (
     <section dir="rtl" className="min-h-[70vh] rounded-[28px] bg-[#070B18] p-4 text-[#F8F1DE] sm:p-6" data-copilot-hud>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -228,9 +225,12 @@ export function CopilotHud() {
           <p className="text-xs tracking-[0.18em] text-[#D4AF37]">دستیار زنده فروش</p>
           <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">پشت خط، جواب را آماده ببینید</h1>
         </div>
-        <p className="rounded-2xl bg-white/5 px-4 py-3 text-sm" data-quota>
-          باقی‌مانده این ماه: {remaining === null ? "…" : clock(remaining)}
-          <span className="mt-1 block text-xs text-white/50">پلن دسترسی: {tier === "free" ? "آزمایشی" : tier === "lms" ? "فقط آکادمی" : tier === "pro_copilot" ? "کوپایلوت" : "سازمانی"}</span>
+        <p className="rounded-2xl border border-[#D4AF37]/50 bg-white/5 px-4 py-3 text-sm" data-quota data-ai-minutes={minutesLeft}>
+          دقایق باقی‌مانده: {faNumber(minutesLeft)} دقیقه
+          <span className="mt-1 block text-xs text-white/50">
+            {pricing.bundle ? "شامل هدیهٔ باندل" : "از کیف پول کوپایلوت"}
+            {remaining === null ? "" : ` · سهمیهٔ نشست: ${clock(remaining)}`}
+          </span>
         </p>
       </div>
 
