@@ -6,15 +6,20 @@
 
 ## اجرا
 
+سایت با Node.js و Express سرو می‌شود، نه با Next.js.
+
 ```bash
 npm install
-cp .env.example .env.local
-npm run dev -- -H 0.0.0.0 -p 43123
+npm start
 ```
 
-`npm run dev` هم Next را روی پورت ۴۳۱۲۳ بالا می‌آورد و هم سرویس HTTP/WebSocket کوپایلوت را روی ۴۳۱۲۴. متغیرها در `.env.example` است.
+سرور روی [http://127.0.0.1:43131](http://127.0.0.1:43131) بالا می‌آید. دستیار در [http://127.0.0.1:43131/dashboard/copilot](http://127.0.0.1:43131/dashboard/copilot) است.
 
-سپس در مرورگر [http://127.0.0.1:43123](http://127.0.0.1:43123) را باز کنید. دستیار زنده در [http://127.0.0.1:43123/dashboard/copilot](http://127.0.0.1:43123/dashboard/copilot) است. مسیر مرحله‌به‌مرحله در [http://127.0.0.1:43123/academy](http://127.0.0.1:43123/academy) است.
+خروجی ثابت گیت‌هاب پیجز را همین سرور می‌سازد:
+
+```bash
+npm run export:pages
+```
 
 ## ساختار
 
@@ -31,12 +36,6 @@ src/components/copilot/   دموی صفحهٔ اول و HUD
 src/components/lms/       نوار پیشرفت درس و پیوال کوپایلوت
 ```
 
-نسخهٔ عمومی: [https://amirhos3in.github.io/sales-pro/](https://amirhos3in.github.io/sales-pro/)
-
-برای ساخت همان خروجی ثابت:
-
-```bash
-npm run export:pages
-```
+نسخهٔ عمومی: [https://amirhos3in.github.io/sales-pro/](https://amirhos3in.github.io/sales-pro/). گیت‌هاب پیجز فقط فایل ثابت اجرا می‌کند؛ همان صفحه‌ها را `npm run export:pages` از سرور Node می‌سازد.
 
 ورود با موبایل و کد آزمایشی است. هر کد ۴ تا ۶ رقمی، مثلاً `1234`، قبول می‌شود. درس رایگان بعد از ورود باز است. مسیر پولی اشتراک می‌خواهد. ویدیوی بعدی فقط بعد از حداقل دو پاسخ درست از سه سؤال باز می‌شود. پلن ماهانه فقط آکادمی است؛ پلن فصلی ۳۰۰ دقیقه کوپایلوت و پلن سالانه ۲۰۰۰ دقیقه می‌دهد. بدون `OPENAI_API_KEY` هم دمو و HUD جواب می‌دهند.
