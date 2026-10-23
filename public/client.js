@@ -151,6 +151,20 @@
     document.querySelectorAll("[data-profile-name], [data-account-name]").forEach((node) => {
       node.textContent = name || "—";
     });
+    const signedIn = Boolean(session && session.isAuthenticated && user && name);
+    document.querySelectorAll("[data-auth-guest]").forEach((node) => {
+      node.hidden = signedIn;
+    });
+    document.querySelectorAll("[data-auth-user]").forEach((node) => {
+      node.hidden = !signedIn;
+      if (node.dataset.authUser === "chip") node.style.display = signedIn ? "inline-flex" : "none";
+    });
+    document.querySelectorAll("[data-header-name]").forEach((node) => {
+      node.textContent = name || "کاربر";
+    });
+    document.querySelectorAll("[data-header-letter]").forEach((node) => {
+      node.textContent = (name || "ن").slice(0, 1);
+    });
     const ownedCount = PAID.filter((id) => owns(state, id)).length;
     const status = state.bundle ? "باندل کامل" : ownedCount ? fa.format(ownedCount) + " دوره" : "بدون دوره";
     const statusLong = state.bundle ? "باندل کامل" : ownedCount ? fa.format(ownedCount) + " دوره فعال" : "هنوز دوره‌ای خریداری نشده";

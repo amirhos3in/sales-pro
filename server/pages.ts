@@ -102,11 +102,21 @@ export function layout(base: string, active: string, title: string, body: string
         <a href="${href("/#courses")}" class="shrink-0 rounded-xl px-2 py-2 text-sm text-cream/70 hover:bg-white/5">اشتراک</a>
       </nav>
       <div class="ms-auto flex items-center gap-2">
-        <a href="${href("/login/")}" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / عضویت</a>
+        <a data-auth-guest href="${href("/login/")}" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / عضویت</a>
+        <a data-auth-user="chip" href="${href("/dashboard/")}" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
+          <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
+          <span data-header-name class="max-w-28 truncate">کاربر</span>
+        </a>
         <button type="button" data-menu class="rounded-xl px-3 py-2 text-sm ring-1 ring-gold/30 md:hidden">منو</button>
       </div>
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
+      <a data-auth-guest href="${href("/login/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / عضویت</a>
+      <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
+        <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
+        <a href="${href("/dashboard/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج از حساب</button>
+      </div>
       ${NAV.map(([path, label]) => `<a href="${href(path)}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">${label}</a>`).join("")}
     </div>
   </header>
