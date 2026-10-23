@@ -74,8 +74,16 @@ export function layout(base: string, active: string, title: string, body: string
       transform: translateY(0);
       filter: blur(0);
     }
+    @keyframes voice-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.75); }
+      100% { box-shadow: 0 0 0 12px rgba(248, 113, 113, 0); }
+    }
+    [data-voice-toggle][data-state="recording"] [data-voice-pulse] {
+      animation: voice-pulse 1.1s ease-out infinite;
+    }
     @media (prefers-reduced-motion: reduce) {
       [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
+      [data-voice-toggle][data-state="recording"] [data-voice-pulse] { animation: none; }
     }
   </style>
 </head>
@@ -114,6 +122,32 @@ export function layout(base: string, active: string, title: string, body: string
 </html>`;
 }
 
+function voiceChat() {
+  const samples = ["قیمت بالاست", "تخفیف بدید", "باید فکر کنم"];
+  return `<div data-voice-chat class="mt-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <label class="block min-w-0 flex-1 text-sm">
+        <span class="text-cream/70">متن گفتگو</span>
+        <textarea data-voice-input rows="2" class="mt-1 w-full resize-y rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none focus:border-gold" placeholder="بنویسید یا با میکروفن بگویید"></textarea>
+      </label>
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" data-voice-toggle aria-pressed="false" data-state="idle" class="inline-flex h-11 items-center gap-2 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-50">
+          <svg data-voice-mic viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/></svg>
+          <svg data-voice-stop viewBox="0 0 24 24" class="hidden size-4" fill="currentColor" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+          <span data-voice-pulse class="hidden size-2 rounded-full bg-red-400"></span>
+          <span data-voice-label>شروع صحبت</span>
+        </button>
+        <button type="button" data-voice-send class="h-11 rounded-2xl px-4 text-sm ring-1 ring-gold/40">ارسال</button>
+      </div>
+    </div>
+    <p data-voice-live class="mt-2 min-h-6 text-sm text-gold" aria-live="polite"></p>
+    <p data-voice-toast class="mt-1 hidden text-sm text-rose-300" role="status"></p>
+    <div class="mt-3 flex flex-wrap gap-2">
+      ${samples.map((sample) => `<button type="button" data-sample-objection="${esc(sample)}" class="h-10 rounded-full px-3 text-xs ring-1 ring-gold/30">${esc(sample)}</button>`).join("")}
+    </div>
+  </div>`;
+}
+
 function courseCards(base: string) {
   return categories.map((category, index) => {
     const count = lessonsOf(category).length;
@@ -148,9 +182,7 @@ export function homePage(base: string) {
       <p class="text-xs tracking-[0.16em] text-gold">دموی زنده، بدون ورود</p>
       <p class="mt-3 inline-flex rounded-2xl border border-gold/50 bg-navy px-4 py-2 text-sm font-semibold" data-ai-minutes>دقایق باقی‌مانده: ۰ دقیقه</p>
       <h2 class="mt-3 text-2xl font-semibold">یک اعتراض بگویید، جواب پشت‌خط را ببینید</h2>
-      <div class="mt-5 flex flex-wrap gap-2">
-        ${["قیمت بالاست", "تخفیف بدید", "باید فکر کنم"].map((sample) => `<button type="button" data-sample-objection="${esc(sample)}" class="h-10 rounded-full px-3 text-xs ring-1 ring-gold/30">${esc(sample)}</button>`).join("")}
-      </div>
+      ${voiceChat()}
       <div data-counter class="mt-4 hidden rounded-3xl bg-navy p-5"></div>
     </section>
     <section ${revealAttrs(120)} id="copilot-minutes" class="mt-8 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
@@ -212,10 +244,7 @@ export function copilotPage(base: string) {
         </div>
         <p class="rounded-2xl border border-gold/50 bg-white/5 px-4 py-3 text-sm" data-ai-minutes>دقایق باقی‌مانده: ۰ دقیقه</p>
       </div>
-      <div class="mt-5 flex flex-wrap gap-2">
-        ${["قیمت بالاست", "تخفیف بدید", "باید فکر کنم"].map((sample) => `<button type="button" data-sample-objection="${esc(sample)}" class="h-10 rounded-full bg-white/10 px-3 text-xs">${esc(sample)}</button>`).join("")}
-        <button type="button" data-demo-mic class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">حرف بزنید</button>
-      </div>
+      ${voiceChat()}
       <div data-counter class="mt-6 hidden rounded-[28px] border border-gold/40 bg-[#10182E] p-5"></div>
       <p class="mt-6 text-sm leading-7 text-white/60">موجودی از کیف پول همین مرورگر خوانده می‌شود. اگر باندل خریده باشید و موجودی خالی باشد، ۵۰۰ دقیقهٔ هدیه نشان داده می‌شود.</p>
     </section>

@@ -250,6 +250,17 @@
     writePricing(state);
   }
 
+  function paintCounter(card, fallback) {
+    const box = document.querySelector("[data-counter]");
+    if (!box) return;
+    box.classList.remove("hidden");
+    if (!card || !card.matched) {
+      box.innerHTML = "<p class=\"text-sm\">هنوز اعتراض روشنی نشنیدم. قیمت، تخفیف یا «باید فکر کنم» را بگویید.</p>";
+      return;
+    }
+    box.innerHTML = "<p class=\"text-sm text-[#F3A6A6]\">🔴 " + card.tag + "</p><p class=\"mt-3 text-xs text-gold\">تکنیک: " + card.technique + "</p><p class=\"mt-2 text-lg leading-8\" data-counter-say>بگو: " + (card.say || (card.lines && card.lines[0]) || fallback || "") + "</p>";
+  }
+
   function reply(text) {
     let book = [];
     try {
@@ -258,14 +269,20 @@
       book = [];
     }
     const hit = book.find((item) => item.patterns.some((pattern) => text.includes(pattern)));
-    const box = document.querySelector("[data-counter]");
-    if (!box) return;
-    box.classList.remove("hidden");
-    if (!hit) {
-      box.innerHTML = "<p class=\"text-sm\">هنوز اعتراض روشنی نشنیدم. قیمت، تخفیف یا «باید فکر کنم» را بگویید.</p>";
-      return;
-    }
-    box.innerHTML = "<p class=\"text-sm text-[#F3A6A6]\">🔴 " + hit.tag + "</p><p class=\"mt-3 text-xs text-gold\">تکنیک: " + hit.technique + "</p><p class=\"mt-2 text-lg leading-8\">بگو: " + hit.lines[0] + "</p>";
+    paintCounter(hit ? { matched: true, tag: hit.tag, technique: hit.technique, say: hit.lines[0] } : null, text);
+  }
+
+  function ask(text) {
+    const clean = String(text || "").trim();
+    if (!clean) return;
+    fetch((base || "") + "/api/copilot/counter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: clean }),
+    }).then((response) => response.ok ? response.json() : null).then((card) => {
+      if (!card || !card.matched) reply(clean);
+      else paintCounter(card, clean);
+    }).catch(() => reply(clean));
   }
 
   document.addEventListener("click", (event) => {
@@ -292,19 +309,9 @@
     const sample = event.target.closest("[data-sample-objection]");
     if (sample) {
       const text = sample.dataset.sampleObjection;
-      fetch((base || "") + "/api/copilot/counter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      }).then((response) => response.ok ? response.json() : null).then((card) => {
-        const box = document.querySelector("[data-counter]");
-        if (!box || !card || !card.matched) {
-          reply(text);
-          return;
-        }
-        box.classList.remove("hidden");
-        box.innerHTML = "<p class=\"text-sm text-[#F3A6A6]\">🔴 " + card.tag + "</p><p class=\"mt-3 text-xs text-gold\">تکنیک: " + card.technique + "</p><p class=\"mt-2 text-lg leading-8\" data-counter-say>بگو: " + card.say + "</p>";
-      }).catch(() => reply(text));
+      const field = document.querySelector("[data-voice-input]");
+      if (field) field.value = text;
+      ask(text);
     }
   });
 
@@ -369,23 +376,202 @@
     });
   }
 
-  const mic = document.querySelector("[data-demo-mic]");
-  if (mic) {
-    mic.addEventListener("click", () => {
-      const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!Ctor) {
-        reply("فکر کنم");
+  function mountVoice() {
+    const chat = document.querySelector("[data-voice-chat]");
+    if (!chat) return;
+    const toggle = chat.querySelector("[data-voice-toggle]");
+    const label = chat.querySelector("[data-voice-label]");
+    const micIcon = chat.querySelector("[data-voice-mic]");
+    const stopIcon = chat.querySelector("[data-voice-stop]");
+    const pulse = chat.querySelector("[data-voice-pulse]");
+    const input = chat.querySelector("[data-voice-input]");
+    const live = chat.querySelector("[data-voice-live]");
+    const toast = chat.querySelector("[data-voice-toast]");
+    const send = chat.querySelector("[data-voice-send]");
+    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let listening = false;
+    let finalText = "";
+    let interimText = "";
+    let endError = "";
+    let userStop = false;
+    let endTimer = 0;
+
+    function toastMessage(message) {
+      toast.textContent = message;
+      toast.classList.toggle("hidden", !message);
+    }
+
+    function setIdle() {
+      listening = false;
+      toggle.disabled = false;
+      toggle.dataset.state = "idle";
+      toggle.setAttribute("aria-pressed", "false");
+      toggle.setAttribute("aria-busy", "false");
+      toggle.classList.add("bg-gold", "text-navy");
+      toggle.classList.remove("bg-rose-600", "text-white");
+      label.textContent = "شروع صحبت";
+      micIcon.classList.remove("hidden");
+      stopIcon.classList.add("hidden");
+      pulse.classList.add("hidden");
+    }
+
+    function setRecording() {
+      listening = true;
+      toggle.disabled = false;
+      toggle.dataset.state = "recording";
+      toggle.setAttribute("aria-pressed", "true");
+      toggle.setAttribute("aria-busy", "false");
+      toggle.classList.remove("bg-gold", "text-navy");
+      toggle.classList.add("bg-rose-600", "text-white");
+      label.textContent = "توقف";
+      micIcon.classList.add("hidden");
+      stopIcon.classList.remove("hidden");
+      pulse.classList.remove("hidden");
+    }
+
+    function setLoading() {
+      toggle.disabled = true;
+      toggle.dataset.state = "loading";
+      toggle.setAttribute("aria-busy", "true");
+      label.textContent = "در حال توقف";
+    }
+
+    function deliver(text) {
+      const clean = String(text || "").replace(/\s+/g, " ").trim();
+      if (!clean) {
+        toastMessage("گفتار تشخیص داده نشد. جمله را دوباره واضح بگویید.");
         return;
       }
-      const recognition = new Ctor();
+      toastMessage("");
+      const current = input.value.trim();
+      input.value = current ? current + " " + clean : clean;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      ask(clean);
+    }
+
+    function finishSession() {
+      window.clearTimeout(endTimer);
+      const spoken = finalText.trim() || (userStop ? interimText.trim() : "");
+      const error = endError;
+      const stoppedByUser = userStop;
+      finalText = "";
+      interimText = "";
+      endError = "";
+      userStop = false;
+      live.textContent = "";
+      setIdle();
+      if (spoken) deliver(spoken);
+      else if (!error && stoppedByUser) toastMessage("گفتار تشخیص داده نشد. جمله را دوباره واضح بگویید.");
+    }
+
+    if (!Ctor) {
+      toggle.disabled = true;
+      toggle.dataset.state = "disabled";
+      toggle.setAttribute("aria-disabled", "true");
+      toastMessage("این مرورگر تشخیص گفتار ندارد. متن را بنویسید و ارسال کنید.");
+    } else {
+      recognition = new Ctor();
       recognition.lang = "fa-IR";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
       recognition.onresult = (event) => {
-        const text = event.results[0] && event.results[0][0] ? event.results[0][0].transcript : "";
-        if (text) reply(text);
+        let interim = "";
+        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+          const piece = event.results[index][0] ? event.results[index][0].transcript : "";
+          if (event.results[index].isFinal) finalText += piece + " ";
+          else interim += piece;
+        }
+        interimText = interim;
+        live.textContent = (interim || finalText).trim();
       };
-      recognition.start();
+
+      recognition.onnomatch = () => {
+        toastMessage("گفتار تشخیص داده نشد. جمله را دوباره بگویید.");
+      };
+
+      recognition.onerror = (event) => {
+        const code = event && event.error;
+        endError = code || "unknown";
+        if (code === "not-allowed" || code === "service-not-allowed") {
+          toastMessage("دسترسی میکروفن بسته است. اجازهٔ میکروفن را در تنظیمات مرورگر باز کنید.");
+        } else if (code === "no-speech") {
+          toastMessage("صدایی شنیده نشد. دوباره شروع کنید و واضح‌تر حرف بزنید.");
+        } else if (code === "audio-capture") {
+          toastMessage("میکروفنی پیدا نشد.");
+        } else if (code !== "aborted") {
+          toastMessage("ضبط گفتار قطع شد. یک بار دیگر تلاش کنید.");
+        }
+      };
+
+      recognition.onend = () => {
+        finishSession();
+      };
+    }
+
+    async function allowMicrophone() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        return true;
+      } catch {
+        toastMessage("دسترسی میکروفن داده نشد. اجازه را بدهید و دوباره شروع کنید.");
+        setIdle();
+        return false;
+      }
+    }
+
+    toggle.addEventListener("click", async () => {
+      if (!recognition) return;
+      if (listening) {
+        userStop = true;
+        setLoading();
+        window.clearTimeout(endTimer);
+        endTimer = window.setTimeout(() => {
+          if (toggle.dataset.state === "loading") finishSession();
+        }, 1600);
+        try {
+          recognition.stop();
+        } catch {
+          finishSession();
+        }
+        return;
+      }
+      toastMessage("");
+      finalText = "";
+      const allowed = await allowMicrophone();
+      if (!allowed) return;
+      try {
+        recognition.start();
+        setRecording();
+        live.textContent = "در حال شنیدن…";
+      } catch {
+        setIdle();
+        toastMessage("ضبط همین حالا در جریان است یا میکروفن در دسترس نیست.");
+      }
+    });
+
+    send.addEventListener("click", () => {
+      const text = input.value.trim();
+      if (!text) {
+        toastMessage("اول متنی بنویسید یا صحبت را شروع کنید.");
+        return;
+      }
+      toastMessage("");
+      ask(text);
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        send.click();
+      }
     });
   }
+
+  mountVoice();
 
   function mountSmoothScroll() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
