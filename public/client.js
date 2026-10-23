@@ -9,10 +9,23 @@
   const RATE = 3000000;
   const PAID = ["online", "hozuri", "telefoni", "mozakerah"];
   const base = document.body.dataset.base || "";
+  const AVATARS = {
+    navy: ["#0B132B", "#D4AF37"],
+    gold: ["#D4AF37", "#0B132B"],
+    ink: ["#1C2541", "#F6F1E4"],
+    sand: ["#F3E5AB", "#0B132B"],
+    pine: ["#1F4D3A", "#F3E5AB"],
+    wine: ["#6E2B3A", "#F6F1E4"],
+  };
+  const TABS = ["overview", "profile", "courses", "wallet", "audits", "tickets"];
 
   const fa = new Intl.NumberFormat("fa-IR");
   function toman(value) {
     return fa.format(value) + " تومان";
+  }
+
+  function escText(value) {
+    return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
   function emptyPricing() {
@@ -86,6 +99,31 @@
     }
   }
 
+  function writeSession(session) {
+    localStorage.setItem(SESSION, JSON.stringify(session));
+    render();
+  }
+
+  function currentTab() {
+    const params = new URLSearchParams(location.search);
+    const fromQuery = params.get("tab");
+    if (TABS.includes(fromQuery)) return fromQuery;
+    const seeded = document.querySelector("[data-user-panel]");
+    if (seeded && TABS.includes(seeded.dataset.initialTab)) return seeded.dataset.initialTab;
+    const path = location.pathname.replace(/\/$/, "");
+    if (path.endsWith("/profile") || path.endsWith("/me")) return "profile";
+    return "overview";
+  }
+
+  const panelPath = location.pathname.replace(/\/$/, "");
+  if (panelPath.endsWith("/dashboard")) {
+    const session = readSession();
+    if (!session || !session.isAuthenticated || !session.currentUser) {
+      location.replace(base + "/login/");
+      return;
+    }
+  }
+
   function render() {
     const state = readPricing();
     const progress = readProgress();
@@ -104,14 +142,65 @@
       node.textContent = fa.format(PAID.filter((id) => owns(state, id)).length);
     });
     const session = readSession();
-    const phone = session && session.currentUser ? session.currentUser.phone : "";
-    const name = session && session.currentUser ? session.currentUser.name : "";
+    const user = session && session.currentUser ? session.currentUser : null;
+    const phone = user ? user.phone : "";
+    const name = user ? user.name : "";
     document.querySelectorAll("[data-phone-line]").forEach((node) => {
       node.textContent = phone || "—";
     });
-    document.querySelectorAll("[data-profile-name]").forEach((node) => {
+    document.querySelectorAll("[data-profile-name], [data-account-name]").forEach((node) => {
       node.textContent = name || "—";
     });
+    const ownedCount = PAID.filter((id) => owns(state, id)).length;
+    const status = state.bundle ? "باندل کامل" : ownedCount ? fa.format(ownedCount) + " دوره" : "بدون دوره";
+    const statusLong = state.bundle ? "باندل کامل" : ownedCount ? fa.format(ownedCount) + " دوره فعال" : "هنوز دوره‌ای خریداری نشده";
+    document.querySelectorAll("[data-status-badge]").forEach((node) => {
+      node.textContent = node.dataset.statusBadge === "short" ? status : statusLong;
+    });
+    document.querySelectorAll("[data-gift-badge]").forEach((node) => node.classList.toggle("hidden", !state.bundle));
+    document.querySelectorAll("[data-owned-hint]").forEach((node) => {
+      node.textContent = state.bundle ? "باندل کامل" : "از ۴ دوره تخصصی";
+    });
+    document.querySelectorAll("[data-minute-hint]").forEach((node) => {
+      node.textContent = state.bundle ? "شامل هدیهٔ " + fa.format(GIFT) + " دقیقه" : "هدیه فقط با باندل";
+    });
+    document.querySelectorAll("[data-wallet-lead]").forEach((node) => {
+      node.textContent = state.bundle
+        ? "باندل کامل خریده شده و ۵۰۰ دقیقه هدیه داخل همین موجودی است."
+        : "دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط با خرید باندل اضافه می‌شود.";
+    });
+    document.querySelectorAll("[data-hello]").forEach((node) => {
+      node.textContent = new Date().getHours() < 17 ? "صبح بخیر" : "عصر بخیر";
+    });
+    document.querySelectorAll("[data-course-status]").forEach((row) => {
+      const active = owns(state, row.dataset.courseStatus);
+      const label = row.querySelector("[data-owned-label]");
+      if (!label) return;
+      label.textContent = active ? "فعال" : "خریداری نشده";
+      label.className = active ? "text-gold" : "text-cream/50";
+    });
+    document.querySelectorAll("[data-bundle-label]").forEach((node) => {
+      node.textContent = state.bundle ? "خریداری شده · هدیهٔ ۵۰۰ دقیقه فعال است" : "خریداری نشده · ۱۶ میلیون تومان به‌جای ۲۰ میلیون";
+    });
+    document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
+    const codeNode = document.querySelector("[data-referral-code]");
+    if (codeNode) {
+      if (!state.referralCode && document.querySelector("[data-user-panel]")) {
+        state.referralCode = "NX" + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem(KEY, JSON.stringify(state));
+      }
+      codeNode.textContent = state.referralCode || "—";
+    }
+    document.querySelectorAll("[data-referral-count]").forEach((node) => {
+      node.textContent = fa.format(state.referrals || 0);
+    });
+    document.querySelectorAll("[data-wallet-balance]").forEach((node) => {
+      node.textContent = fa.format(user && user.walletBalance ? user.walletBalance : 0);
+    });
+    paintAvatar(user);
+    paintTransactions(user);
+    paintLiveTickets(user);
+    paintProfile(user);
 
     document.querySelectorAll("[data-course]").forEach((card) => {
       const id = card.dataset.course;
@@ -215,11 +304,68 @@
     });
   }
 
+  function paintAvatar(user) {
+    const id = user && AVATARS[user.avatarId] ? user.avatarId : "navy";
+    const colors = AVATARS[id];
+    const letter = user && user.name ? user.name.slice(0, 1) : "ن";
+    document.querySelectorAll("span[data-avatar]").forEach((node) => {
+      node.textContent = letter;
+      node.style.background = colors[0];
+      node.style.color = colors[1];
+    });
+    document.querySelectorAll("[data-avatar-pick]").forEach((node) => {
+      node.classList.toggle("ring-2", node.dataset.avatarPick === id);
+      node.classList.toggle("ring-gold", node.dataset.avatarPick === id);
+      node.setAttribute("aria-pressed", node.dataset.avatarPick === id ? "true" : "false");
+    });
+  }
+
+  function paintTransactions(user) {
+    const body = document.querySelector("[data-tx-body]");
+    const empty = document.querySelector("[data-tx-empty]");
+    if (!body) return;
+    const rows = user && Array.isArray(user.transactions) ? user.transactions : [];
+    const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" });
+    body.innerHTML = rows.map((row) => {
+      const signed = Number(row.amount) || 0;
+      const tone = signed < 0 ? "text-rose-300" : "text-emerald-300";
+      const when = row.at ? stamp.format(new Date(row.at)) : "";
+      return "<tr class=\"border-t border-gold/20\"><td class=\"px-3 py-3\">" + escText(row.title || "تراکنش") + "</td><td class=\"px-3 py-3 font-medium " + tone + "\">" + (signed > 0 ? "+" : "") + fa.format(signed) + " تومان</td><td class=\"px-3 py-3 text-cream/60\">" + escText(when) + "</td></tr>";
+    }).join("");
+    if (empty) empty.classList.toggle("hidden", rows.length > 0);
+  }
+
+  function paintLiveTickets(user) {
+    const list = document.querySelector("[data-live-tickets]");
+    if (!list) return;
+    const rows = user && Array.isArray(user.tickets) ? user.tickets : [];
+    list.innerHTML = rows.map((ticket) => "<article class=\"glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2></div><span class=\"rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy\">در حال بررسی</span></article>").join("");
+  }
+
+  function paintProfile(user) {
+    const form = document.querySelector("[data-profile-form]");
+    if (!form || form.dataset.ready === "yes" || !user) return;
+    form.elements.name.value = user.name || "";
+    form.elements.phone.value = user.phone || "";
+    form.elements.email.value = user.email || "";
+    form.elements.jobTitle.value = user.jobTitle || "";
+    form.elements.bio.value = user.bio || "";
+    form.dataset.picked = user.avatarId || "navy";
+    form.dataset.ready = "yes";
+  }
+
   function paintTabs() {
-    const params = new URLSearchParams(location.search);
-    const tab = params.get("tab") === "courses" || params.get("tab") === "wallet" ? params.get("tab") : "overview";
+    const tab = currentTab();
     document.querySelectorAll("[data-tab]").forEach((node) => {
       node.classList.toggle("active", node.dataset.tab === tab);
+    });
+    document.querySelectorAll("[data-tab-link]").forEach((node) => {
+      const on = node.dataset.tabLink === tab;
+      node.classList.toggle("bg-gold", on);
+      node.classList.toggle("text-navy", on);
+      node.classList.toggle("font-medium", on);
+      if (on) node.setAttribute("aria-current", "page");
+      else node.removeAttribute("aria-current");
     });
     if (typeof mountReveal === "function") mountReveal();
   }
@@ -302,8 +448,103 @@
     }
     const minutes = event.target.closest("#buy-minutes");
     if (minutes) {
-      const slider = minutes.parentElement.querySelector("#minute-slider");
-      if (slider) buyMinutes(slider);
+      const slider = document.querySelector("#minute-slider");
+      if (slider) {
+        buyMinutes(slider);
+        const note = document.querySelector("[data-minute-note]");
+        if (note) note.textContent = fa.format(Number(slider.value)) + " دقیقه به کیف کوپایلوت اضافه شد.";
+      }
+      return;
+    }
+    const tabLink = event.target.closest("[data-tab-link]");
+    if (tabLink) {
+      event.preventDefault();
+      const url = new URL(base + "/dashboard/", location.origin);
+      url.searchParams.set("tab", tabLink.dataset.tabLink);
+      history.pushState({}, "", url);
+      paintTabs();
+      return;
+    }
+    const avatar = event.target.closest("[data-avatar-pick]");
+    if (avatar) {
+      const form = document.querySelector("[data-profile-form]");
+      if (form) form.dataset.picked = avatar.dataset.avatarPick;
+      const current = readSession();
+      paintAvatar({
+        name: form && form.elements.name.value ? form.elements.name.value : current && current.currentUser ? current.currentUser.name : "",
+        avatarId: avatar.dataset.avatarPick,
+      });
+      return;
+    }
+    if (event.target.closest("[data-audit-toggle]")) {
+      const card = event.target.closest("[data-audit]");
+      const report = card && card.querySelector("[data-audit-report]");
+      if (report) report.classList.toggle("hidden");
+      return;
+    }
+    if (event.target.closest("[data-refer]")) {
+      const state = readPricing();
+      if (!state.referralCode) state.referralCode = "NX" + Math.floor(1000 + Math.random() * 9000);
+      state.referrals += 1;
+      state.cashbackToman += 200000;
+      writePricing(state);
+      const note = document.querySelector("[data-panel-note]");
+      if (note) note.textContent = toman(200000) + " پاداش معرفی ثبت شد.";
+      return;
+    }
+    if (event.target.closest("[data-deposit-open]")) {
+      const dialog = document.querySelector("[data-deposit]");
+      if (dialog) {
+        dialog.dataset.amount = dialog.dataset.amount || "200000";
+        dialog.classList.remove("hidden");
+        dialog.classList.add("flex");
+      }
+      return;
+    }
+    if (event.target.closest("[data-deposit-close]")) {
+      const dialog = document.querySelector("[data-deposit]");
+      if (dialog) {
+        dialog.classList.add("hidden");
+        dialog.classList.remove("flex");
+      }
+      return;
+    }
+    const preset = event.target.closest("[data-deposit-amount]");
+    if (preset) {
+      const dialog = document.querySelector("[data-deposit]");
+      if (dialog) dialog.dataset.amount = preset.dataset.depositAmount;
+      document.querySelectorAll("[data-deposit-amount]").forEach((node) => {
+        const on = node === preset;
+        node.classList.toggle("bg-gold", on);
+        node.classList.toggle("text-navy", on);
+      });
+      return;
+    }
+    if (event.target.closest("[data-deposit-confirm]")) {
+      const dialog = document.querySelector("[data-deposit]");
+      const amount = Number(dialog && dialog.dataset.amount) || 200000;
+      const session = readSession();
+      if (session && session.currentUser) {
+        session.currentUser.walletBalance = (Number(session.currentUser.walletBalance) || 0) + amount;
+        session.currentUser.transactions = [{
+          id: String(Date.now()),
+          amount,
+          at: new Date().toISOString(),
+          title: "شارژ اعتبار تومانی",
+        }].concat(session.currentUser.transactions || []);
+        writeSession(session);
+      }
+      if (dialog) {
+        dialog.classList.add("hidden");
+        dialog.classList.remove("flex");
+      }
+      const note = document.querySelector("[data-panel-note]");
+      if (note) note.textContent = "اعتبار به کیف پول اضافه شد.";
+      return;
+    }
+    if (event.target.closest("[data-sign-out]")) {
+      localStorage.removeItem(SESSION);
+      location.href = base + "/login/";
       return;
     }
     const sample = event.target.closest("[data-sample-objection]");
@@ -361,7 +602,7 @@
       }
       localStorage.setItem(SESSION, JSON.stringify({
         isAuthenticated: true,
-        currentUser: { name, phone, jobTitle: "", bio: "", plan: "free", walletBalance: 0, cashbackEarned: 0, transactions: [] },
+        currentUser: { name, phone, email: "", jobTitle: "", bio: "", avatarId: "navy", plan: "free", walletBalance: 0, cashbackEarned: 0, transactions: [], tickets: [] },
       }));
       location.href = base + "/dashboard/";
     });
@@ -570,6 +811,67 @@
       }
     });
   }
+
+  const profileForm = document.querySelector("[data-profile-form]");
+  if (profileForm) {
+    profileForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const session = readSession();
+      const note = profileForm.querySelector("[data-profile-note]");
+      if (!session || !session.currentUser) return;
+      const name = profileForm.elements.name.value.trim();
+      const phone = profileForm.elements.phone.value.trim();
+      const email = profileForm.elements.email.value.trim();
+      const jobTitle = profileForm.elements.jobTitle.value.trim();
+      const bio = profileForm.elements.bio.value.trim();
+      if (name.length < 2 || jobTitle.length < 2) {
+        note.textContent = "نام و حوزه فعالیت را کامل بنویسید.";
+        return;
+      }
+      if (!/^09\d{9}$/.test(phone)) {
+        note.textContent = "شماره موبایل را کامل وارد کنید.";
+        return;
+      }
+      if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+        note.textContent = "ایمیل را درست وارد کنید.";
+        return;
+      }
+      session.currentUser = {
+        ...session.currentUser,
+        name,
+        phone,
+        email,
+        jobTitle,
+        bio,
+        avatarId: profileForm.dataset.picked || session.currentUser.avatarId || "navy",
+      };
+      note.textContent = "تغییرات ذخیره شد.";
+      writeSession(session);
+    });
+  }
+
+  const panelTicket = document.querySelector("[data-panel-ticket]");
+  if (panelTicket) {
+    panelTicket.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const session = readSession();
+      const title = String(new FormData(panelTicket).get("title") || "").trim();
+      const note = panelTicket.querySelector("[data-ticket-note]");
+      if (!session || !session.currentUser || title.length < 2) {
+        if (note) note.textContent = "موضوع تیکت را بنویسید.";
+        return;
+      }
+      const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
+      session.currentUser.tickets = [{ id: "TK-" + String(Date.now()).slice(-4), subject: title, at: stamp }].concat(session.currentUser.tickets || []);
+      panelTicket.reset();
+      if (note) note.textContent = "تیکت روی همین مرورگر ثبت شد.";
+      writeSession(session);
+    });
+  }
+
+  window.addEventListener("popstate", () => {
+    if (document.querySelector("[data-user-panel]")) paintTabs();
+  });
 
   mountVoice();
 

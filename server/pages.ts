@@ -297,33 +297,220 @@ export function subscriptionPage(base: string) {
   return layout(base, "home", "خرید دوره | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">دو مسیر خرید</h1><p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">دوره‌ها و باندل جدا از دقیقهٔ کوپایلوت فروخته می‌شوند. هر دوره ${toman(COURSE_PRICE)} است و باندل ${toman(BUNDLE_PRICE)}.</p><p class="mt-6"><a class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 font-semibold text-navy" href="${base}/#courses">رفتن به دوره‌ها</a> <a class="ms-2 inline-flex h-11 items-center rounded-2xl px-4 ring-1 ring-gold/40" href="${base}/#copilot-minutes">دقیقهٔ کوپایلوت</a></p></section>`);
 }
 
-export function dashboardPage(base: string) {
-  const cards = categories.filter((category) => category.tierRequired === "pro").map((category, index) => `<article ${revealAttrs(index * 70)} class="glass rounded-[28px] p-5" data-dash-course="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}">
-    <div class="flex items-start justify-between gap-3"><h2 class="font-semibold">${esc(category.title.fa)}</h2><span data-lock class="rounded-full bg-white/10 px-2 py-1 text-[11px]">قفل</span></div>
-    <p class="mt-3 text-xs text-cream/60" data-video-line>ویدیوهای دیده‌شده: ۰</p>
-    <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-video-bar class="h-full bg-gold" style="width:0%"></div></div>
-    <p class="mt-3 text-xs text-cream/60" data-quiz-line>چالش‌های قبول‌شده: ۰</p>
-    <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-quiz-bar class="h-full bg-cream" style="width:0%"></div></div>
-    <a data-enter="${category.id}" href="${base}/learn/${category.id}/" class="mt-4 hidden h-10 items-center justify-center rounded-2xl border-2 border-gold bg-navy px-4 text-sm font-semibold text-gold">ورود به دوره و مشاهده ویدیوها</a>
-    <a data-buy-link="${category.id}" href="${base}/#courses" class="mt-4 inline-flex h-10 items-center rounded-2xl bg-cream px-4 text-sm font-semibold text-navy">ثبت‌نام این دوره (${toman(COURSE_PRICE)})</a>
+const AVATARS = [
+  { id: "navy", background: "#0B132B", color: "#D4AF37" },
+  { id: "gold", background: "#D4AF37", color: "#0B132B" },
+  { id: "ink", background: "#1C2541", color: "#F6F1E4" },
+  { id: "sand", background: "#F3E5AB", color: "#0B132B" },
+  { id: "pine", background: "#1F4D3A", color: "#F3E5AB" },
+  { id: "wine", background: "#6E2B3A", color: "#F6F1E4" },
+];
+
+const PANEL_TABS = [
+  ["overview", "پیشخوان"],
+  ["profile", "پروفایل من"],
+  ["courses", "دوره‌های من"],
+  ["wallet", "کیف پول"],
+  ["audits", "تحلیل‌های تماس من"],
+  ["tickets", "تیکت‌ها"],
+] as const;
+
+function dashboardPage(base: string, initialTab = "overview") {
+  const tabLink = (id: string, label: string, compact: boolean) =>
+    `<a href="${base}/dashboard/?tab=${id}" data-tab-link="${id}" class="${compact ? "shrink-0 px-3 py-2" : "px-3 py-2.5"} flex items-center gap-2 rounded-2xl text-sm">${label}</a>`;
+  const cards = categories.filter((category) => category.tierRequired === "pro").map((category) => `<article class="glass flex flex-col rounded-[28px] p-5" data-dash-course="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}">
+    <div class="flex items-start justify-between gap-3"><h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2><span data-lock class="rounded-full bg-white/10 px-2.5 py-1 text-[11px]">قفل</span></div>
+    <p class="mt-2 text-sm text-cream/60">${toman(COURSE_PRICE)}</p>
+    <p class="mt-4 text-sm text-cream/60" data-video-line>ویدیوهای دیده‌شده: ۰</p>
+    <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-video-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+    <p class="mt-3 text-sm text-cream/60" data-quiz-line>چالش‌های قبول‌شده: ۰</p>
+    <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-quiz-bar class="h-full rounded-full bg-cream" style="width:0%"></div></div>
+    <a data-enter="${category.id}" href="${base}/learn/${category.id}/" class="mt-5 hidden h-10 items-center justify-center rounded-2xl border-2 border-gold bg-navy px-4 text-sm font-medium text-gold">ورود به دوره و مشاهده ویدیوها</a>
+    <a data-buy-link="${category.id}" href="${base}/#courses" class="mt-5 inline-flex h-10 items-center justify-center rounded-2xl bg-cream px-4 text-sm font-medium text-navy">ثبت‌نام این دوره (${toman(COURSE_PRICE)})</a>
+  </article>`).join("");
+  const courseStatus = categories.filter((category) => category.tierRequired === "pro").map((category) => `<li class="flex items-center justify-between rounded-2xl border border-gold/30 px-3 py-3 text-sm" data-course-status="${category.id}"><span>${esc(category.title.fa)}</span><span data-owned-label class="text-cream/50">خریداری نشده</span></li>`).join("");
+  const audits = [
+    ["call-82", "۱۴۰۵/۷/۹", "تماس پیگیری قیمت", "۸۲", "شروع تماس دلیل مشخصی داشت. نام خریدار را درست گفتید و قبل از معرفی محصول، یک جمله دربارهٔ نتیجهٔ تماس گفتید."],
+    ["call-74", "۱۴۰۵/۷/۲", "تماس معرفی محصول", "۷۴", "لحن شروع آرام بود و نام خریدار را درست گفتید."],
+    ["call-91", "۱۴۰۵/۶/۲۷", "مذاکره تمدید قرارداد", "۹۱", "بستن تماس روز و صاحب قدم بعدی را مشخص کرد."],
+  ].map(([id, at, title, score, strength]) => `<article class="glass rounded-[28px] p-5" data-audit="${id}">
+    <div class="flex flex-wrap items-start justify-between gap-3"><div><h2 class="text-lg font-semibold">${title}</h2><p class="mt-1 text-xs text-cream/50">${at}</p></div><p class="text-sm font-semibold text-gold">امتیاز ${score} / ۱۰۰</p></div>
+    <p class="mt-3 text-sm leading-7 text-cream/70">${strength}</p>
+    <button type="button" data-audit-toggle class="mt-4 h-10 rounded-2xl bg-gold px-4 text-sm font-medium text-navy">مشاهده کارنامه</button>
+    <div data-audit-report class="mt-4 hidden space-y-2 rounded-2xl border border-gold/30 p-4 text-sm leading-7">
+      <p>لحن و اعتمادبه‌نفس: ۸۸</p><p>گوش دادن فعال: ۷۲</p><p>مدیریت اعتراض: ۸۵</p><p>بستن و دعوت به اقدام: ۶۸</p>
+      <p class="text-cream/70">${strength}</p>
+    </div>
   </article>`).join("");
   return layout(base, "home", "پنل کاربری | نکس‌سل", `
-    <header ${revealAttrs(0)}><p class="text-xs tracking-[0.16em] text-gold">پنل کاربری</p>
-    <h1 class="mt-2 text-3xl font-semibold">حساب، دوره‌ها و کیف دقیقه</h1></header>
-    <div class="mt-4 flex gap-2 text-sm"><a href="${base}/dashboard/" data-tab-link="overview" class="rounded-xl bg-gold px-3 py-2 text-navy">نمای کلی</a><a href="${base}/dashboard/?tab=courses" data-tab-link="courses" class="rounded-xl px-3 py-2 ring-1 ring-gold/30">دوره‌های من</a><a href="${base}/dashboard/?tab=wallet" data-tab-link="wallet" class="rounded-xl px-3 py-2 ring-1 ring-gold/30">کیف پول</a></div>
-    <section ${revealAttrs(40)} data-tab="overview" class="view active mt-6"><p class="text-sm text-cream/70">شمارهٔ ذخیره‌شده: <span data-phone-line dir="ltr">—</span></p><p class="mt-3 text-sm">دوره‌های فعال: <span data-owned-count>۰</span> از ۴</p></section>
-    <section data-tab="courses" class="view mt-6"><h2 ${revealAttrs(0)} class="text-lg font-semibold">دوره‌های من</h2><div class="mt-4 grid gap-3 sm:grid-cols-2">${cards}</div></section>
-    <section ${revealAttrs(40)} data-tab="wallet" class="view mt-6 rounded-[28px] border border-gold/40 p-5">
-      <h2 class="text-lg font-semibold">کیف پول دقایق کوپایلوت هوش مصنوعی</h2>
-      <p class="mt-4 text-4xl font-semibold text-gold"><span data-minute-balance>۰</span> دقیقه</p>
-      <p class="mt-3 text-sm" data-ai-minutes>دقایق باقی‌مانده: ۰ دقیقه</p>
-      <div class="mt-5 flex items-end justify-between"><p data-selected-minutes class="text-2xl font-semibold">۱٬۰۰۰ دقیقه</p><p data-minute-price class="text-gold">۳٬۰۰۰٬۰۰۰ تومان</p></div>
-      <input id="minute-slider" type="range" min="1000" max="20000" step="1000" value="1000" class="mt-4 h-2 w-full accent-gold" aria-label="انتخاب دقیقه کوپایلوت" />
-      <button type="button" id="buy-minutes" class="mt-5 h-12 rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">خرید اعتبار هوش مصنوعی</button>
-      <p class="mt-4 text-sm">کش‌بک تومانی: <span data-cashback>۰</span> تومان</p>
-    </section>
+    <div data-user-panel data-initial-tab="${esc(initialTab)}" class="lg:flex lg:items-start lg:gap-4">
+      <div class="glass -mx-4 flex gap-2 overflow-x-auto px-4 py-2 lg:hidden" data-lenis-prevent>
+        ${PANEL_TABS.map(([id, label]) => tabLink(id, label, true)).join("")}
+        <a href="${base}/dashboard/copilot/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2 text-sm">دستیار</a>
+      </div>
+      <aside class="glass hidden w-64 shrink-0 rounded-[28px] p-4 lg:block">
+        <div class="flex items-center gap-3">
+          <span data-avatar class="grid size-12 shrink-0 place-items-center rounded-full text-lg font-semibold" style="background:#0B132B;color:#D4AF37">ن</span>
+          <div class="min-w-0">
+            <p data-account-name class="truncate text-sm font-semibold">—</p>
+            <p data-phone-line class="truncate text-xs text-cream/60" dir="ltr">—</p>
+          </div>
+        </div>
+        <p data-status-badge="short" class="mt-3 inline-flex rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-navy">بدون دوره</p>
+        <p class="mt-2 text-xs text-cream/60"><span data-minute-balance>۰</span> دقیقه کوپایلوت</p>
+        <nav class="mt-5 flex flex-col gap-1">
+          ${PANEL_TABS.map(([id, label]) => tabLink(id, label, false)).join("")}
+          <a href="${base}/dashboard/copilot/" class="mt-2 flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm">دستیار زنده</a>
+        </nav>
+        <button type="button" data-sign-out class="mt-4 w-full rounded-2xl px-3 py-2 text-start text-sm text-cream/70 ring-1 ring-white/15">خروج از حساب</button>
+      </aside>
+      <div class="mt-4 min-w-0 flex-1 lg:mt-0">
+        <section data-tab="overview" class="view active space-y-4">
+          <section class="rounded-[28px] bg-navy p-6 ring-1 ring-gold/30">
+            <p class="text-xs tracking-[0.16em] text-gold">پنل کاربری</p>
+            <h1 class="mt-2 text-2xl font-semibold sm:text-3xl"><span data-hello>سلام</span> <span data-profile-name>—</span></h1>
+            <p class="mt-3 text-sm text-cream/70">موبایل: <span data-phone-line dir="ltr">—</span></p>
+            <div class="mt-5 flex flex-wrap items-center gap-2">
+              <span data-status-badge="long" class="rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy">هنوز دوره‌ای خریداری نشده</span>
+              <span data-gift-badge class="hidden rounded-full border border-gold/60 px-3 py-1 text-xs text-gold">۵۰۰ دقیقه هدیه فعال است</span>
+            </div>
+          </section>
+          <div class="grid gap-3 sm:grid-cols-3">
+            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دوره‌های فعال</p><p class="mt-3 text-2xl font-semibold" data-owned-count>۰</p><p class="mt-1 text-xs text-cream/50" data-owned-hint>از ۴ دوره تخصصی</p></article>
+            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دقیقهٔ باقی‌مانده کوپایلوت</p><p class="mt-3 text-2xl font-semibold" data-minute-balance>۰</p><p class="mt-1 text-xs text-cream/50" data-minute-hint>هدیه فقط با باندل</p></article>
+            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">کش‌بک تومانی</p><p class="mt-3 text-2xl font-semibold" data-cashback>۰</p><p class="mt-1 text-xs text-cream/50">۵٪ خرید و پاداش معرفی</p></article>
+          </div>
+          <section class="glass rounded-[28px] p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2 class="text-lg font-semibold">وضعیت دوره‌ها</h2>
+              <a href="${base}/#courses" class="inline-flex h-10 items-center justify-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">خرید دوره یا باندل</a>
+            </div>
+            <ul class="mt-4 grid gap-2 sm:grid-cols-2">${courseStatus}</ul>
+          </section>
+        </section>
+        <section data-tab="profile" class="view">
+          <form data-profile-form class="glass space-y-5 rounded-[28px] p-6">
+            <div><p class="text-xs tracking-[0.16em] text-gold">پروفایل من</p><h1 class="mt-2 text-2xl font-semibold">اطلاعات و پروفایل من</h1></div>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <span data-avatar class="grid size-20 place-items-center rounded-full text-2xl font-semibold" style="background:#0B132B;color:#D4AF37">ن</span>
+              <div>
+                <p class="text-sm font-medium">انتخاب تصویر</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  ${AVATARS.map((item) => `<button type="button" data-avatar-pick="${item.id}" aria-label="${item.id}" class="size-8 rounded-full ring-offset-2 ring-offset-navy" style="background:${item.background}"></button>`).join("")}
+                </div>
+              </div>
+            </div>
+            <label class="block space-y-1.5 text-sm">نام و نام خانوادگی<input name="name" class="h-11 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold" /></label>
+            <label class="block space-y-1.5 text-sm"><span class="flex items-center gap-2">شماره موبایل <span class="rounded-full border border-gold/50 px-2 py-0.5 text-[10px] text-gold">تایید شده</span></span><input name="phone" dir="ltr" inputmode="tel" class="h-11 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-left text-sm outline-none focus:border-gold" /></label>
+            <label class="block space-y-1.5 text-sm">ایمیل<input name="email" dir="ltr" type="email" class="h-11 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-left text-sm outline-none focus:border-gold" /></label>
+            <label class="block space-y-1.5 text-sm">حوزه فعالیت / شغل<input name="jobTitle" class="h-11 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold" /></label>
+            <label class="block space-y-1.5 text-sm">درباره من / بیوگرافی کاری<textarea name="bio" rows="5" placeholder="تجربه فروش، حوزه مذاکره یا نوع مشتریانی که با آن‌ها کار می‌کنید." class="w-full rounded-2xl border border-gold/35 bg-white/5 px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
+            <button type="submit" class="h-11 rounded-2xl bg-gold px-5 text-sm font-medium text-navy">ذخیره تغییرات</button>
+            <p data-profile-note class="text-sm text-cream/70" role="status"></p>
+          </form>
+        </section>
+        <section data-tab="courses" class="view space-y-4">
+          <div>
+            <p class="text-xs tracking-[0.16em] text-gold">دوره‌های من</p>
+            <h1 class="mt-2 text-2xl font-semibold">وضعیت خرید دوره‌ها</h1>
+            <p class="mt-1 text-sm text-cream/60" dir="ltr" data-phone-line>—</p>
+            <p class="mt-2 text-sm leading-7 text-cream/60">هر دوره ${toman(COURSE_PRICE)} است. باندل چهار دوره ${toman(BUNDLE_PRICE)} است و ${fa.format(BUNDLE_GIFT_MINUTES)} دقیقه کوپایلوت هدیه می‌دهد.</p>
+          </div>
+          <article class="rounded-[28px] bg-navy p-5 ring-1 ring-gold/30" data-bundle-card>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-lg font-semibold">باندل کامل</h2>
+              <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">خریداری نشده · ۱۶ میلیون تومان به‌جای ۲۰ میلیون</span>
+            </div>
+            <a data-bundle-buy href="${base}/#courses" class="mt-4 inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">خرید باندل و دریافت هدیه</a>
+          </article>
+          <div class="grid gap-3 sm:grid-cols-2">${cards}</div>
+        </section>
+        <section data-tab="wallet" class="view space-y-4">
+          <section class="rounded-[28px] bg-navy p-6 ring-1 ring-gold/30">
+            <p class="text-xs tracking-[0.16em] text-gold">کیف دقیقه</p>
+            <h1 class="mt-2 text-2xl font-semibold">کیف پول دقایق کوپایلوت هوش مصنوعی</h1>
+            <p class="mt-6 text-4xl font-semibold text-gold"><span data-minute-balance>۰</span> <span class="text-lg font-medium text-cream">دقیقه</span></p>
+            <p class="mt-3 text-sm" data-ai-minutes>دقایق باقی‌مانده: ۰ دقیقه</p>
+            <p class="mt-3 text-sm leading-7 text-cream/70" data-wallet-lead>دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط با خرید باندل اضافه می‌شود.</p>
+            <div class="mt-6">
+              <div class="flex items-end justify-between gap-3">
+                <p data-selected-minutes class="text-2xl font-semibold">۱٬۰۰۰ دقیقه</p>
+                <p data-minute-price class="text-lg font-semibold text-gold">۳٬۰۰۰٬۰۰۰ تومان</p>
+              </div>
+              <input id="minute-slider" type="range" min="1000" max="20000" step="1000" value="1000" class="mt-4 h-2 w-full cursor-pointer accent-gold" aria-label="انتخاب دقیقه کوپایلوت" />
+              <div class="mt-2 flex justify-between text-xs text-cream/50"><span>۱٬۰۰۰ دقیقه</span><span>۲۰٬۰۰۰ دقیقه</span></div>
+            </div>
+            <button type="button" id="buy-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">خرید اعتبار هوش مصنوعی</button>
+            <p data-minute-note class="mt-3 text-sm text-gold" role="status"></p>
+          </section>
+          <section class="glass rounded-[28px] p-6">
+            <p class="text-xs tracking-[0.16em] text-gold">وفاداری تومانی</p>
+            <h2 class="mt-2 text-xl font-semibold">کش‌بک جمع‌شده</h2>
+            <p class="mt-4 text-3xl font-semibold"><span data-cashback>۰</span> <span class="text-lg font-medium">تومان</span></p>
+            <p class="mt-3 text-sm leading-7 text-cream/60">با هر خرید دوره یا دقیقه، ۵٪ از مبلغ پرداختی به کش‌بک تومانی همین حساب اضافه می‌شود.</p>
+          </section>
+          <section class="glass rounded-[28px] p-5">
+            <h2 class="text-lg font-semibold">معرفی دوستان</h2>
+            <p class="mt-2 text-sm leading-7 text-cream/60">هر معرفی ثبت‌شده ${toman(200000)} به کش‌بک تومانی اضافه می‌کند.</p>
+            <p class="mt-3 font-semibold" dir="ltr" data-referral-code>—</p>
+            <p class="mt-1 text-sm text-cream/60"><span data-referral-count>۰</span> معرفی ثبت شده</p>
+            <button type="button" data-refer class="mt-4 h-11 rounded-2xl bg-gold px-4 text-sm font-medium text-navy">ثبت یک معرفی</button>
+          </section>
+          <section class="glass rounded-[28px] p-6">
+            <p class="text-sm text-cream/60">اعتبار تومانی حساب</p>
+            <p class="mt-1 text-3xl font-semibold"><span data-wallet-balance>۰</span> <span class="text-lg font-medium">تومان</span></p>
+            <button type="button" data-deposit-open class="mt-5 h-11 rounded-2xl bg-gold px-5 text-sm font-medium text-navy">افزایش اعتبار کیف پول</button>
+          </section>
+          <section class="glass overflow-hidden rounded-[28px]">
+            <h2 class="px-5 pt-5 text-lg font-semibold">تراکنش‌ها</h2>
+            <div class="overflow-x-auto px-2 pb-4">
+              <table class="w-full min-w-[28rem] text-sm">
+                <thead><tr class="text-cream/50"><th class="px-3 py-3 text-start font-medium">تراکنش‌ها</th><th class="px-3 py-3 text-start font-medium">مبلغ</th><th class="px-3 py-3 text-start font-medium">تاریخ</th></tr></thead>
+                <tbody data-tx-body></tbody>
+              </table>
+              <p data-tx-empty class="px-3 text-sm text-cream/50">هنوز تراکنشی ثبت نشده است.</p>
+            </div>
+          </section>
+        </section>
+        <section data-tab="audits" class="view space-y-4">
+          <div><h1 class="text-2xl font-semibold">تحلیل‌های تماس من</h1><p class="mt-2 text-sm leading-7 text-cream/60">کارنامه‌هایی که از تحلیل تماس ساخته شده‌اند.</p></div>
+          <div class="grid gap-3">${audits}</div>
+        </section>
+        <section data-tab="tickets" class="view space-y-4">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div><h1 class="text-2xl font-semibold">تیکت‌ها و پشتیبانی</h1><p class="mt-2 text-sm leading-7 text-cream/60">وضعیت درخواست‌های پشتیبانی شما.</p></div>
+            <a href="#new-ticket" class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">ثبت تیکت جدید</a>
+          </div>
+          <div data-live-tickets class="grid gap-3"></div>
+          <article class="glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5"><div><p class="text-xs text-cream/50">TK-2401</p><h2 class="mt-1 font-semibold">دسترسی ویدیوی مذاکره بعد از خرید دوره</h2><p class="mt-1 text-xs text-cream/50">۱۴۰۵/۷/۹</p></div><span class="rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy">در حال بررسی</span></article>
+          <article class="glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5"><div><p class="text-xs text-cream/50">TK-2388</p><h2 class="mt-1 font-semibold">کد تایید برای ورود به پنل</h2><p class="mt-1 text-xs text-cream/50">۱۴۰۵/۶/۳۱</p></div><span class="rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy">پاسخ داده شده</span></article>
+          <article class="glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5"><div><p class="text-xs text-cream/50">TK-2310</p><h2 class="mt-1 font-semibold">رسید کش‌بک خرید دوره</h2><p class="mt-1 text-xs text-cream/50">۱۴۰۵/۶/۱۳</p></div><span class="rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy">بسته شده</span></article>
+          <form id="new-ticket" data-panel-ticket class="glass grid gap-3 rounded-[28px] p-5">
+            <label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label>
+            <button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button>
+            <p data-ticket-note class="text-sm text-cream/70" role="status"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+    <div data-deposit class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+      <div class="w-full max-w-md rounded-3xl bg-navy p-5 text-cream ring-1 ring-gold/40" role="dialog" aria-modal="true" aria-labelledby="deposit-title">
+        <h2 id="deposit-title" class="text-lg font-semibold">شارژ آزمایشی کیف پول</h2>
+        <p class="mt-2 text-sm text-cream/70">مبلغ را انتخاب کنید. پرداخت واقعی انجام نمی‌شود.</p>
+        <div class="mt-4 grid gap-2">
+          ${[200000, 500000, 1000000].map((amount) => `<button type="button" data-deposit-amount="${amount}" class="h-11 rounded-2xl border border-gold/40 text-sm">${toman(amount)}</button>`).join("")}
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button type="button" data-deposit-confirm class="h-11 flex-1 rounded-2xl bg-gold text-sm font-medium text-navy">افزودن به کیف پول</button>
+          <button type="button" data-deposit-close class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/20">بستن</button>
+        </div>
+      </div>
+    </div>
+    <p data-panel-note class="sr-only" role="status"></p>
   `);
 }
+
+export { dashboardPage };
 
 function findCategory(id: string) {
   return categories.find((category) => category.id === id) ?? null;
@@ -381,7 +568,7 @@ export function progressPage(base: string) {
 }
 
 export function profilePage(base: string) {
-  return layout(base, "home", "حساب | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">اطلاعات من</h1><p class="mt-4 text-sm">نام: <span data-profile-name>—</span></p><p class="mt-2 text-sm" dir="ltr">موبایل: <span data-phone-line>—</span></p><p class="mt-6"><a class="text-gold" href="${base}/dashboard/">رفتن به پنل کاربری</a></p></section>`);
+  return dashboardPage(base, "profile");
 }
 
 export function notFoundPage(base: string) {
