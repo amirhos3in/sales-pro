@@ -559,8 +559,72 @@ export function learnLessonPage(base: string, categoryId: string, lessonId: stri
   `);
 }
 
+function authTabs(base: string, mode: "login" | "register") {
+  const item = (id: "login" | "register", href: string, label: string) =>
+    `<a href="${base}${href}" class="flex h-11 items-center justify-center rounded-2xl text-sm ${mode === id ? "bg-gold font-semibold text-navy" : "text-cream/80 ring-1 ring-gold/30"}">${label}</a>`;
+  return `<div class="grid grid-cols-2 gap-2">${item("login", "/login/", "ورود")}${item("register", "/register/", "عضویت")}</div>`;
+}
+
+function otpFields() {
+  return `<div data-auth-otp class="hidden space-y-4">
+    <p class="text-sm leading-7 text-cream/80">کد تایید برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> ارسال شد. این ارسال نمادین است و پیامک واقعی نمی‌رود.</p>
+    <div>
+      <p class="mb-3 text-sm font-medium">کد تایید پیامکی</p>
+      <div dir="ltr" class="flex justify-between gap-2">
+        ${[0, 1, 2, 3, 4].map((index) => `<input data-otp-digit inputmode="numeric" autocomplete="${index === 0 ? "one-time-code" : "off"}" aria-label="رقم ${fa.format(index + 1)} کد تایید" maxlength="${index === 0 ? 5 : 1}" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" />`).join("")}
+      </div>
+    </div>
+    <p class="text-xs leading-6 text-cream/60">هر کد ۵ رقمی قبول است، مثلاً ۱۲۳۴۵.</p>
+    <div class="flex items-center justify-between gap-3 text-sm">
+      <span data-otp-timer dir="ltr" class="font-mono text-base tabular-nums text-gold">01:59</span>
+      <button type="button" data-otp-resend disabled class="text-gold disabled:opacity-40">ارسال دوباره</button>
+    </div>
+  </div>`;
+}
+
+const authField = "mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold";
+
 export function loginPage(base: string) {
-  return layout(base, "home", "ورود | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">ورود با موبایل</h1><p class="mt-2 text-sm text-cream/70">هر کد ۵ رقمی قبول است. پرداخت واقعی انجام نمی‌شود.</p></header><form ${revealAttrs(80)} data-login class="mt-6 grid max-w-md gap-3"><input name="name" placeholder="نام" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3" /><input name="phone" dir="ltr" placeholder="09120000000" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3 text-left" /><input name="otp" dir="ltr" placeholder="12345" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3 text-left" /><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">تایید و ورود</button><p data-login-note class="text-sm"></p></form>`);
+  return layout(base, "home", "ورود | نکس‌سل", `
+    <form data-auth="login" class="glass mx-auto w-full max-w-[420px] space-y-4 rounded-[28px] p-6 sm:p-8">
+      ${authTabs(base, "login")}
+      <div>
+        <p class="text-xs tracking-[0.18em] text-gold">ورود / عضویت</p>
+        <h1 class="mt-2 text-2xl font-semibold">ورود</h1>
+        <p class="mt-2 text-sm leading-7 text-cream/70">شماره موبایل را وارد کنید. کد پنج‌رقمی فقط بعد از تایید شماره ارسال می‌شود.</p>
+      </div>
+      <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${authField} text-left" /></label>
+      <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تایید شماره و دریافت کد</button>
+      ${otpFields()}
+      <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ورود</button>
+      <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
+      <p data-auth-note class="text-sm text-cream/80" role="status"></p>
+      <a href="${base}/register/" class="block text-sm text-gold">حساب کاربری ندارید؟ ثبت‌نام کنید</a>
+    </form>
+  `);
+}
+
+export function registerPage(base: string) {
+  return layout(base, "home", "عضویت | نکس‌سل", `
+    <form data-auth="register" class="glass mx-auto w-full max-w-[420px] space-y-4 rounded-[28px] p-6 sm:p-8">
+      ${authTabs(base, "register")}
+      <div>
+        <p class="text-xs tracking-[0.18em] text-gold">ورود / عضویت</p>
+        <h1 class="mt-2 text-2xl font-semibold">عضویت</h1>
+        <p class="mt-2 text-sm leading-7 text-cream/70">حساب آکادمی را با همین شماره می‌سازید. کد تایید بعد از تایید شماره می‌آید.</p>
+      </div>
+      <label class="block text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" class="${authField}" /></label>
+      <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${authField} text-left" /></label>
+      <label class="block text-sm">حوزه فعالیت / شغل<input name="jobTitle" class="${authField}" /></label>
+      <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تایید شماره و دریافت کد</button>
+      ${otpFields()}
+      <label data-auth-terms class="hidden items-start gap-3 text-sm"><input name="terms" type="checkbox" class="mt-1 size-4 accent-gold" /><span>قوانین و مقررات را می‌پذیرم</span></label>
+      <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ثبت‌نام و ورود</button>
+      <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
+      <p data-auth-note class="text-sm text-cream/80" role="status"></p>
+      <a href="${base}/login/" class="block text-sm text-gold">قبلاً ثبت‌نام کرده‌اید؟ ورود به حساب</a>
+    </form>
+  `);
 }
 
 export function progressPage(base: string) {

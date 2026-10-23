@@ -12,6 +12,7 @@ import {
   learnCategoryPage,
   learnLessonPage,
   loginPage,
+  registerPage,
   notFoundPage,
   profilePage,
   progressPage,
@@ -61,7 +62,8 @@ export function createApp() {
   app.get(["/subscription", "/subscription/"], (_req, res) => send(subscriptionPage(base), res));
   app.get(["/dashboard", "/dashboard/"], (_req, res) => send(dashboardPage(base), res));
   app.get(["/wallet", "/wallet/"], (_req, res) => res.redirect(302, `${base}/dashboard/?tab=wallet`));
-  app.get(["/login", "/login/", "/register", "/register/"], (_req, res) => send(loginPage(base), res));
+  app.get(["/login", "/login/"], (_req, res) => send(loginPage(base), res));
+  app.get(["/register", "/register/"], (_req, res) => send(registerPage(base), res));
   app.get(["/progress", "/progress/"], (_req, res) => send(progressPage(base), res));
   app.get(["/profile", "/profile/", "/me", "/me/"], (_req, res) => send(profilePage(base), res));
   app.get(["/learn/:category", "/learn/:category/", "/courses/:category", "/courses/:category/"], (req, res) => send(learnCategoryPage(base, one(req.params.category)), res));

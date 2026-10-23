@@ -587,26 +587,203 @@
     });
   }
 
-  const login = document.querySelector("[data-login]");
-  if (login) {
-    login.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const data = new FormData(login);
-      const phone = String(data.get("phone") || "").trim();
-      const name = String(data.get("name") || "").trim();
-      const otp = String(data.get("otp") || "").trim();
-      const note = login.querySelector("[data-login-note]");
-      if (!/^09\d{9}$/.test(phone) || name.length < 2 || !/^\d{4,6}$/.test(otp)) {
-        note.textContent = "نام، شمارهٔ ۱۱ رقمی و کد ۴ تا ۶ رقمی را کامل کنید.";
+  function englishDigits(value) {
+    return String(value || "")
+      .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+      .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
+  }
+
+  function phoneKey(value) {
+    const digits = englishDigits(value).replace(/\D/g, "");
+    if (digits.startsWith("98") && digits.length >= 12) return "0" + digits.slice(2);
+    if (digits.length === 10 && digits.startsWith("9")) return "0" + digits;
+    return digits;
+  }
+
+  function readAccounts() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem("nexsell-accounts-v1") || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeAccounts(accounts) {
+    localStorage.setItem("nexsell-accounts-v1", JSON.stringify(accounts));
+  }
+
+  function blankUser(phone, extra) {
+    return {
+      name: "کاربر نکس‌سل",
+      phone,
+      email: "",
+      jobTitle: "",
+      bio: "",
+      avatarId: "navy",
+      plan: "free",
+      walletBalance: 0,
+      cashbackEarned: 0,
+      transactions: [],
+      tickets: [],
+      ...extra,
+    };
+  }
+
+  function mountAuth() {
+    const root = document.querySelector("[data-auth]");
+    if (!root) return;
+    const existing = readSession();
+    if (existing && existing.isAuthenticated && existing.currentUser) {
+      location.replace(base + "/dashboard/");
+      return;
+    }
+    const mode = root.dataset.auth;
+    const phoneInput = root.querySelector("[data-auth-phone]");
+    const otpStep = root.querySelector("[data-auth-otp]");
+    const note = root.querySelector("[data-auth-note]");
+    const sentPhone = root.querySelector("[data-auth-sent-phone]");
+    const timerNode = root.querySelector("[data-otp-timer]");
+    const resend = root.querySelector("[data-otp-resend]");
+    const finish = root.querySelector("[data-auth-finish]");
+    const edit = root.querySelector("[data-auth-edit]");
+    const terms = root.querySelector("[data-auth-terms]");
+    const boxes = Array.from(root.querySelectorAll("[data-otp-digit]"));
+    let confirmed = "";
+    let left = 0;
+    let timerId = 0;
+
+    function say(message) {
+      if (note) note.textContent = message;
+    }
+
+    function clock(total) {
+      const minutes = String(Math.floor(total / 60)).padStart(2, "0");
+      const seconds = String(total % 60).padStart(2, "0");
+      return minutes + ":" + seconds;
+    }
+
+    function startTimer() {
+      window.clearInterval(timerId);
+      left = 119;
+      if (timerNode) timerNode.textContent = clock(left);
+      if (resend) resend.disabled = true;
+      timerId = window.setInterval(() => {
+        left = Math.max(0, left - 1);
+        if (timerNode) timerNode.textContent = clock(left);
+        if (resend) resend.disabled = left > 0;
+        if (left === 0) window.clearInterval(timerId);
+      }, 1000);
+    }
+
+    function showCodeStep(message) {
+      otpStep.classList.remove("hidden");
+      finish.classList.remove("hidden");
+      edit.classList.remove("hidden");
+      if (terms) {
+        terms.classList.remove("hidden");
+        terms.classList.add("flex");
+      }
+      if (sentPhone) sentPhone.textContent = confirmed;
+      say(message);
+      startTimer();
+      if (boxes[0]) boxes[0].focus();
+    }
+
+    function sendCode(again) {
+      const phone = phoneKey(phoneInput.value);
+      if (!/^09\d{9}$/.test(phone)) {
+        say("شماره موبایل را کامل وارد کنید.");
         return;
       }
-      localStorage.setItem(SESSION, JSON.stringify({
-        isAuthenticated: true,
-        currentUser: { name, phone, email: "", jobTitle: "", bio: "", avatarId: "navy", plan: "free", walletBalance: 0, cashbackEarned: 0, transactions: [], tickets: [] },
-      }));
+      confirmed = phone;
+      showCodeStep(again ? "کد تایید دوباره برای همین شماره ارسال شد." : "کد تایید برای همین شماره ارسال شد.");
+    }
+
+    function hideCodeStep() {
+      confirmed = "";
+      window.clearInterval(timerId);
+      otpStep.classList.add("hidden");
+      finish.classList.add("hidden");
+      edit.classList.add("hidden");
+      if (terms) {
+        terms.classList.add("hidden");
+        terms.classList.remove("flex");
+      }
+      boxes.forEach((box) => { box.value = ""; });
+      say("");
+      phoneInput.focus();
+    }
+
+    function otpValue() {
+      return boxes.map((box) => englishDigits(box.value).replace(/\D/g, "")).join("").slice(0, 5);
+    }
+
+    function enter() {
+      if (!confirmed) {
+        say("اول شماره را تایید کنید تا کد تایید ارسال شود.");
+        return;
+      }
+      const otp = otpValue();
+      if (!/^\d{5}$/.test(otp)) {
+        say("کد باید ۵ رقم باشد.");
+        return;
+      }
+      const accounts = readAccounts();
+      let user = accounts[confirmed] ? { ...accounts[confirmed], phone: confirmed } : blankUser(confirmed);
+      if (mode === "register") {
+        const name = String(new FormData(root).get("name") || "").trim();
+        const jobTitle = String(new FormData(root).get("jobTitle") || "").trim();
+        const accepted = root.querySelector("[name=terms]");
+        if (name.length < 2 || jobTitle.length < 2) {
+          say("نام و حوزه فعالیت را کامل بنویسید.");
+          return;
+        }
+        if (!accepted || !accepted.checked) {
+          say("پذیرش قوانین و مقررات لازم است.");
+          return;
+        }
+        user = { ...user, name, jobTitle, phone: confirmed };
+        accounts[confirmed] = user;
+        writeAccounts(accounts);
+      } else if (accounts[confirmed]) {
+        user = { ...accounts[confirmed], phone: confirmed };
+      }
+      localStorage.setItem(SESSION, JSON.stringify({ isAuthenticated: true, currentUser: user }));
       location.href = base + "/dashboard/";
+    }
+
+    root.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!confirmed) sendCode(false);
+      else enter();
+    });
+    root.querySelector("[data-auth-request]").addEventListener("click", () => sendCode(false));
+    finish.addEventListener("click", enter);
+    edit.addEventListener("click", hideCodeStep);
+    resend.addEventListener("click", () => {
+      if (left > 0 || !confirmed) return;
+      sendCode(true);
+    });
+    boxes.forEach((box, index) => {
+      box.addEventListener("input", () => {
+        const value = englishDigits(box.value).replace(/\D/g, "");
+        if (value.length > 1) {
+          const chars = value.slice(0, 5).split("");
+          boxes.forEach((item, itemIndex) => { item.value = chars[itemIndex] || ""; });
+          boxes[Math.min(chars.length, boxes.length - 1)].focus();
+          return;
+        }
+        box.value = value.slice(0, 1);
+        if (value && boxes[index + 1]) boxes[index + 1].focus();
+      });
+      box.addEventListener("keydown", (event) => {
+        if (event.key === "Backspace" && !box.value && boxes[index - 1]) boxes[index - 1].focus();
+      });
     });
   }
+
+  mountAuth();
 
   const ticket = document.querySelector("[data-ticket]");
   if (ticket) {
