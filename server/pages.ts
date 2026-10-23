@@ -9,6 +9,10 @@ export function toman(value: number) {
   return `${fa.format(value)} تومان`;
 }
 
+function revealAttrs(delayMs = 0) {
+  return `data-reveal data-delay="${delayMs}"`;
+}
+
 function esc(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -38,6 +42,7 @@ export function layout(base: string, active: string, title: string, body: string
   <title>${esc(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${href("/lenis.css")}" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { theme: { extend: {
@@ -46,10 +51,32 @@ export function layout(base: string, active: string, title: string, body: string
     } } }
   </script>
   <style>
-    body { background: #0B132B; color: #F6F1E4; }
+    html { scroll-behavior: auto; }
+    body {
+      background: #0B132B;
+      color: #F6F1E4;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
     .glass { background: rgba(15, 28, 63, 0.55); border: 1px solid rgba(212, 175, 55, 0.22); backdrop-filter: blur(16px); }
     .view { display: none; }
     .view.active { display: block; }
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(1.5rem);
+      filter: blur(2px);
+      transition: opacity 700ms ease-out, transform 700ms ease-out, filter 700ms ease-out;
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    [data-reveal].is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
+    }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased" data-base="${esc(base)}">
@@ -71,7 +98,7 @@ export function layout(base: string, active: string, title: string, body: string
         <button type="button" data-menu class="rounded-xl px-3 py-2 text-sm ring-1 ring-gold/30 md:hidden">منو</button>
       </div>
     </div>
-    <div data-mobile-nav class="hidden border-t border-white/10 px-4 py-3 md:hidden">
+    <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       ${NAV.map(([path, label]) => `<a href="${href(path)}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">${label}</a>`).join("")}
     </div>
   </header>
@@ -81,17 +108,18 @@ export function layout(base: string, active: string, title: string, body: string
     <p>ساخته‌شده با Node.js.</p>
   </footer>
   <script id="objections" type="application/json">${JSON.stringify(OBJECTIONS)}</script>
+  <script src="${href("/lenis.min.js")}"></script>
   <script src="${href("/client.js")}"></script>
 </body>
 </html>`;
 }
 
 function courseCards(base: string) {
-  return categories.map((category) => {
+  return categories.map((category, index) => {
     const count = lessonsOf(category).length;
     const paid = category.tierRequired === "pro";
     const enter = `${base}/learn/${category.id}/`;
-    return `<article class="glass flex flex-col rounded-3xl p-5" data-course="${category.id}" data-paid="${paid ? "yes" : "no"}">
+    return `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5" data-course="${category.id}" data-paid="${paid ? "yes" : "no"}">
       <h2 class="text-lg font-semibold"><a href="${enter}" class="hover:text-gold">${esc(category.title.fa)}</a></h2>
       <p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
       ${paid ? `<p class="mt-3 text-2xl font-semibold text-gold">${toman(COURSE_PRICE)}</p>` : `<p class="mt-3 text-sm text-emerald-300">آموزش رایگان</p>`}
@@ -107,7 +135,7 @@ function courseCards(base: string) {
 
 export function homePage(base: string) {
   return layout(base, "home", "نکس‌سل | آکادمی تخصصی مهارت‌های فروش", `
-    <section class="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-10">
+    <section ${revealAttrs(0)} class="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-10">
       <p class="text-xs tracking-[0.18em] text-gold">سامانه آموزش ویدیویی</p>
       <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">دستیار زنده فروش پشت خط، به‌علاوه آکادمی گیمیفای‌شده.</h1>
       <p class="mt-4 max-w-2xl text-sm leading-8 text-cream/70">کوپایلوت اعتراض تماس را می‌شنود و یک جملهٔ آماده برای گفتن نشان می‌دهد. درس‌ها ویدیوی آپارات‌اند و فقط با قبولی حداقل دو سؤال از سه سؤال باز می‌شوند.</p>
@@ -116,7 +144,7 @@ export function homePage(base: string) {
         <a href="${base}/academy/" class="inline-flex h-11 items-center rounded-2xl px-4 text-sm ring-1 ring-gold/30">مسیر آموزش</a>
       </div>
     </section>
-    <section class="glass mt-8 rounded-[2rem] p-6 sm:p-8" data-live-demo>
+    <section ${revealAttrs(80)} class="glass mt-8 rounded-[2rem] p-6 sm:p-8" data-live-demo>
       <p class="text-xs tracking-[0.16em] text-gold">دموی زنده، بدون ورود</p>
       <p class="mt-3 inline-flex rounded-2xl border border-gold/50 bg-navy px-4 py-2 text-sm font-semibold" data-ai-minutes>دقایق باقی‌مانده: ۰ دقیقه</p>
       <h2 class="mt-3 text-2xl font-semibold">یک اعتراض بگویید، جواب پشت‌خط را ببینید</h2>
@@ -125,7 +153,7 @@ export function homePage(base: string) {
       </div>
       <div data-counter class="mt-4 hidden rounded-3xl bg-navy p-5"></div>
     </section>
-    <section id="copilot-minutes" class="mt-8 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
+    <section ${revealAttrs(120)} id="copilot-minutes" class="mt-8 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
       <p class="text-xs tracking-[0.16em] text-gold">مسیر کوپایلوت</p>
       <h2 class="mt-2 text-2xl font-semibold">دقیقهٔ هوش مصنوعی، جدا از دوره</h2>
       <p class="mt-2 text-sm leading-7 text-cream/70">هر ۱٬۰۰۰ دقیقه ۳٬۰۰۰٬۰۰۰ تومان. اسلایدر را بکشید تا مبلغ همان لحظه عوض شود.</p>
@@ -138,10 +166,10 @@ export function homePage(base: string) {
       <button type="button" id="buy-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">خرید اعتبار هوش مصنوعی</button>
     </section>
     <section class="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      ${[["+", "۵٬۰۰۰", "دانش‌پذیر فعال"], ["+", "۱۲۰", "ساعت آموزش"], ["٪", "۹۸", "رضایت"], ["+", "۳۰۰", "تیم آموزش‌دیده"]].map(([pre, num, label]) => `<article class="rounded-2xl border border-gold/35 bg-white/5 px-4 py-4"><p class="text-2xl font-semibold text-gold">${pre === "+" ? "+" : ""}${num}${pre === "٪" ? "٪" : ""}</p><p class="mt-2 text-xs text-cream/60">${label}</p></article>`).join("")}
+      ${[["+", "۵٬۰۰۰", "دانش‌پذیر فعال"], ["+", "۱۲۰", "ساعت آموزش"], ["٪", "۹۸", "رضایت"], ["+", "۳۰۰", "تیم آموزش‌دیده"]].map(([pre, num, label], index) => `<article ${revealAttrs(index * 70)} class="rounded-2xl border border-gold/35 bg-white/5 px-4 py-4"><p class="text-2xl font-semibold text-gold">${pre === "+" ? "+" : ""}${num}${pre === "٪" ? "٪" : ""}</p><p class="mt-2 text-xs text-cream/60">${label}</p></article>`).join("")}
     </section>
     <section id="courses" class="mt-8 space-y-4">
-      <article id="bundle" class="rounded-[28px] bg-navy p-5 text-cream shadow-xl ring-1 ring-gold/40 sm:p-7" data-offer="bundle">
+      <article ${revealAttrs(40)} id="bundle" class="rounded-[28px] bg-navy p-5 text-cream shadow-xl ring-1 ring-gold/40 sm:p-7" data-offer="bundle">
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="text-xl font-semibold sm:text-2xl">پکیج جامع ۴ دوره تخصصی فروش و مذاکره</h2>
           <span class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">۵۰۰ دقیقه کوپایلوت هوش مصنوعی هدیه رایگان</span>
@@ -161,9 +189,9 @@ export function homePage(base: string) {
 }
 
 export function academyPage(base: string) {
-  const tracks = categories.map((category) => {
+  const tracks = categories.map((category, index) => {
     const rows = lessonsOf(category);
-    return `<article class="glass rounded-3xl p-5">
+    return `<article ${revealAttrs(Math.min(index, 6) * 80)} class="glass rounded-3xl p-5">
       <h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2>
       <p class="mt-2 text-sm text-cream/70">${esc(category.description.fa)}</p>
       <ol class="mt-4 space-y-2 text-sm">
@@ -171,12 +199,12 @@ export function academyPage(base: string) {
       </ol>
     </article>`;
   }).join("");
-  return layout(base, "academy", "آموزش | نکس‌سل", `<p class="text-xs tracking-[0.16em] text-gold">مسیر مرحله‌به‌مرحله</p><h1 class="mt-2 text-3xl font-semibold">آموزش</h1><div class="mt-6 grid gap-4">${tracks}</div>`);
+  return layout(base, "academy", "آموزش | نکس‌سل", `<header ${revealAttrs(0)}><p class="text-xs tracking-[0.16em] text-gold">مسیر مرحله‌به‌مرحله</p><h1 class="mt-2 text-3xl font-semibold">آموزش</h1></header><div class="mt-6 grid gap-4">${tracks}</div>`);
 }
 
 export function copilotPage(base: string) {
   return layout(base, "copilot", "دستیار زنده فروش | نکس‌سل", `
-    <section class="min-h-[70vh] rounded-[28px] bg-[#070B18] p-4 sm:p-6" data-copilot-hud>
+    <section ${revealAttrs(0)} class="min-h-[70vh] rounded-[28px] bg-[#070B18] p-4 sm:p-6" data-copilot-hud>
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p class="text-xs tracking-[0.18em] text-gold">دستیار زنده فروش</p>
@@ -195,12 +223,12 @@ export function copilotPage(base: string) {
 }
 
 export function articlesPage(base: string) {
-  const cards = articles.map((article) => `<a href="${base}/articles/${article.slug}/" class="glass block rounded-3xl p-5">
+  const cards = articles.map((article, index) => `<a ${revealAttrs(Math.min(index, 6) * 70)} href="${base}/articles/${article.slug}/" class="glass block rounded-3xl p-5">
     <p class="text-xs text-gold">${esc(article.category.fa)} · ${esc(article.readTime.fa)}</p>
     <h2 class="mt-2 text-lg font-semibold">${esc(article.title.fa)}</h2>
     <p class="mt-2 text-sm leading-7 text-cream/70">${esc(article.excerpt.fa)}</p>
   </a>`).join("");
-  return layout(base, "articles", "مقالات | نکس‌سل", `<h1 class="text-3xl font-semibold">مقالات</h1><div class="mt-6 grid gap-4">${cards}</div>`);
+  return layout(base, "articles", "مقالات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">مقالات</h1></header><div class="mt-6 grid gap-4">${cards}</div>`);
 }
 
 export function articlePage(base: string, slug: string) {
@@ -211,7 +239,7 @@ export function articlePage(base: string, slug: string) {
     if (block.type === "ul") return `<ul class="mt-3 list-disc space-y-2 pe-5 text-sm leading-7 text-cream/80">${block.items.map((item) => `<li>${esc(item.fa)}</li>`).join("")}</ul>`;
     return `<p class="mt-3 text-sm leading-8 text-cream/80">${esc(block.text.fa)}</p>`;
   }).join("");
-  return layout(base, "articles", `${article.title.fa} | نکس‌سل`, `<a href="${base}/articles/" class="text-sm text-gold">بازگشت به مقالات</a><h1 class="mt-3 text-3xl font-semibold">${esc(article.title.fa)}</h1><p class="mt-2 text-sm text-cream/50">${esc(article.author.name.fa)} · ${esc(article.publishedAt.fa)}</p>${blocks}`);
+  return layout(base, "articles", `${article.title.fa} | نکس‌سل`, `<article ${revealAttrs(0)}><a href="${base}/articles/" class="text-sm text-gold">بازگشت به مقالات</a><h1 class="mt-3 text-3xl font-semibold">${esc(article.title.fa)}</h1><p class="mt-2 text-sm text-cream/50">${esc(article.author.name.fa)} · ${esc(article.publishedAt.fa)}</p>${blocks}</article>`);
 }
 
 export function servicesPage(base: string) {
@@ -221,27 +249,27 @@ export function servicesPage(base: string) {
     ["بهینه‌سازی قیف فروش", "صفحهٔ فرود، پیشنهاد و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم."],
     ["منتورینگ مدیر فروش", "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم و شاخص‌ها."],
   ];
-  return layout(base, "services", "خدمات | نکس‌سل", `<h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([title, text]) => `<article class="glass rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 text-sm leading-7 text-cream/70">${text}</p></article>`).join("")}</div><p class="mt-6 text-sm text-cream/60">درخواست را از <a class="text-gold" href="${base}/contact/">ارتباط با ما</a> بفرستید.</p>`);
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([title, text], index) => `<article ${revealAttrs(index * 80)} class="glass rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 text-sm leading-7 text-cream/70">${text}</p></article>`).join("")}</div><p ${revealAttrs(160)} class="mt-6 text-sm text-cream/60">درخواست را از <a class="text-gold" href="${base}/contact/">ارتباط با ما</a> بفرستید.</p>`);
 }
 
 export function supportPage(base: string) {
-  return layout(base, "support", "پشتیبانی | نکس‌سل", `<h1 class="text-3xl font-semibold">پشتیبانی</h1><form data-ticket class="glass mt-6 grid max-w-xl gap-3 rounded-3xl p-5"><label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label><label class="text-sm">شرح<textarea name="body" required class="mt-1 min-h-28 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button><p data-ticket-note class="text-sm text-cream/70"></p></form>`);
+  return layout(base, "support", "پشتیبانی | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">پشتیبانی</h1></header><form ${revealAttrs(80)} data-ticket data-lenis-prevent class="glass mt-6 grid max-w-xl gap-3 rounded-3xl p-5"><label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label><label class="text-sm">شرح<textarea name="body" required class="mt-1 min-h-28 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button><p data-ticket-note class="text-sm text-cream/70"></p></form>`);
 }
 
 export function aboutPage(base: string) {
-  return layout(base, "about", "درباره ما | نکس‌سل", `<p class="text-xs tracking-[0.18em] text-gold">آکادمی تخصصی فروش و مذاکره</p><h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45]">فروش آنلاین، حضوری و تلفنی را با مذاکرهٔ دقیق به نتیجه می‌رسانیم.</h1><div class="mt-6 grid gap-3 md:grid-cols-2"><article class="glass rounded-3xl p-5"><h2 class="text-gold">مأموریت</h2><p class="mt-2 text-sm leading-8 text-cream/75">توانمند کردن کسب‌وکارها برای تسلط بر فروش آنلاین، حضوری و تلفنی، همراه با مذاکره در موقعیت‌های حساس.</p></article><article class="glass rounded-3xl p-5"><h2 class="text-gold">چشم‌انداز</h2><p class="mt-2 text-sm leading-8 text-cream/75">مرجع آموزش فروش و مذاکره؛ جایی که هر تیم گفتگو را به تصمیم روشن تبدیل کند.</p></article></div>`);
+  return layout(base, "about", "درباره ما | نکس‌سل", `<header ${revealAttrs(0)}><p class="text-xs tracking-[0.18em] text-gold">آکادمی تخصصی فروش و مذاکره</p><h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45]">فروش آنلاین، حضوری و تلفنی را با مذاکرهٔ دقیق به نتیجه می‌رسانیم.</h1></header><div class="mt-6 grid gap-3 md:grid-cols-2"><article ${revealAttrs(80)} class="glass rounded-3xl p-5"><h2 class="text-gold">مأموریت</h2><p class="mt-2 text-sm leading-8 text-cream/75">توانمند کردن کسب‌وکارها برای تسلط بر فروش آنلاین، حضوری و تلفنی، همراه با مذاکره در موقعیت‌های حساس.</p></article><article ${revealAttrs(160)} class="glass rounded-3xl p-5"><h2 class="text-gold">چشم‌انداز</h2><p class="mt-2 text-sm leading-8 text-cream/75">مرجع آموزش فروش و مذاکره؛ جایی که هر تیم گفتگو را به تصمیم روشن تبدیل کند.</p></article></div>`);
 }
 
 export function contactPage(base: string) {
-  return layout(base, "contact", "ارتباط با ما | نکس‌سل", `<h1 class="text-3xl font-semibold">کانال مستقیم، بدون فرم اضافه.</h1><div class="mt-6 grid gap-4 md:grid-cols-2"><article class="glass rounded-3xl p-5"><h2>دفتر مرکزی</h2><p class="mt-2 text-sm text-cream/70">تهران، خیابان ولیعصر، برج فناوری، طبقه ۸</p></article><article class="glass rounded-3xl p-5"><h2>تماس</h2><p class="mt-2 text-sm" dir="ltr">021-88880000</p><p class="text-sm" dir="ltr">support@academy.com</p><p class="mt-2 text-sm text-cream/60">شنبه تا چهارشنبه ۹ تا ۱۸</p></article></div>`);
+  return layout(base, "contact", "ارتباط با ما | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">کانال مستقیم، بدون فرم اضافه.</h1></header><div class="mt-6 grid gap-4 md:grid-cols-2"><article ${revealAttrs(80)} class="glass rounded-3xl p-5"><h2>دفتر مرکزی</h2><p class="mt-2 text-sm text-cream/70">تهران، خیابان ولیعصر، برج فناوری، طبقه ۸</p></article><article ${revealAttrs(160)} class="glass rounded-3xl p-5"><h2>تماس</h2><p class="mt-2 text-sm" dir="ltr">021-88880000</p><p class="text-sm" dir="ltr">support@academy.com</p><p class="mt-2 text-sm text-cream/60">شنبه تا چهارشنبه ۹ تا ۱۸</p></article></div>`);
 }
 
 export function subscriptionPage(base: string) {
-  return layout(base, "home", "خرید دوره | نکس‌سل", `<h1 class="text-3xl font-semibold">دو مسیر خرید</h1><p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">دوره‌ها و باندل جدا از دقیقهٔ کوپایلوت فروخته می‌شوند. هر دوره ${toman(COURSE_PRICE)} است و باندل ${toman(BUNDLE_PRICE)}.</p><p class="mt-6"><a class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 font-semibold text-navy" href="${base}/#courses">رفتن به دوره‌ها</a> <a class="ms-2 inline-flex h-11 items-center rounded-2xl px-4 ring-1 ring-gold/40" href="${base}/#copilot-minutes">دقیقهٔ کوپایلوت</a></p>`);
+  return layout(base, "home", "خرید دوره | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">دو مسیر خرید</h1><p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">دوره‌ها و باندل جدا از دقیقهٔ کوپایلوت فروخته می‌شوند. هر دوره ${toman(COURSE_PRICE)} است و باندل ${toman(BUNDLE_PRICE)}.</p><p class="mt-6"><a class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 font-semibold text-navy" href="${base}/#courses">رفتن به دوره‌ها</a> <a class="ms-2 inline-flex h-11 items-center rounded-2xl px-4 ring-1 ring-gold/40" href="${base}/#copilot-minutes">دقیقهٔ کوپایلوت</a></p></section>`);
 }
 
 export function dashboardPage(base: string) {
-  const cards = categories.filter((category) => category.tierRequired === "pro").map((category) => `<article class="glass rounded-[28px] p-5" data-dash-course="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}">
+  const cards = categories.filter((category) => category.tierRequired === "pro").map((category, index) => `<article ${revealAttrs(index * 70)} class="glass rounded-[28px] p-5" data-dash-course="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}">
     <div class="flex items-start justify-between gap-3"><h2 class="font-semibold">${esc(category.title.fa)}</h2><span data-lock class="rounded-full bg-white/10 px-2 py-1 text-[11px]">قفل</span></div>
     <p class="mt-3 text-xs text-cream/60" data-video-line>ویدیوهای دیده‌شده: ۰</p>
     <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-video-bar class="h-full bg-gold" style="width:0%"></div></div>
@@ -251,12 +279,12 @@ export function dashboardPage(base: string) {
     <a data-buy-link="${category.id}" href="${base}/#courses" class="mt-4 inline-flex h-10 items-center rounded-2xl bg-cream px-4 text-sm font-semibold text-navy">ثبت‌نام این دوره (${toman(COURSE_PRICE)})</a>
   </article>`).join("");
   return layout(base, "home", "پنل کاربری | نکس‌سل", `
-    <p class="text-xs tracking-[0.16em] text-gold">پنل کاربری</p>
-    <h1 class="mt-2 text-3xl font-semibold">حساب، دوره‌ها و کیف دقیقه</h1>
+    <header ${revealAttrs(0)}><p class="text-xs tracking-[0.16em] text-gold">پنل کاربری</p>
+    <h1 class="mt-2 text-3xl font-semibold">حساب، دوره‌ها و کیف دقیقه</h1></header>
     <div class="mt-4 flex gap-2 text-sm"><a href="${base}/dashboard/" data-tab-link="overview" class="rounded-xl bg-gold px-3 py-2 text-navy">نمای کلی</a><a href="${base}/dashboard/?tab=courses" data-tab-link="courses" class="rounded-xl px-3 py-2 ring-1 ring-gold/30">دوره‌های من</a><a href="${base}/dashboard/?tab=wallet" data-tab-link="wallet" class="rounded-xl px-3 py-2 ring-1 ring-gold/30">کیف پول</a></div>
-    <section data-tab="overview" class="view active mt-6"><p class="text-sm text-cream/70">شمارهٔ ذخیره‌شده: <span data-phone-line dir="ltr">—</span></p><p class="mt-3 text-sm">دوره‌های فعال: <span data-owned-count>۰</span> از ۴</p></section>
-    <section data-tab="courses" class="view mt-6"><h2 class="text-lg font-semibold">دوره‌های من</h2><div class="mt-4 grid gap-3 sm:grid-cols-2">${cards}</div></section>
-    <section data-tab="wallet" class="view mt-6 rounded-[28px] border border-gold/40 p-5">
+    <section ${revealAttrs(40)} data-tab="overview" class="view active mt-6"><p class="text-sm text-cream/70">شمارهٔ ذخیره‌شده: <span data-phone-line dir="ltr">—</span></p><p class="mt-3 text-sm">دوره‌های فعال: <span data-owned-count>۰</span> از ۴</p></section>
+    <section data-tab="courses" class="view mt-6"><h2 ${revealAttrs(0)} class="text-lg font-semibold">دوره‌های من</h2><div class="mt-4 grid gap-3 sm:grid-cols-2">${cards}</div></section>
+    <section ${revealAttrs(40)} data-tab="wallet" class="view mt-6 rounded-[28px] border border-gold/40 p-5">
       <h2 class="text-lg font-semibold">کیف پول دقایق کوپایلوت هوش مصنوعی</h2>
       <p class="mt-4 text-4xl font-semibold text-gold"><span data-minute-balance>۰</span> دقیقه</p>
       <p class="mt-3 text-sm" data-ai-minutes>دقایق باقی‌مانده: ۰ دقیقه</p>
@@ -277,13 +305,15 @@ export function learnCategoryPage(base: string, id: string) {
   if (!category) return null;
   const rows = lessonsOf(category);
   return layout(base, "academy", `${category.title.fa} | نکس‌سل`, `
+    <header ${revealAttrs(0)}>
     <p class="text-xs text-gold">${category.tierRequired === "free" ? "آموزش رایگان" : toman(COURSE_PRICE)}</p>
     <h1 class="mt-2 text-3xl font-semibold">${esc(category.title.fa)}</h1>
     <p class="mt-3 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
+    </header>
     <div class="mt-4" data-course="${category.id}">
       ${category.tierRequired === "pro" ? `<button type="button" data-buy="${category.id}" class="h-11 rounded-2xl bg-cream px-4 text-sm font-semibold text-navy">ثبت‌نام این دوره (${toman(COURSE_PRICE)})</button>` : ""}
     </div>
-    <ol class="mt-6 space-y-3">${rows.map((row, index) => `<li class="glass rounded-2xl px-4 py-3"><a href="${base}/learn/${category.id}/${row.lesson.id}/" class="font-semibold">${fa.format(index + 1)}. ${esc(row.lesson.title.fa)}</a><p class="mt-1 text-xs text-cream/60">${esc(row.lesson.summary.fa)}</p></li>`).join("")}</ol>
+    <ol class="mt-6 space-y-3">${rows.map((row, index) => `<li ${revealAttrs(Math.min(index, 6) * 50)} class="glass rounded-2xl px-4 py-3"><a href="${base}/learn/${category.id}/${row.lesson.id}/" class="font-semibold">${fa.format(index + 1)}. ${esc(row.lesson.title.fa)}</a><p class="mt-1 text-xs text-cream/60">${esc(row.lesson.summary.fa)}</p></li>`).join("")}</ol>
   `);
 }
 
@@ -297,14 +327,14 @@ export function learnLessonPage(base: string, categoryId: string, lessonId: stri
     ${question.options.map((option, oIndex) => `<label class="mt-2 flex items-center gap-2 text-sm"><input type="radio" name="q${qIndex}" value="${oIndex}" class="accent-gold" /><span>${esc(option.fa)}</span></label>`).join("")}
   </fieldset>`).join("");
   return layout(base, "academy", `${row.lesson.title.fa} | نکس‌سل`, `
-    <a href="${base}/learn/${category.id}/" class="text-sm text-gold">بازگشت به ${esc(category.title.fa)}</a>
-    <h1 class="mt-3 text-2xl font-semibold sm:text-3xl">${esc(row.lesson.title.fa)}</h1>
+    <header ${revealAttrs(0)}><a href="${base}/learn/${category.id}/" class="text-sm text-gold">بازگشت به ${esc(category.title.fa)}</a>
+    <h1 class="mt-3 text-2xl font-semibold sm:text-3xl">${esc(row.lesson.title.fa)}</h1></header>
     <p class="mt-2 text-sm leading-7 text-cream/70">${esc(row.lesson.summary.fa)}</p>
-    <div class="mt-4 aspect-video overflow-hidden rounded-2xl bg-black" data-course-gate="${category.id}" data-free="${category.tierRequired === "free" ? "yes" : "no"}">
+    <div ${revealAttrs(80)} class="mt-4 aspect-video overflow-hidden rounded-2xl bg-black" data-course-gate="${category.id}" data-free="${category.tierRequired === "free" ? "yes" : "no"}">
       <iframe class="h-full w-full" title="ویدیوی آپارات" allowfullscreen data-aparat="${esc(row.lesson.aparat)}"></iframe>
       <p data-locked class="grid h-full place-items-center p-6 text-center text-sm">برای تماشای این درس، همین دوره را ثبت‌نام کنید.</p>
     </div>
-    <form data-quiz data-lesson="${esc(row.lesson.id)}" class="mt-5 space-y-3">
+    <form ${revealAttrs(140)} data-quiz data-lesson="${esc(row.lesson.id)}" class="mt-5 space-y-3">
       <label class="flex items-center gap-2 text-sm"><input name="watched" type="checkbox" class="size-4 accent-gold" /> ویدیو را دیدم</label>
       ${quiz}
       <button type="submit" class="h-11 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">ثبت چالش</button>
@@ -314,19 +344,19 @@ export function learnLessonPage(base: string, categoryId: string, lessonId: stri
 }
 
 export function loginPage(base: string) {
-  return layout(base, "home", "ورود | نکس‌سل", `<h1 class="text-3xl font-semibold">ورود با موبایل</h1><p class="mt-2 text-sm text-cream/70">هر کد ۵ رقمی قبول است. پرداخت واقعی انجام نمی‌شود.</p><form data-login class="mt-6 grid max-w-md gap-3"><input name="name" placeholder="نام" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3" /><input name="phone" dir="ltr" placeholder="09120000000" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3 text-left" /><input name="otp" dir="ltr" placeholder="12345" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3 text-left" /><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">تایید و ورود</button><p data-login-note class="text-sm"></p></form>`);
+  return layout(base, "home", "ورود | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">ورود با موبایل</h1><p class="mt-2 text-sm text-cream/70">هر کد ۵ رقمی قبول است. پرداخت واقعی انجام نمی‌شود.</p></header><form ${revealAttrs(80)} data-login class="mt-6 grid max-w-md gap-3"><input name="name" placeholder="نام" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3" /><input name="phone" dir="ltr" placeholder="09120000000" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3 text-left" /><input name="otp" dir="ltr" placeholder="12345" class="h-11 rounded-2xl border border-white/15 bg-white/5 px-3 text-left" /><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">تایید و ورود</button><p data-login-note class="text-sm"></p></form>`);
 }
 
 export function progressPage(base: string) {
-  return layout(base, "academy", "پیشرفت | نکس‌سل", `<h1 class="text-3xl font-semibold">درصد پیشرفت</h1><p class="mt-4 text-4xl font-semibold text-gold" data-progress-percent>۰٪</p><p class="mt-2 text-sm text-cream/70"><span data-progress-done>۰</span> چالش از <span data-progress-total>${fa.format(categories.reduce((sum, category) => sum + lessonsOf(category).length, 0))}</span> درس</p><a class="mt-6 inline-flex text-gold" href="${base}/academy/">ادامهٔ مسیر</a>`);
+  return layout(base, "academy", "پیشرفت | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">درصد پیشرفت</h1><p class="mt-4 text-4xl font-semibold text-gold" data-progress-percent>۰٪</p><p class="mt-2 text-sm text-cream/70"><span data-progress-done>۰</span> چالش از <span data-progress-total>${fa.format(categories.reduce((sum, category) => sum + lessonsOf(category).length, 0))}</span> درس</p><a class="mt-6 inline-flex text-gold" href="${base}/academy/">ادامهٔ مسیر</a></section>`);
 }
 
 export function profilePage(base: string) {
-  return layout(base, "home", "حساب | نکس‌سل", `<h1 class="text-3xl font-semibold">اطلاعات من</h1><p class="mt-4 text-sm">نام: <span data-profile-name>—</span></p><p class="mt-2 text-sm" dir="ltr">موبایل: <span data-phone-line>—</span></p><p class="mt-6"><a class="text-gold" href="${base}/dashboard/">رفتن به پنل کاربری</a></p>`);
+  return layout(base, "home", "حساب | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">اطلاعات من</h1><p class="mt-4 text-sm">نام: <span data-profile-name>—</span></p><p class="mt-2 text-sm" dir="ltr">موبایل: <span data-phone-line>—</span></p><p class="mt-6"><a class="text-gold" href="${base}/dashboard/">رفتن به پنل کاربری</a></p></section>`);
 }
 
 export function notFoundPage(base: string) {
-  return layout(base, "home", "پیدا نشد | نکس‌سل", `<h1 class="text-3xl font-semibold">این صفحه پیدا نشد.</h1><a class="mt-4 inline-flex text-gold" href="${base}/">بازگشت به خانه</a>`);
+  return layout(base, "home", "پیدا نشد | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">این صفحه پیدا نشد.</h1><a class="mt-4 inline-flex text-gold" href="${base}/">بازگشت به خانه</a></section>`);
 }
 
 export function answerCounter(text: string, variant = 0) {

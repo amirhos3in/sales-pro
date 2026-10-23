@@ -66,5 +66,7 @@ for (const [file, html] of files) {
   writeFileSync(target, html);
 }
 cpSync(path.join(process.cwd(), "public", "client.js"), path.join(out, "client.js"));
+cpSync(path.join(process.cwd(), "public", "lenis.min.js"), path.join(out, "lenis.min.js"));
+cpSync(path.join(process.cwd(), "public", "lenis.css"), path.join(out, "lenis.css"));
 writeFileSync(path.join(out, ".nojekyll"), "");
 console.log(`Wrote ${files.length} pages to ${out}`);

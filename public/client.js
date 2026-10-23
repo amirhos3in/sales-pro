@@ -221,6 +221,7 @@
     document.querySelectorAll("[data-tab]").forEach((node) => {
       node.classList.toggle("active", node.dataset.tab === tab);
     });
+    if (typeof mountReveal === "function") mountReveal();
   }
 
   function buyCourse(id) {
@@ -386,5 +387,66 @@
     });
   }
 
+  function mountSmoothScroll() {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || typeof window.Lenis !== "function") return;
+    const lenis = new window.Lenis({
+      duration: 1.2,
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+      touchMultiplier: 1.05,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    });
+    window.lenis = lenis;
+    function frame(time) {
+      lenis.raf(time);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      const url = new URL(link.href, location.href);
+      if (url.origin !== location.origin || url.pathname !== location.pathname || !url.hash) return;
+      const target = document.getElementById(url.hash.slice(1));
+      if (!target) return;
+      event.preventDefault();
+      lenis.scrollTo(target, { offset: -80 });
+    });
+    const menu = document.querySelector("[data-menu]");
+    if (menu) {
+      menu.addEventListener("click", () => {
+        const open = !document.querySelector("[data-mobile-nav]").classList.contains("hidden");
+        if (open) lenis.stop();
+        else lenis.start();
+      });
+    }
+  }
+
+  function mountReveal() {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const nodes = document.querySelectorAll("[data-reveal]:not(.is-revealed)");
+    if (reduce || !("IntersectionObserver" in window)) {
+      nodes.forEach((node) => node.classList.add("is-revealed"));
+      return;
+    }
+    if (!mountReveal.observer) {
+      mountReveal.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-revealed");
+          mountReveal.observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.16, rootMargin: "0px 0px -8% 0px" });
+    }
+    nodes.forEach((node) => {
+      const delay = Number(node.dataset.delay || 0);
+      node.style.setProperty("--reveal-delay", (Number.isFinite(delay) ? delay : 0) + "ms");
+      mountReveal.observer.observe(node);
+    });
+  }
+
+  mountSmoothScroll();
+  mountReveal();
   render();
 })();
