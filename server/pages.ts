@@ -158,7 +158,36 @@ function voiceChat() {
   </div>`;
 }
 
-function courseCards(base: string) {
+const COURSE_MARK: Record<string, string> = {
+  online: "آنلاین",
+  hozuri: "حضوری",
+  telefoni: "تلفنی",
+  mozakerah: "مذاکره",
+  free: "رایگان",
+};
+
+function durationLabel(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours > 0 && rest > 0) return `${fa.format(hours)} ساعت و ${fa.format(rest)} دقیقه آموزش`;
+  if (hours > 0) return `${fa.format(hours)} ساعت آموزش`;
+  return `${fa.format(minutes)} دقیقه آموزش`;
+}
+
+function courseCatalog() {
+  return categories.map((category) => {
+    const rows = lessonsOf(category);
+    return {
+      id: category.id,
+      title: category.title.fa,
+      description: category.description.fa,
+      paid: category.tierRequired === "pro",
+      lessons: rows.map((row) => ({ id: row.lesson.id, title: row.lesson.title.fa })),
+    };
+  });
+}
+
+function homeCourseCards(base: string) {
   return categories.map((category, index) => {
     const count = lessonsOf(category).length;
     const paid = category.tierRequired === "pro";
@@ -175,6 +204,99 @@ function courseCards(base: string) {
       </div>
     </article>`;
   }).join("");
+}
+
+function academyCourseCards(base: string) {
+  return categories.map((category, index) => {
+    const rows = lessonsOf(category);
+    const minutes = rows.reduce((sum, row) => sum + row.lesson.minutes, 0);
+    const paid = category.tierRequired === "pro";
+    const first = rows[0]?.lesson.id;
+    const enter = first ? `${base}/learn/${category.id}/${first}/` : `${base}/learn/${category.id}/`;
+    const spotlight = category.spotlight === "bestseller"
+      ? `<span class="rounded-full bg-gold px-2 py-1 text-[11px] font-semibold text-navy">پرفروش‌ترین</span>`
+      : category.spotlight === "recommended"
+        ? `<span class="rounded-full bg-gold px-2 py-1 text-[11px] font-semibold text-navy">پیشنهادی</span>`
+        : "";
+    const freeBadge = paid ? "" : `<span class="rounded-full bg-emerald-500/20 px-2 py-1 text-[11px] font-semibold text-emerald-200">رایگان</span>`;
+    const actions = paid
+      ? `<div data-card-price><p class="text-2xl font-semibold text-gold">${toman(COURSE_PRICE)}</p></div>
+        <div data-card-progress class="hidden">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <p data-card-fraction>۰ از ${fa.format(rows.length)} درس تکمیل‌شده</p>
+            <span data-card-status="learning" class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-gold">در حال یادگیری</span>
+            <span data-card-status="done" class="hidden shrink-0 rounded-full bg-gold px-2 py-0.5 text-navy">تکمیل‌شده</span>
+          </div>
+          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div data-card-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+        </div>
+        <div class="mt-3 grid gap-2">
+          <button type="button" data-card-overview class="h-11 rounded-2xl bg-gold text-sm font-semibold text-navy" aria-haspopup="dialog">مشاهده سرفصل‌ها و معرفی</button>
+          <button type="button" data-card-buy data-buy="${category.id}" class="h-11 rounded-2xl text-sm ring-1 ring-gold/40">خرید دوره</button>
+          <a data-card-resume href="${enter}" class="hidden h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">ادامه یادگیری</a>
+        </div>`
+      : `<div data-card-progress class="hidden">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <p data-card-fraction>۰ از ${fa.format(rows.length)} درس تکمیل‌شده</p>
+            <span data-card-status="learning" class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-gold">در حال یادگیری</span>
+            <span data-card-status="done" class="hidden shrink-0 rounded-full bg-gold px-2 py-0.5 text-navy">تکمیل‌شده</span>
+          </div>
+          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div data-card-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+        </div>
+        <div class="mt-3 grid gap-2">
+          <a data-card-guest href="${base}/login/" class="inline-flex h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">ورود برای شروع</a>
+          <a data-card-resume href="${enter}" class="hidden h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">شروع یادگیری</a>
+        </div>`;
+    return `<article ${revealAttrs(index * 80)} class="glass flex cursor-pointer flex-col overflow-hidden rounded-3xl" data-course-card="${category.id}" data-paid="${paid ? "yes" : "no"}" data-card-mode="${paid ? "locked" : "login"}">
+      <div class="flex items-start justify-between gap-3 bg-[#10182E] px-5 py-5">
+        <span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-gold text-sm font-bold text-navy">${esc(COURSE_MARK[category.id] || "ن")}</span>
+        <div class="flex flex-wrap justify-end gap-1.5">
+          ${spotlight}${freeBadge}
+          <span class="rounded-full border border-gold/40 px-2 py-1 text-[11px] text-cream">دارای آزمون سنجش</span>
+        </div>
+      </div>
+      <div class="flex flex-1 flex-col p-5">
+        <h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2>
+        <p class="mt-2 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
+        <ul class="mt-3 flex flex-wrap gap-2 text-[11px] text-cream/60">
+          <li class="rounded-full bg-white/5 px-2.5 py-1">${durationLabel(minutes)}</li>
+          <li class="rounded-full bg-white/5 px-2.5 py-1">${fa.format(rows.length)} درس</li>
+          <li class="rounded-full bg-white/5 px-2.5 py-1">ویدیویی + کوییز گیمیفای‌شده</li>
+        </ul>
+        <div class="mt-4 border-t border-white/10 pt-4">${actions}</div>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function courseOverview() {
+  return `<dialog id="course-overview" aria-labelledby="course-overview-title">
+    <div class="flex max-h-[min(90vh,52rem)] flex-col sm:max-h-[min(90vh,52rem)]">
+      <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
+        <div>
+          <p class="text-xs text-gold">معرفی دوره</p>
+          <h2 id="course-overview-title" data-ov-title class="mt-1 text-xl font-semibold"></h2>
+        </div>
+        <button type="button" data-overview-close class="grid size-10 shrink-0 place-items-center rounded-full text-lg ring-1 ring-white/20" aria-label="بستن">×</button>
+      </div>
+      <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
+        <p data-ov-desc class="text-sm leading-7 text-cream/70"></p>
+        <div class="mt-4 grid aspect-video place-items-center rounded-2xl bg-black px-6 text-center">
+          <div>
+            <span class="mx-auto grid size-12 place-items-center rounded-full bg-gold text-navy" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="size-5" fill="currentColor"><path d="M9 7.5v9l8-4.5-8-4.5Z"/></svg>
+            </span>
+            <p class="mt-3 text-sm text-cream/70">ویدیوی معرفی به‌زودی در این قاب پخش می‌شود.</p>
+          </div>
+        </div>
+        <p class="mt-4 text-sm font-medium text-gold">قبولی در ۲ سوال از ۳ سوال برای باز شدن درس بعد</p>
+        <ol data-ov-lessons class="mt-3 space-y-2"></ol>
+      </div>
+      <div class="border-t border-white/10 p-5">
+        <button type="button" data-buy data-ov-buy class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">خرید و ثبت‌نام در دوره</button>
+        <p data-ov-price class="mt-2 text-center text-xs text-cream/50"></p>
+      </div>
+    </div>
+  </dialog>`;
 }
 
 export function homePage(base: string) {
@@ -224,24 +346,40 @@ export function homePage(base: string) {
         </div>
         <button type="button" id="buy-bundle" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">خرید یکجای تمام دوره‌ها</button>
       </article>
-      <div class="grid gap-4 md:grid-cols-2">${courseCards(base)}</div>
+      <div class="grid gap-4 md:grid-cols-2">${homeCourseCards(base)}</div>
     </section>
     <p class="mt-6 text-xs text-cream/40">هدیهٔ باندل ${fa.format(BUNDLE_GIFT_MINUTES)} دقیقه است و فقط یک‌بار به موجودی اضافه می‌شود.</p>
   `);
 }
 
 export function academyPage(base: string) {
-  const tracks = categories.map((category, index) => {
-    const rows = lessonsOf(category);
-    return `<article ${revealAttrs(Math.min(index, 6) * 80)} class="glass rounded-3xl p-5">
-      <h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2>
-      <p class="mt-2 text-sm text-cream/70">${esc(category.description.fa)}</p>
-      <ol class="mt-4 space-y-2 text-sm">
-        ${rows.map((row, index) => `<li><a class="text-gold" href="${base}/learn/${category.id}/${row.lesson.id}/">${fa.format(index + 1)}. ${esc(row.lesson.title.fa)}</a></li>`).join("")}
-      </ol>
-    </article>`;
-  }).join("");
-  return layout(base, "academy", "آموزش | نکس‌سل", `<header ${revealAttrs(0)}><p class="text-xs tracking-[0.16em] text-gold">مسیر مرحله‌به‌مرحله</p><h1 class="mt-2 text-3xl font-semibold">آموزش</h1></header><div class="mt-6 grid gap-4">${tracks}</div>`);
+  const catalog = JSON.stringify(courseCatalog()).replaceAll("<", "\\u003c");
+  return layout(base, "academy", "آموزش | نکس‌سل", `
+    <style>
+      #course-overview {
+        width: min(40rem, calc(100vw - 1.5rem));
+        max-height: min(90vh, 52rem);
+        margin: auto;
+        padding: 0;
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: 1.5rem;
+        background: #0B132B;
+        color: #F6F1E4;
+      }
+      #course-overview::backdrop { background: rgba(0, 0, 0, 0.66); }
+      @media (max-width: 640px) {
+        #course-overview { width: 100vw; max-height: 100vh; height: 100vh; border-radius: 0; }
+      }
+    </style>
+    <header ${revealAttrs(0)}>
+      <p class="text-xs tracking-[0.16em] text-gold">مسیر مرحله‌به‌مرحله</p>
+      <h1 class="mt-2 text-3xl font-semibold">آموزش</h1>
+      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">دورهٔ نخریده سرفصل قفل دارد. بعد از خرید، ادامه از اولین درسی است که هنوز قبول نشده.</p>
+    </header>
+    <div class="mt-6 grid gap-4 md:grid-cols-2">${academyCourseCards(base)}</div>
+    ${courseOverview()}
+    <script id="course-catalog" type="application/json">${catalog}</script>
+  `);
 }
 
 export function copilotPage(base: string) {

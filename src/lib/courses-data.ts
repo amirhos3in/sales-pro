@@ -23,11 +23,14 @@ export type Subtopic = {
 
 export type CourseTier = "pro" | "free";
 
+export type CourseSpotlight = "bestseller" | "recommended";
+
 export type Category = {
   id: string;
   title: Localized;
   description: Localized;
   tierRequired: CourseTier;
+  spotlight?: CourseSpotlight;
   subtopics: Subtopic[];
 };
 
@@ -78,6 +81,7 @@ export const categories: Category[] = [
   {
     id: "online",
     tierRequired: "pro",
+    spotlight: "recommended",
     title: text("آموزش فروش آنلاین", "Online Sales Mastery"),
     description: text(
       "قیف، اعتماد در اینستاگرام و تبدیل توجه به گفتگوی خرید.",
@@ -356,6 +360,7 @@ export const categories: Category[] = [
   {
     id: "telefoni",
     tierRequired: "pro",
+    spotlight: "bestseller",
     title: text("آموزش فروش تلفنی", "Telesales Mastery"),
     description: text(
       "برخورد اول، مکالمه بیمه و نقشه راه تماس سرد تا قرار بعدی.",

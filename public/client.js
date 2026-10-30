@@ -216,6 +216,8 @@
     paintLiveTickets(user);
     paintProfile(user);
 
+    paintAcademyCards(state, progress, signedIn);
+
     document.querySelectorAll("[data-course]").forEach((card) => {
       const id = card.dataset.course;
       const paid = card.dataset.paid !== "no";
@@ -384,12 +386,109 @@
     if (typeof mountReveal === "function") mountReveal();
   }
 
+  function readCatalog() {
+    const node = document.querySelector("#course-catalog");
+    if (!node) return [];
+    try {
+      const parsed = JSON.parse(node.textContent || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function paintAcademyCards(state, progress, signedIn) {
+    const catalog = readCatalog();
+    document.querySelectorAll("[data-course-card]").forEach((card) => {
+      const id = card.dataset.courseCard;
+      const meta = catalog.find((item) => item.id === id);
+      const paid = card.dataset.paid !== "no";
+      const owned = paid && (state.bundle || state.courses.includes(id));
+      const lessons = meta && Array.isArray(meta.lessons) ? meta.lessons : [];
+      const total = lessons.length;
+      const done = lessons.filter((lesson) => progress.passed.includes(lesson.id)).length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      const next = lessons.find((lesson) => !progress.passed.includes(lesson.id)) || lessons[0];
+      const resumeHref = next ? base + "/learn/" + id + "/" + next.id + "/" : base + "/learn/" + id + "/";
+      const showLearn = paid ? owned : signedIn;
+      const showLocked = paid && !owned;
+      const showGuest = !paid && !signedIn;
+      card.dataset.cardMode = showLocked ? "locked" : showLearn ? "learn" : "login";
+      const price = card.querySelector("[data-card-price]");
+      const progressBox = card.querySelector("[data-card-progress]");
+      const overview = card.querySelector("[data-card-overview]");
+      const buy = card.querySelector("[data-card-buy]");
+      const resume = card.querySelector("[data-card-resume]");
+      const guest = card.querySelector("[data-card-guest]");
+      if (price) price.classList.toggle("hidden", !showLocked);
+      if (progressBox) progressBox.classList.toggle("hidden", !showLearn);
+      if (overview) overview.classList.toggle("hidden", !showLocked);
+      if (buy) buy.classList.toggle("hidden", !showLocked);
+      if (guest) guest.classList.toggle("hidden", !showGuest);
+      if (resume) {
+        resume.classList.toggle("hidden", !showLearn);
+        resume.classList.toggle("inline-flex", showLearn);
+        resume.href = resumeHref;
+        if (!paid) resume.textContent = done > 0 ? "ادامه یادگیری" : "شروع یادگیری";
+      }
+      const fraction = card.querySelector("[data-card-fraction]");
+      if (fraction) fraction.textContent = fa.format(done) + " از " + fa.format(total) + " درس تکمیل‌شده - " + fa.format(percent) + "٪";
+      const learning = card.querySelector('[data-card-status="learning"]');
+      const complete = card.querySelector('[data-card-status="done"]');
+      if (learning) learning.classList.toggle("hidden", percent === 100);
+      if (complete) complete.classList.toggle("hidden", percent !== 100);
+      const bar = card.querySelector("[data-card-bar]");
+      if (bar) {
+        bar.style.width = percent + "%";
+        const track = bar.parentElement;
+        if (track) {
+          track.setAttribute("role", "progressbar");
+          track.setAttribute("aria-valuenow", String(percent));
+          track.setAttribute("aria-valuemin", "0");
+          track.setAttribute("aria-valuemax", "100");
+          track.setAttribute("aria-label", "پیشرفت دوره");
+        }
+      }
+    });
+  }
+
+  function openOverview(id) {
+    const dialog = document.querySelector("#course-overview");
+    const meta = readCatalog().find((item) => item.id === id);
+    if (!dialog || !meta) return;
+    const title = dialog.querySelector("[data-ov-title]");
+    const desc = dialog.querySelector("[data-ov-desc]");
+    const list = dialog.querySelector("[data-ov-lessons]");
+    const buy = dialog.querySelector("[data-ov-buy]");
+    const price = dialog.querySelector("[data-ov-price]");
+    if (title) title.textContent = meta.title || "";
+    if (desc) desc.textContent = meta.description || "";
+    if (list) {
+      const lessons = Array.isArray(meta.lessons) ? meta.lessons : [];
+      list.innerHTML = lessons.map((lesson, index) => {
+        return '<li class="flex items-center justify-between gap-3 rounded-2xl border border-white/10 px-3 py-3 text-sm"><span>' + fa.format(index + 1) + ". " + escText(lesson.title) + '</span><span class="inline-flex items-center gap-1 text-xs text-cream/50"><svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>قفل</span></li>';
+      }).join("");
+    }
+    if (buy) buy.dataset.buy = id;
+    if (price) price.textContent = toman(COURSE_PRICE);
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+  }
+
+  function closeOverview() {
+    const dialog = document.querySelector("#course-overview");
+    if (!dialog) return;
+    if (typeof dialog.close === "function") dialog.close();
+    else dialog.removeAttribute("open");
+  }
+
   function buyCourse(id) {
     const state = readPricing();
     if (owns(state, id) || !PAID.includes(id)) return;
     state.courses.push(id);
     state.cashbackToman += Math.round(COURSE_PRICE * 0.05);
     writePricing(state);
+    closeOverview();
   }
 
   function buyBundle() {
@@ -446,6 +545,33 @@
   }
 
   document.addEventListener("click", (event) => {
+    const dialog = document.querySelector("#course-overview");
+    if (dialog && event.target === dialog) {
+      closeOverview();
+      return;
+    }
+    if (event.target.closest("[data-overview-close]")) {
+      closeOverview();
+      return;
+    }
+    const overview = event.target.closest("[data-card-overview]");
+    if (overview) {
+      const card = overview.closest("[data-course-card]");
+      if (card) openOverview(card.dataset.courseCard);
+      return;
+    }
+    const academyCard = event.target.closest("[data-course-card]");
+    if (academyCard && !event.target.closest("a, button")) {
+      if (academyCard.dataset.cardMode === "locked") openOverview(academyCard.dataset.courseCard);
+      else if (academyCard.dataset.cardMode === "learn") {
+        const resume = academyCard.querySelector("[data-card-resume]");
+        if (resume) location.href = resume.href;
+      } else if (academyCard.dataset.cardMode === "login") {
+        const guest = academyCard.querySelector("[data-card-guest]");
+        if (guest) location.href = guest.href;
+      }
+      return;
+    }
     const menu = event.target.closest("[data-menu]");
     if (menu) {
       document.querySelector("[data-mobile-nav]").classList.toggle("hidden");
