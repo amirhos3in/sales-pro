@@ -25,6 +25,7 @@ function esc(value: string) {
 const NAV = [
   ["/", "خانه", "home"],
   ["/academy/", "آموزش", "academy"],
+  ["/demo/", "دستیار", "copilot"],
   ["/articles/", "مقالات", "articles"],
   ["/services/", "خدمات", "services"],
   ["/support/", "پشتیبانی", "support"],
@@ -423,7 +424,7 @@ export function homePage(base: string) {
         <p class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></p>
         <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
       </article>
-      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دموی دستیار در صفحهٔ جداست و جزو ثبت‌نام دوره نیست.</a></p>
+      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دستیار پشت خط از دقیقهٔ خریده‌شده استفاده می‌کند و جزو ثبت‌نام دوره نیست.</a></p>
     </section>
   `);
 }
@@ -454,11 +455,22 @@ export function minutesPage(base: string) {
 }
 
 export function demoPage(base: string) {
-  return layout(base, "copilot", "دموی دستیار | نکس‌سل", `
+  return layout(base, "copilot", "دستیار | نکس‌سل", `
     <section ${revealAttrs(0)} class="rounded-[28px] bg-[#070B18] p-4 sm:p-6" data-live-demo>
-      <p class="text-xs tracking-[0.16em] text-gold">جدا از ثبت‌نام دوره</p>
-      <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">دموی دستیار</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">این صفحه دوره یا دقیقه نمی‌فروشد. قبل از ضبط، رضایت را تأیید کنید.</p>
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="text-xs tracking-[0.16em] text-gold">پشت خط</p>
+          <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">دستیار</h1>
+          <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">جملهٔ مشتری را بگویید یا بنویسید. دستیار اعتراض را نام می‌برد و یک جمله برای گفتن همان لحظه می‌دهد.</p>
+        </div>
+        <div class="rounded-3xl border border-gold/40 bg-navy px-4 py-3">
+          <p class="text-xs text-cream/60">موجودی همین مرورگر</p>
+          <p class="mt-1 text-2xl font-semibold text-gold"><span data-assistant-balance>۰</span> <span class="text-sm font-medium text-cream">دقیقه</span></p>
+          <a href="${base}/services/#ai-minutes" class="mt-2 inline-flex text-xs text-gold">افزودن دقیقه</a>
+        </div>
+      </div>
+      <p class="mt-4 text-sm leading-7 text-cream/70">هر پاسخ متنی ۱ دقیقه کم می‌کند. صحبت زنده، طول همان شنیدن را به دقیقهٔ بالا گرد می‌کند و کمتر از ۱ دقیقه حساب نمی‌شود.</p>
+      <p data-assistant-lock class="mt-3 hidden rounded-2xl border border-gold/30 bg-white/5 px-3 py-3 text-sm leading-7">موجودی دقیقه تمام شده. تا وقتی از بخش خدمات دقیقه اضافه نکنید، دستیار جواب نمی‌دهد.</p>
       ${voiceChat()}
       <div data-counter class="mt-4 hidden rounded-3xl bg-navy p-5"></div>
     </section>

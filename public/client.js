@@ -125,6 +125,12 @@
     const state = readPricing();
     const progress = readProgress();
     const left = remaining(state);
+    document.querySelectorAll("[data-assistant-balance]").forEach((node) => {
+      node.textContent = fa.format(left);
+    });
+    document.querySelectorAll("[data-assistant-lock]").forEach((node) => {
+      node.classList.toggle("hidden", left > 0);
+    });
     document.querySelectorAll("[data-ai-minutes]").forEach((node) => {
       node.textContent = "دقایق باقی‌مانده: " + fa.format(left) + " دقیقه";
       node.dataset.aiMinutes = String(left);
@@ -929,11 +935,13 @@
     const box = document.querySelector("[data-counter]");
     if (!box) return;
     box.classList.remove("hidden");
+    const heard = fallback ? "<p class=\"mt-3 text-xs leading-6 text-cream/50\">شنیدم: " + escText(fallback) + "</p>" : "";
     if (!card || !card.matched) {
-      box.innerHTML = "<p class=\"text-sm\">هنوز اعتراض روشنی نشنیدم. قیمت، تخفیف یا «باید فکر کنم» را بگویید.</p>";
+      box.innerHTML = "<p class=\"text-sm leading-7\">این جمله اعتراض شناخته‌شده‌ای نبود. قیمت، تخفیف، فکر کردن، مدیر، وقت، مقایسه یا بی‌اعتمادی را واضح‌تر بگویید.</p>" + heard;
       return;
     }
-    box.innerHTML = "<p class=\"text-sm text-[#F3A6A6]\">🔴 " + card.tag + "</p><p class=\"mt-3 text-xs text-gold\">تکنیک: " + card.technique + "</p><p class=\"mt-2 text-lg leading-8\" data-counter-say>بگو: " + (card.say || (card.lines && card.lines[0]) || fallback || "") + "</p>";
+    const alt = card.alt ? "<p class=\"mt-3 text-sm leading-7 text-cream/80\">اگر این جمله ننشست: " + escText(card.alt) + "</p>" : "";
+    box.innerHTML = "<p class=\"text-sm text-[#F3A6A6]\">" + escText(card.tag) + "</p><p class=\"mt-3 text-xs text-gold\">تکنیک: " + escText(card.technique) + "</p><p class=\"mt-2 text-lg leading-8\">بگو: " + escText(card.say || (card.lines && card.lines[0]) || "") + "</p>" + alt + heard;
   }
 
   function reply(text) {
@@ -944,19 +952,48 @@
       book = [];
     }
     const hit = book.find((item) => item.patterns.some((pattern) => text.includes(pattern)));
-    paintCounter(hit ? { matched: true, tag: hit.tag, technique: hit.technique, say: hit.lines[0] } : null, text);
+    paintCounter(hit ? { matched: true, tag: hit.tag, technique: hit.technique, say: hit.lines[0], alt: hit.lines[1] || "" } : null, text);
   }
 
-  function ask(text) {
+  function takeMinutes(seconds) {
+    const state = readPricing();
+    if (state.minutes < 1) return 0;
+    const cost = Math.max(1, Math.ceil(Math.max(1, seconds) / 60));
+    const used = Math.min(state.minutes, cost);
+    state.minutes -= used;
+    writePricing(state);
+    return used;
+  }
+
+  function ask(text, seconds) {
     const clean = String(text || "").trim();
     if (!clean) return;
+    const used = takeMinutes(seconds || 60);
+    if (!used) {
+      const toast = document.querySelector("[data-voice-toast]");
+      if (toast) {
+        toast.textContent = "موجودی دقیقه تمام شده. از بخش خدمات دقیقه اضافه کنید.";
+        toast.classList.remove("hidden");
+      }
+      return;
+    }
     fetch((base || "") + "/api/copilot/counter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: clean }),
     }).then((response) => response.ok ? response.json() : null).then((card) => {
       if (!card || !card.matched) reply(clean);
-      else paintCounter(card, clean);
+      else {
+        let alt = "";
+        try {
+          const book = JSON.parse(document.querySelector("#objections").textContent || "[]");
+          const hit = book.find((item) => item.tag === card.tag);
+          alt = hit && hit.lines ? hit.lines[1] || "" : "";
+        } catch {
+          alt = "";
+        }
+        paintCounter({ matched: true, tag: card.tag, technique: card.technique, say: card.say, alt }, clean);
+      }
     }).catch(() => reply(clean));
   }
 
@@ -1143,7 +1180,7 @@
       const text = sample.dataset.sampleObjection;
       const field = document.querySelector("[data-voice-input]");
       if (field) field.value = text;
-      ask(text);
+      ask(text, 60);
     }
   });
 
@@ -1405,6 +1442,7 @@
     let endError = "";
     let userStop = false;
     let endTimer = 0;
+    let listenStarted = 0;
 
     function toastMessage(message) {
       toast.textContent = message;
@@ -1456,7 +1494,8 @@
       const current = input.value.trim();
       input.value = current ? current + " " + clean : clean;
       input.dispatchEvent(new Event("input", { bubbles: true }));
-      ask(clean);
+      const seconds = Math.max(1, Math.round((Date.now() - (listenStarted || Date.now())) / 1000));
+      ask(clean, seconds);
     }
 
     function finishSession() {
@@ -1534,6 +1573,10 @@
 
     toggle.addEventListener("click", async () => {
       if (!recognition) return;
+      if (remaining(readPricing()) < 1) {
+        toastMessage("موجودی دقیقه تمام شده. از بخش خدمات دقیقه اضافه کنید.");
+        return;
+      }
       if (listening) {
         userStop = true;
         setLoading();
@@ -1559,6 +1602,7 @@
       if (!allowed) return;
       try {
         recognition.start();
+        listenStarted = Date.now();
         setRecording();
         live.textContent = "در حال شنیدن…";
       } catch {
@@ -1573,8 +1617,12 @@
         toastMessage("اول متنی بنویسید یا صحبت را شروع کنید.");
         return;
       }
+      if (remaining(readPricing()) < 1) {
+        toastMessage("موجودی دقیقه تمام شده. از بخش خدمات دقیقه اضافه کنید.");
+        return;
+      }
       toastMessage("");
-      ask(text);
+      ask(text, 60);
     });
 
     input.addEventListener("keydown", (event) => {
