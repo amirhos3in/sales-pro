@@ -223,7 +223,7 @@ function renderNav() {
     $("#nav-login").onclick = () => openModal("auth-modal");
     return;
   }
-  const badge = user.plan === "vip" ? "اشتراک ویژه" : "رایگان";
+  const badge = user.plan === "vip" ? "دسترسی آزمایشی" : "رایگان";
   host.innerHTML = `
     <span class="hidden text-xs text-white/70 sm:inline">${user.phone}</span>
     <span class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-bold text-navy">${badge}</span>
@@ -263,7 +263,8 @@ function renderTracks() {
 
 function renderPlanNote() {
   const user = current();
-  $("#plan-note").textContent = user?.plan === "vip" ? "اشتراک ویژه روی همین مرورگر فعال است." : "این دکمه پرداخت واقعی نیست و فقط برای آزمون قفل‌ها پلن را ویژه می‌کند.";
+  const note = document.getElementById("plan-note");
+  if (note) note.textContent = "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست.";
 }
 
 function render() {
@@ -416,6 +417,7 @@ function digits(value) {
 
 function animateStats() {
   const nodes = document.querySelectorAll("[data-count]");
+  if (!nodes.length) return;
   const run = () => {
     nodes.forEach((node) => {
       const target = Number(node.dataset.count);
@@ -451,7 +453,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (current()) document.getElementById("tracks").scrollIntoView();
     else openModal("auth-modal");
   };
-  $("#start-free").onclick = () => $("#cta-start").click();
+  const startFree = document.getElementById("start-free");
+  if (startFree) startFree.onclick = () => $("#cta-start").click();
   $("#buy-plan").onclick = activateVip;
   $("#paywall-buy").onclick = activateVip;
   $("#player-done").onchange = () => {

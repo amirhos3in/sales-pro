@@ -7,7 +7,7 @@ import type { AcademyUser } from "@/context/AuthContext";
 import { categories, lessonsOf, pickText } from "@/lib/courses-data";
 import { localeNumber, toman } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { BUNDLE_GIFT_MINUTES, BUNDLE_PRICE, COURSE_PRICE, ownsCourse, PAID_COURSES } from "@/lib/pricing";
+import { BUNDLE_PRICE, COURSE_PRICE, ownsCourse, PAID_COURSES } from "@/lib/pricing";
 import { useStore } from "@/lib/store";
 import { usePricing } from "@/lib/use-pricing";
 
@@ -33,8 +33,8 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
         </p>
         <p className="mt-2 text-sm leading-7 text-muted-foreground">
           {fa
-            ? `هر دوره ${toman(COURSE_PRICE)} است. باندل چهار دوره ${toman(BUNDLE_PRICE)} است و ${localeNumber(BUNDLE_GIFT_MINUTES, lang)} دقیقه کوپایلوت هدیه می‌دهد.`
-            : `Each course is ${toman(COURSE_PRICE)}. The bundle is ${toman(BUNDLE_PRICE)} and gifts ${localeNumber(BUNDLE_GIFT_MINUTES, lang)} copilot minutes.`}
+            ? `هر مسیر ${toman(COURSE_PRICE)}. هر چهار مسیر، ${toman(BUNDLE_PRICE)}. یکی رایگان است. دسترسی آزمایشی روی همین مرورگر است و پرداخت بانکی نیست.`
+            : `Each path is ${toman(COURSE_PRICE)}. All four paths are ${toman(BUNDLE_PRICE)}, and one is free. Trial access stays in this browser. This is not a bank payment.`}
         </p>
       </div>
 
@@ -44,11 +44,11 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
           <span className="rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-semibold text-[#0B132B]">
             {pricing.bundle
               ? fa
-                ? "خریداری شده · هدیهٔ ۵۰۰ دقیقه فعال است"
-                : "Purchased · 500 gifted minutes are active"
+                ? "دسترسی آزمایشی روی همین مرورگر است"
+                : "Trial access stays in this browser"
               : fa
-                ? "خریداری نشده · ۱۶ میلیون تومان به‌جای ۲۰ میلیون"
-                : "Not purchased · 16M instead of 20M Tomans"}
+                ? `هر چهار مسیر، ${toman(BUNDLE_PRICE)}. یکی رایگان است`
+                : `All four paths, ${toman(BUNDLE_PRICE)}. One is free`}
           </span>
         </div>
         {pricing.bundle ? null : (
@@ -71,7 +71,7 @@ export function MyCoursesTab({ user }: { user: AcademyUser }) {
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-lg font-semibold">{pickText(category.title, lang)}</h2>
                 <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${owned ? "bg-[#D4AF37] text-[#0B132B]" : "bg-[#0B132B]/10 text-muted-foreground"}`}>
-                  {owned ? (fa ? "خریداری شده" : "Purchased") : fa ? "قفل" : "Locked"}
+                  {owned ? (fa ? "دسترسی آزمایشی" : "Trial access") : fa ? "قفل" : "Locked"}
                 </span>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">{toman(COURSE_PRICE)}</p>

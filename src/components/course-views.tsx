@@ -19,7 +19,7 @@ import {
   tracks,
 } from "@/lib/curriculum";
 import { faNumber } from "@/lib/format";
-import { planById, type PlanId } from "@/lib/plans";
+import type { PlanId } from "@/lib/plans";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -259,11 +259,10 @@ export function LessonScreen({
         <section className="rounded-3xl bg-card p-6 ring-1 ring-foreground/10">
           <div className="flex items-center gap-2 font-medium">
             <Lock className="size-4" />
-            این درس در پلن {planById(lesson.minPlan).name} باز می‌شود
+            برای دیدن این درس، همین مسیر را به سبد اضافه کنید
           </div>
           <p className="mt-2 text-sm leading-7 text-muted-foreground">
-            عنوان و مسیر را می‌بینید. متن، اسکریپت و تمرین بعد از فعال شدن پلن{" "}
-            {planLabel[lesson.minPlan]} یا بالاتر در دسترس است. پیش‌نمایش رایگان، درس اول هر مسیر است.
+            دسترسی آزمایشی روی همین مرورگر است و پرداخت بانکی نیست.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/subscription" className={cn(buttonVariants(), "h-10 px-4")}>

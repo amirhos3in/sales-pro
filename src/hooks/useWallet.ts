@@ -99,13 +99,13 @@ export function useWalletRedeem() {
   return function redeem(planId: PlanId) {
     if (!currentUser || currentUser.walletBalance < planById(planId).price) return false;
     if (coveredPlan(currentUser, planId)) {
-      toast.success("این پلن همین حالا فعال است.");
+      toast.success("دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست.");
       return false;
     }
     const { plan, patch } = redeemWithWallet(currentUser, planId);
     updateProfile(patch);
     if (learner) grantPlan(plan.id);
-    toast.success(`اشتراک ${plan.name} با موجودی کیف پول فعال شد.`);
+    toast.success("دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست.");
     burstConfetti();
     return true;
   };

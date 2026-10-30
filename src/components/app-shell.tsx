@@ -56,29 +56,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const passed = user?.passed.length ?? 0;
   const percent = total ? Math.round((passed / total) * 100) : 0;
 
-  function openPurchase(href: string) {
-    const id = href.split("#")[1];
-    if (pathname === "/" && id) {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      window.history.replaceState(null, "", `${window.location.pathname}#${id}`);
-      return;
-    }
-    router.push(href);
-  }
-
   const nav = [
     { href: "/", label: copy.nav.home },
     { href: "/academy", label: lang === "fa" ? "آموزش" : "Academy" },
-    { href: "/dashboard/copilot", label: lang === "fa" ? "دستیار" : "Copilot" },
+    { href: "/subscription", label: copy.nav.plans },
     { href: "/articles", label: copy.nav.articles },
     { href: "/services", label: copy.nav.services },
     { href: "/support", label: copy.nav.support },
     { href: "/about", label: copy.nav.about },
     { href: "/contact", label: copy.nav.contact },
-  ];
-  const purchaseLinks = [
-    { href: "/#courses", label: lang === "fa" ? "دوره‌ها و باندل" : "Courses and bundle" },
-    { href: "/#copilot-minutes", label: lang === "fa" ? "دقیقهٔ کوپایلوت" : "Copilot minutes" },
   ];
   const menu = [
     { href: "/profile", label: copy.menu.profile, icon: UserRound },
@@ -117,23 +103,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {item.label}
               </Link>
             ))}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={cn(
-                  "shrink-0 rounded-xl px-2 py-2 text-sm text-muted-foreground transition hover:bg-foreground/5 hover:text-foreground",
-                  pathname === "/subscription" && "bg-[#D4AF37] text-[#0B132B]",
-                )}
-              >
-                {copy.nav.plans}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-52">
-                {purchaseLinks.map((item) => (
-                  <DropdownMenuItem key={item.href} onClick={() => openPurchase(item.href)}>
-                    {item.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </nav>
 
           <div className="ms-auto flex items-center gap-2">
@@ -268,17 +237,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   "rounded-xl px-3 py-2 text-sm",
                   isActive(pathname, item.href) ? "bg-[#D4AF37] text-[#0B132B]" : "hover:bg-foreground/5",
                 )}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <p className="mt-3 px-3 text-xs text-muted-foreground">{copy.nav.plans}</p>
-            {purchaseLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm hover:bg-foreground/5"
               >
                 {item.label}
               </Link>

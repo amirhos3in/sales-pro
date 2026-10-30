@@ -8,10 +8,7 @@ import { lessonsOf, pickText, type Category, type CourseTier } from "@/lib/cours
 import { toman } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import {
-  BUNDLE_GIFT_MINUTES,
-  BUNDLE_LIST_PRICE,
   BUNDLE_PRICE,
-  BUNDLE_SAVE,
   buyBundle,
   buyCourse,
   COURSE_PRICE,
@@ -105,10 +102,10 @@ export function CourseCta({ category }: { category: Category }) {
       data-course-action="buy"
       onClick={() => {
         buyCourse(category.id as PaidCourseId);
-        toast.success(fa ? `«${pickText(category.title, lang)}» ثبت شد و روی همین مرورگر باز است.` : "This course is now open in this browser.");
+        toast.success(fa ? "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست." : "Trial access stays in this browser. This is not a bank payment.");
       }}
     >
-      {fa ? `ثبت‌نام این دوره (${toman(COURSE_PRICE)})` : `Enroll in this course (${toman(COURSE_PRICE)})`}
+      {fa ? "افزودن به سبد" : "Add to cart"}
     </button>
   );
 }
@@ -120,35 +117,21 @@ export function BundleBanner() {
 
   return (
     <article id="bundle" className="rounded-[28px] bg-[#0B132B] p-5 text-[#F8F1DE] shadow-xl sm:p-7" data-offer="bundle">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-xl font-semibold sm:text-2xl">{fa ? "پکیج جامع ۴ دوره تخصصی فروش و مذاکره" : "Full bundle of the four specialist courses"}</h2>
-        <span className="rounded-full bg-[#D4AF37] px-2.5 py-1 text-[11px] font-semibold text-[#0B132B]">
-          {fa ? "۵۰۰ دقیقه کوپایلوت هوش مصنوعی هدیه رایگان" : `Gift: ${BUNDLE_GIFT_MINUTES.toLocaleString("en-US")} free copilot minutes`}
-        </span>
-      </div>
-      <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
-        {fa
-          ? "فروش آنلاین، حضوری، تلفنی و مذاکره با هم باز می‌شوند. به‌جای ۲۰ میلیون، ۱۶ میلیون تومان؛ ۴ میلیون تومان کمتر، به‌علاوه هدیهٔ دقیقه."
-          : "Online, in-person, telephone, and negotiation open together: 16 million instead of 20 million Tomans, plus the minute gift."}
+      <p className="text-lg font-semibold leading-8">
+        {fa ? "هر چهار مسیر، " : "All four paths, "}
+        <span className="text-[#D4AF37]" data-bundle-price={BUNDLE_PRICE}>{toman(BUNDLE_PRICE)}</span>
+        {fa ? ". یکی رایگان است." : ". One is free."}
       </p>
-      <div className="mt-4 flex flex-wrap items-end gap-3">
-        <p className="text-3xl font-semibold text-[#D4AF37] sm:text-4xl" data-bundle-price={BUNDLE_PRICE}>
-          {toman(BUNDLE_PRICE)}
-        </p>
-        <p className="pb-1 text-sm text-white/50 line-through">{toman(BUNDLE_LIST_PRICE)}</p>
-        <p className="pb-1 text-sm text-[#D4AF37]">{fa ? "۴ میلیون تومان سود خرید یکجا" : `${toman(BUNDLE_SAVE)} off`}</p>
-      </div>
       <button
         type="button"
         disabled={pricing.bundle}
         onClick={() => {
-          const already = readPricing().bundle;
           buyBundle();
-          toast.success(already ? (fa ? "باندل از قبل فعال است." : "The bundle is already active.") : fa ? "باندل فعال شد و ۵۰۰ دقیقه کوپایلوت هدیه اضافه شد." : "The bundle is active, with 500 gifted minutes.");
+          toast.success(fa ? "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست." : "Trial access stays in this browser. This is not a bank payment.");
         }}
         className="mt-5 inline-flex h-12 items-center rounded-2xl bg-[#D4AF37] px-5 text-sm font-semibold text-[#0B132B] disabled:opacity-60"
       >
-        {pricing.bundle ? (fa ? "باندل فعال است" : "Bundle active") : fa ? "خرید یکجای تمام دوره‌ها" : "Buy the full bundle"}
+        {pricing.bundle ? (fa ? "در سبد" : "In the cart") : fa ? "افزودن به سبد" : "Add to cart"}
       </button>
     </article>
   );

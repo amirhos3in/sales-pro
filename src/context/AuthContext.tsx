@@ -60,19 +60,11 @@ const seedProfile = {
   email: "demo@nexsell.ir",
   jobTitle: "استراتژیست فروش",
   bio: "فروش آنلاین، حضوری و تلفنی را با مذاکرهٔ دقیق تمرین می‌کنم.",
-  plan: "vip" as const,
-  subscription: {
-    isActive: true,
-    planType: "quarterly" as const,
-    expiresAt: "2026-12-31T23:59:59.000Z",
-  },
-  walletBalance: 2_450_000,
-  cashbackEarned: 297_100,
-  transactions: [
-    { id: "tx-topup", kind: "topup" as const, amount: 1_000_000, at: "2026-09-28T09:00:00", title: "شارژ کیف پول", status: "success" as const },
-    { id: "tx-cash", kind: "cashback" as const, actionType: "payment_cashback" as const, amount: 297_100, at: "2026-09-12T11:30:00", title: "هدیه ۵٪ کش‌بک خرید اشتراک سالانه", status: "success" as const },
-    { id: "tx-plan", kind: "plan" as const, amount: -4_728_000, at: "2026-09-12T11:20:00", title: "خرید اشتراک ۳ ماهه", status: "success" as const },
-  ],
+  plan: "free" as const,
+  subscription: inactiveSubscription,
+  walletBalance: 0,
+  cashbackEarned: 0,
+  transactions: [],
 };
 
 const AuthContext = createContext<AuthValue | null>(null);

@@ -67,7 +67,7 @@ export function CashbackMilestoneBar() {
   function activate() {
     if (!pending || !currentUser) return;
     if (coveredPlan(currentUser, pending.planId)) {
-      toast.success(fa ? "این اشتراک همین حالا فعال است." : "This plan is already active.");
+      toast.success(fa ? "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست." : "Trial access stays in this browser. This is not a bank payment.");
       setPendingId(null);
       return;
     }
@@ -78,7 +78,7 @@ export function CashbackMilestoneBar() {
     }
     updateProfile({ plan: "vip", subscription: subscriptionForPlan(pending.planId) });
     if (learner) grantPlan(pending.planId);
-    toast.success(fa ? `${pending.label} با موجودی کیف پول فعال شد.` : `${pending.label} is now active from your wallet.`);
+    toast.success(fa ? "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست." : "Trial access stays in this browser. This is not a bank payment.");
     setPendingId(null);
     setPinnedId(null);
   }
@@ -213,8 +213,8 @@ export function CashbackMilestoneBar() {
           >
             <p className="text-sm leading-8">
               {fa
-                ? `${pending.label} با پرداخت کامل ${dollar(pending.targetUsd)} از کیف پول دلاری فعال می‌شود و به درگاه نمی‌روید.`
-                : `${pending.label} activates with a full wallet payment of ${dollar(pending.targetUsd)}. No gateway charge.`}
+                ? "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست."
+                : "Trial access stays in this browser. This is not a bank payment."}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <button type="button" data-confirm-wallet-pay className="h-11 flex-1 rounded-2xl px-4 text-sm font-medium" style={goldGlassButton} onClick={activate}>

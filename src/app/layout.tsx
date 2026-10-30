@@ -19,7 +19,7 @@ const inter = Inter({
 const themeBoot = `(function(){try{var t=localStorage.getItem("nexsell-theme");var l=localStorage.getItem("nexsell-lang");var root=document.documentElement;if(t==="light"){root.classList.remove("dark")}else{root.classList.add("dark")}if(l==="en"){root.lang="en";root.dir="ltr";root.classList.add("font-en")}else{root.lang="fa";root.dir="rtl";root.classList.remove("font-en")}}catch(e){}})();`;
 
 export const metadata: Metadata = {
-  title: "نکس‌سل | آکادمی تخصصی مهارت‌های فروش",
+  title: "نکس‌سل | آکادمی فروش",
   description:
     "آموزش سناریومحور فروش حضوری، مذاکره، تماس تلفنی و فروش در شبکه‌های اجتماعی.",
 };

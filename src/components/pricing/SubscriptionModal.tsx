@@ -110,7 +110,7 @@ export function WalletSplitFields({
           </span>
         </p>
         <p data-gateway-toman={gatewayToman(split)} data-remaining-usd={split.remainingUsd} data-pay-mode={split.direct ? "direct" : "gateway"}>
-          {fa ? "مبلغ قابل پرداخت در درگاه" : "Gateway amount"}: {money(gatewayToman(split))} {fa ? "تومان" : "Toman"}
+          {fa ? "پرداخت بانکی نیست. دسترسی آزمایشی روی همین مرورگر است." : "This is not a bank payment. Trial access stays in this browser."}
         </p>
       </div>
     </div>
@@ -161,7 +161,7 @@ function SubscriptionForm({ plan, onClose }: { plan: Plan; onClose: () => void }
       return;
     }
     settled.current = true;
-    toast.success(result.split.direct ? (fa ? "اشتراک با موجودی کیف پول فعال شد." : "The plan is active from your wallet.") : copy.pay.done);
+    toast.success(fa ? "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست." : "Trial access stays in this browser. This is not a bank payment.");
     onClose();
   }
 
@@ -190,14 +190,12 @@ function SubscriptionForm({ plan, onClose }: { plan: Plan; onClose: () => void }
       <DialogHeader>
         <DialogTitle>{fa ? `اشتراک ${plan.name}` : plan.name}</DialogTitle>
         <DialogDescription>
-          {fa ? "پرداخت ترکیبی از کیف پول دلاری و درگاه" : "Split the plan between your dollar wallet and the gateway."}
+          {fa ? "پرداخت بانکی نیست. دسترسی آزمایشی روی همین مرورگر است." : "This is not a bank payment. Trial access stays in this browser."}
         </DialogDescription>
       </DialogHeader>
       {phase === "gateway" ? (
         <p className="text-sm leading-7" data-gateway-step="charge">
-          {fa
-            ? `در حال انتقال ${formatUsd(split.remainingUsd, lang)} دلار باقی‌مانده به درگاه…`
-            : `Sending the remaining ${formatUsd(split.remainingUsd, lang)} USD to the gateway…`}
+          {fa ? "پرداخت بانکی نیست." : "This is not a bank payment."}
         </p>
       ) : (
         <>
@@ -205,11 +203,11 @@ function SubscriptionForm({ plan, onClose }: { plan: Plan; onClose: () => void }
           <button type="button" className="mt-3 h-11 w-full rounded-2xl text-sm font-medium" style={goldButtonStyle} data-pay-cta onClick={pay}>
             {split.direct
               ? fa
-                ? "فعال‌سازی مستقیم با موجودی کیف پول"
-                : "Activate directly with wallet balance"
+                ? "ثبت دسترسی آزمایشی روی همین مرورگر"
+                : "Save trial access in this browser"
               : fa
-                ? "پرداخت باقی‌مانده در درگاه"
-                : "Pay the remainder at the gateway"}
+                ? "ثبت دسترسی آزمایشی روی همین مرورگر"
+                : "Save trial access in this browser"}
           </button>
         </>
       )}

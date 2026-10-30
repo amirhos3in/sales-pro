@@ -16,7 +16,7 @@ const LABELS: Record<(typeof CLAIMS)[number], { fa: string; en: string }> = {
 };
 
 function rewardLabel(action: RewardAction, fa: boolean) {
-  if (action === "payment_cashback") return fa ? "کش‌بک ۵٪ درگاه" : "5% gateway cashback";
+  if (action === "payment_cashback") return fa ? "کش‌بک ۵٪ همین مرورگر" : "5% browser cashback";
   return fa ? LABELS[action].fa : LABELS[action].en;
 }
 

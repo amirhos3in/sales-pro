@@ -25,12 +25,12 @@ function aiAnswer(message: string, lang: Lang) {
   const quiz = /quiz|challenge|unlock|lock|چالش|قفل|کوییز|آزمون/.test(q);
   const video = /video|aparat|film|ویدیو|فیلم|آپارات/.test(q);
   if (lang === "en") {
-    if (pricing) return "Gold and VIP both open the four specialist paths. The practice checkout does not charge a real card. Lesson challenges still unlock the next film.";
+    if (pricing) return "Each path is 5,000,000 Tomans. All four paths are 15,000,000 Tomans, and one is free. Trial access stays in this browser. This is not a bank payment.";
     if (quiz) return "Each lesson has three questions. All three must be correct. A miss keeps the next video locked until you retry and pass.";
     if (video) return "Films play from Aparat. When the film ends, confirm viewing, then start the lesson challenge. Free training does not need a paid plan.";
     return "I can help with paths, locked videos, Gold or VIP, and the three-question challenge. Ask in one sentence.";
   }
-  if (pricing) return "پلن طلایی و VIP هر چهار مسیر تخصصی را باز می‌کنند. درگاه آزمایشی است و کارت واقعی کشیده نمی‌شود. چالش هر درس هنوز برای ویدیوی بعدی لازم است.";
+  if (pricing) return "هر مسیر ۵٬۰۰۰٬۰۰۰ تومان است. هر چهار مسیر، ۱۵٬۰۰۰٬۰۰۰ تومان و یکی رایگان است. دسترسی آزمایشی روی همین مرورگر است و پرداخت بانکی نیست.";
   if (quiz) return "هر درس سه سوال دارد و هر سه باید درست باشد. اگر رد شوید ویدیوی بعدی قفل می‌ماند تا تلاش مجدد قبول شود.";
   if (video) return "فیلم از آپارات پخش می‌شود. بعد از پایان، مشاهده را تایید کنید و بعد به چالش همان درس بروید. آموزش رایگان پلن نمی‌خواهد.";
   return "درباره مسیر دوره، قفل ویدیو، قیمت پلن یا قانون چالش بپرسید. یک جمله کافی است.";

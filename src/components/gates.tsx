@@ -227,18 +227,11 @@ function PaywallModal({
   const fa = lang === "fa";
   const tracks = [
     {
-      href: "/#courses",
-      title: fa ? "دوره‌ها و باندل کامل" : "Courses and the full bundle",
+      href: "/subscription",
+      title: fa ? "قیمت چهار مسیر" : "Price of the four paths",
       body: fa
-        ? "هر دوره ۵ میلیون تومان. باندل چهار دوره ۱۶ میلیون تومان، با هدیهٔ ۵۰۰ دقیقه کوپایلوت."
-        : "Each course is 5,000,000 Tomans. The four-course bundle is 16,000,000, with 500 gifted copilot minutes.",
-    },
-    {
-      href: "/#copilot-minutes",
-      title: fa ? "دقیقهٔ کوپایلوت" : "Copilot minutes",
-      body: fa
-        ? "جدا از قیمت دوره. با اسلایدر، از ۱٬۰۰۰ تا ۲۰٬۰۰۰ دقیقه، هر هزار دقیقه ۳ میلیون تومان."
-        : "Separate from course prices. The slider runs from 1,000 to 20,000 minutes at 3,000,000 Tomans per thousand.",
+        ? "هر مسیر ۵٬۰۰۰٬۰۰۰ تومان. هر چهار مسیر، ۱۵٬۰۰۰٬۰۰۰ تومان. یکی رایگان است. دسترسی آزمایشی روی همین مرورگر است و پرداخت بانکی نیست."
+        : "Each path is 5,000,000 Tomans. All four paths are 15,000,000 Tomans, and one is free. Trial access stays in this browser. This is not a bank payment.",
     },
   ];
 

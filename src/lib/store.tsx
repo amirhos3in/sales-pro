@@ -348,7 +348,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             ...current.transactions,
           ],
         }));
-        return { ok: true, message: `پلن ${selected.name} فعال شد.` };
+        return { ok: true, message: "دسترسی آزمایشی روی همین مرورگر است. پرداخت بانکی نیست." };
       },
       grantPlan: (plan) => {
         if (!db.session) return;

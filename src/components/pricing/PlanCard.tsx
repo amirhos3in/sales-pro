@@ -8,7 +8,7 @@ import { goldGlassButton } from "@/components/wallet/gold-glass";
 import { WalletRedeemDialog } from "@/components/wallet/WalletRedeemDialog";
 import { useWallet, useWalletRedeem } from "@/hooks/useWallet";
 import { toman } from "@/lib/format";
-import { PLAN_RANK, type Plan, type PlanId } from "@/lib/plans";
+import { PLAN_RANK, PLANS_OFFER_ACTIVE, type Plan, type PlanId } from "@/lib/plans";
 import { coveredPlan } from "@/lib/redeem";
 import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/lib/store";
@@ -28,6 +28,7 @@ export function PlanCard({
   const milestone: Milestone | undefined = milestones.find((item) => item.id === plan.id);
   const redeem = useWalletRedeem();
   const [open, setOpen] = useState(false);
+  if (!PLANS_OFFER_ACTIVE) return null;
   const cashbackAmount = Math.round(plan.price * 0.05);
   const active = user?.plan === plan.id || coveredPlan(currentUser, plan.id);
   const ownedHigher = Boolean(user?.plan && PLAN_RANK[user.plan] > PLAN_RANK[plan.id]);
