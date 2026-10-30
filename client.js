@@ -276,6 +276,7 @@
     paintDashboardProgress(progress);
     paintTotals(progress);
     paintTabs();
+    paintCart();
   }
 
   function paintDashboardProgress(progress) {
@@ -482,30 +483,442 @@
     else dialog.removeAttribute("open");
   }
 
-  function buyCourse(id) {
+  const CART_KEY = "nexsell-cart-v1";
+  const ORDERS_KEY = "nexsell-orders-v1";
+  const COURSE_TITLES = {
+    online: "آموزش فروش آنلاین",
+    hozuri: "آموزش فروش حضوری",
+    telefoni: "آموزش فروش تلفنی",
+    mozakerah: "آموزش مذاکره",
+  };
+  const SERVICES = {
+    script: {
+      title: "بازنویسی اسکریپت تیم فروش",
+      fields: [
+        { name: "team", label: "اندازه تیم فروش", type: "text", placeholder: "مثلاً ۸ نفر" },
+        { name: "calls", label: "نوع تماس", type: "select", options: ["تماس ورودی", "تماس سرد", "هر دو"] },
+        { name: "objections", label: "اعتراض‌های پرتکرار", type: "textarea", placeholder: "قیمت، تخفیف، باید فکر کنم" },
+        { name: "deadline", label: "بازۀ تحویل", type: "text", placeholder: "مثلاً تا پایان ماه" },
+      ],
+    },
+    workshop: {
+      title: "آموزش حضوری پرسنل",
+      fields: [
+        { name: "headcount", label: "تعداد شرکت‌کننده‌ها", type: "text", placeholder: "مثلاً ۱۲ نفر" },
+        { name: "city", label: "شهر برگزاری", type: "text", placeholder: "تهران" },
+        { name: "topics", label: "موضوع‌های لازم", type: "textarea", placeholder: "زبان بدن، نیازسنجی، دمو" },
+        { name: "when", label: "بازۀ زمانی کارگاه", type: "text", placeholder: "هفته سوم آبان" },
+      ],
+    },
+    funnel: {
+      title: "بهینه‌سازی قیف فروش",
+      fields: [
+        { name: "channel", label: "کانال اصلی", type: "select", options: ["اینستاگرام", "سایت", "تماس تلفنی", "چند کانال"] },
+        { name: "offer", label: "پیشنهاد فعلی", type: "textarea", placeholder: "محصول یا خدمتی که می‌فروشید" },
+        { name: "metric", label: "شاخصی که باید بهتر شود", type: "text", placeholder: "مثلاً نرخ پاسخ دایرکت" },
+        { name: "deadline", label: "مهلت", type: "text", placeholder: "مثلاً ۳۰ روز" },
+      ],
+    },
+    mentor: {
+      title: "منتورینگ مدیر فروش",
+      fields: [
+        { name: "role", label: "نقش شما", type: "text", placeholder: "مدیر فروش" },
+        { name: "team", label: "اندازه تیم", type: "text", placeholder: "مثلاً ۵ نفر" },
+        { name: "pain", label: "مسئله اصلی تیم", type: "textarea", placeholder: "کجا معامله می‌ایستد؟" },
+        { name: "start", label: "شروع همکاری", type: "text", placeholder: "ماه آینده" },
+      ],
+    },
+  };
+  let serviceId = "";
+  let serviceStep = "form";
+  let serviceAnswers = [];
+  let toastTimer = 0;
+
+  function digits(value) {
+    return String(value || "").replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))).replace(/[^\d]/g, "");
+  }
+
+  function clampMinutePick(value) {
+    const snapped = Math.round(Number(value) / STEP) * STEP;
+    return Math.min(20000, Math.max(STEP, snapped || STEP));
+  }
+
+  function minuteCost(amount) {
+    return (clampMinutePick(amount) / STEP) * RATE;
+  }
+
+  function readCart() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(CART_KEY) || "{}");
+      return { items: Array.isArray(parsed.items) ? parsed.items : [] };
+    } catch {
+      return { items: [] };
+    }
+  }
+
+  function writeCart(cart) {
+    localStorage.setItem(CART_KEY, JSON.stringify({ items: cart.items }));
+    paintCart();
+  }
+
+  function showDialog(id) {
+    const dialog = document.querySelector(id);
+    if (!dialog) return null;
+    if (typeof dialog.showModal === "function" && !dialog.open) dialog.showModal();
+    return dialog;
+  }
+
+  function hideDialog(id) {
+    const dialog = document.querySelector(id);
+    if (!dialog) return;
+    if (typeof dialog.close === "function" && dialog.open) dialog.close();
+  }
+
+  function toast(message, withCart) {
+    const node = document.querySelector("#cart-toast");
+    if (!node) return;
+    const text = node.querySelector("[data-toast-text]");
+    const button = node.querySelector("[data-toast-cart]");
+    if (text) text.textContent = message;
+    if (button) button.hidden = !withCart;
+    node.hidden = false;
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => {
+      node.hidden = true;
+    }, 4200);
+  }
+
+  function addCourse(id) {
+    if (!PAID.includes(id)) return;
     const state = readPricing();
-    if (owns(state, id) || !PAID.includes(id)) return;
-    state.courses.push(id);
-    state.cashbackToman += Math.round(COURSE_PRICE * 0.05);
-    writePricing(state);
+    if (owns(state, id)) {
+      toast("این دوره برای شما فعال است.", false);
+      return;
+    }
+    const cart = readCart();
+    if (cart.items.some((item) => item.type === "bundle")) {
+      toast("پکیج جامع این دوره را شامل می‌شود.", true);
+      return;
+    }
+    if (cart.items.some((item) => item.type === "course" && item.courseId === id)) {
+      toast("این دوره همین حالا در سبد است.", true);
+      return;
+    }
+    cart.items.push({
+      type: "course",
+      id: "course:" + id,
+      courseId: id,
+      title: COURSE_TITLES[id] || id,
+      price: COURSE_PRICE,
+    });
+    writeCart(cart);
     closeOverview();
+    toast("دوره به سبد خرید اضافه شد.", true);
   }
 
-  function buyBundle() {
+  function addBundle() {
     const state = readPricing();
-    if (state.bundle) return;
-    state.bundle = true;
-    state.courses = PAID.slice();
-    state.minutes += GIFT;
-    state.cashbackToman += Math.round(BUNDLE_PRICE * 0.05);
-    writePricing(state);
+    if (state.bundle) {
+      toast("پکیج جامع برای شما فعال است.", false);
+      return;
+    }
+    const cart = readCart();
+    if (cart.items.some((item) => item.type === "bundle")) {
+      toast("پکیج جامع همین حالا در سبد است.", true);
+      return;
+    }
+    cart.items = cart.items.filter((item) => item.type !== "course");
+    cart.items.unshift({
+      type: "bundle",
+      id: "bundle",
+      title: "پکیج جامع ۴ دوره تخصصی",
+      price: BUNDLE_PRICE,
+      listPrice: 20000000,
+      giftMinutes: GIFT,
+    });
+    writeCart(cart);
+    toast("پکیج و هدیهٔ ۵۰۰ دقیقه به سبد اضافه شد.", true);
   }
 
-  function buyMinutes(slider) {
-    const amount = Number(slider.value);
+  function addMinutes(amount) {
+    const minutes = clampMinutePick(amount);
+    const cart = readCart();
+    const existing = cart.items.find((item) => item.type === "copilot_minutes");
+    const next = {
+      type: "copilot_minutes",
+      id: "copilot",
+      title: "دقیقهٔ کوپایلوت",
+      minutes,
+      price: minuteCost(minutes),
+    };
+    if (existing) {
+      existing.minutes = next.minutes;
+      existing.price = next.price;
+      existing.title = next.title;
+    } else cart.items.push(next);
+    writeCart(cart);
+    toast(existing ? "مقدار دقیقهٔ سبد به‌روز شد." : "دقیقه‌ها به سبد خرید اضافه شد.", true);
+  }
+
+  function removeCartItem(id) {
+    const cart = readCart();
+    cart.items = cart.items.filter((item) => item.id !== id);
+    writeCart(cart);
+  }
+
+  function changeMinutes(delta) {
+    const cart = readCart();
+    const item = cart.items.find((entry) => entry.type === "copilot_minutes");
+    if (!item) return;
+    item.minutes = clampMinutePick(item.minutes + delta);
+    item.price = minuteCost(item.minutes);
+    writeCart(cart);
+  }
+
+  function clearCart() {
+    writeCart({ items: [] });
+  }
+
+  function pricedTotal(items) {
+    return items.reduce((sum, item) => sum + (item.type === "service" ? 0 : Number(item.price) || 0), 0);
+  }
+
+  function openCart() {
+    hideDialog("#service-order");
+    hideDialog("#checkout-order");
+    paintCart();
+    showDialog("#cart-drawer");
+  }
+
+  function paintCart() {
+    const items = readCart().items;
+    document.querySelectorAll("[data-cart-count]").forEach((node) => {
+      node.textContent = fa.format(items.length);
+      if (node.classList.contains("absolute")) node.classList.toggle("hidden", items.length === 0);
+    });
+    const body = document.querySelector("[data-cart-body]");
+    const footer = document.querySelector("[data-cart-footer]");
+    if (!body || !footer) return;
+    if (!items.length) {
+      body.innerHTML = '<div class="rounded-2xl border border-white/10 p-4 text-sm leading-7 text-cream/70"><p>سبد خرید خالی است.</p><div class="mt-3 flex flex-wrap gap-2"><a class="rounded-full bg-gold px-3 py-1 text-xs font-semibold text-navy" href="' + base + '/academy/">دوره‌ها</a><a class="rounded-full px-3 py-1 text-xs ring-1 ring-gold/40" href="' + base + '/services/">خدمات</a></div></div>';
+      footer.innerHTML = "";
+      return;
+    }
+    const groups = [
+      ["course", "دوره‌ها"],
+      ["bundle", "پکیج"],
+      ["copilot_minutes", "کوپایلوت"],
+      ["service", "خدمات"],
+    ];
+    body.innerHTML = groups.map(([type, label]) => {
+      const rows = items.filter((item) => item.type === type);
+      if (!rows.length) return "";
+      return '<section class="mb-4"><h3 class="text-xs text-gold">' + label + "</h3>" + rows.map(cartRow).join("") + "</section>";
+    }).join("");
+    const payable = pricedTotal(items);
+    const pending = items.some((item) => item.type === "service");
+    const discount = items.some((item) => item.type === "bundle") ? 4000000 : 0;
+    footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع قابل پرداخت</span><span>' + toman(payable) + "</span></p>" +
+      (discount ? '<p class="flex justify-between text-gold"><span>سود خرید یکجا، داخل قیمت پکیج</span><span>' + toman(discount) + "</span></p>" : "") +
+      (pending ? '<p class="text-xs leading-6 text-cream/60">خدمات سفارشی نیازمند بررسی و برآورد قیمت‌اند و در این مبلغ نیستند.</p>' : "") +
+      '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">تکمیل خرید و ثبت نهایی</button>';
+  }
+
+  function cartRow(item) {
+    const price = item.type === "service"
+      ? "نیازمند بررسی و برآورد قیمت"
+      : toman(item.price);
+    const meta = item.type === "bundle"
+      ? '<p class="mt-1 text-xs text-gold">هدیه: ' + fa.format(item.giftMinutes || GIFT) + " دقیقه کوپایلوت</p>"
+      : item.type === "copilot_minutes"
+        ? '<div class="mt-2 flex items-center gap-2 text-xs"><button type="button" data-minute-step="-1000" class="grid size-8 place-items-center rounded-full ring-1 ring-gold/40" aria-label="کم کردن دقیقه">−</button><span>' + fa.format(item.minutes) + ' دقیقه</span><button type="button" data-minute-step="1000" class="grid size-8 place-items-center rounded-full ring-1 ring-gold/40" aria-label="زیاد کردن دقیقه">+</button></div>'
+        : "";
+    const details = item.type === "service"
+      ? '<details class="mt-2 text-xs text-cream/70"><summary class="cursor-pointer text-gold">مشاهده جزئیات سفارش</summary><ul class="mt-2 space-y-1">' + (item.answers || []).map((row) => "<li><span class=\"text-cream/50\">" + escText(row.label) + ":</span> " + escText(row.value) + "</li>").join("") + "</ul></details>"
+      : "";
+    return '<article class="mt-2 rounded-2xl border border-white/10 p-3"><div class="flex items-start justify-between gap-3"><div><p class="text-sm font-semibold">' + escText(item.title) + "</p>" + meta + details + '</div><div class="text-end"><p class="text-xs text-gold">' + price + '</p><button type="button" data-cart-remove="' + escText(item.id) + '" class="mt-2 text-xs text-cream/50">حذف</button></div></div></article>';
+  }
+
+  function fieldControl(field) {
+    const common = ' name="' + field.name + '" class="mt-1 w-full rounded-2xl border border-white/15 bg-white/5 px-3 text-sm outline-none focus:border-gold"';
+    if (field.type === "textarea") return '<textarea' + common + ' rows="3" placeholder="' + escText(field.placeholder || "") + '"></textarea>';
+    if (field.type === "select") return '<select' + common + '><option value="">انتخاب کنید</option>' + field.options.map((option) => '<option>' + escText(option) + "</option>").join("") + "</select>";
+    return '<input' + common + ' placeholder="' + escText(field.placeholder || "") + '" />';
+  }
+
+  function openService(id) {
+    const service = SERVICES[id];
+    if (!service) return;
+    serviceId = id;
+    serviceStep = "form";
+    const title = document.querySelector("[data-service-title]");
+    const box = document.querySelector("[data-service-fields]");
+    const error = document.querySelector("[data-service-error]");
+    if (title) title.textContent = service.title;
+    if (error) error.textContent = "";
+    if (box) {
+      box.innerHTML = service.fields.map((field) => '<label class="block text-sm">' + escText(field.label) + fieldControl(field) + '<span data-field-error="' + field.name + '" class="mt-1 block text-xs text-rose-300"></span></label>').join("");
+    }
+    paintServiceStep();
+    showDialog("#service-order");
+  }
+
+  function paintServiceStep() {
+    const next = document.querySelector("[data-service-next]");
+    const back = document.querySelector("[data-service-back]");
+    const confirm = document.querySelector("[data-service-confirm]");
+    const summary = serviceStep === "summary";
+    if (next) next.classList.toggle("hidden", summary);
+    if (back) back.classList.toggle("hidden", !summary);
+    if (confirm) confirm.classList.toggle("hidden", !summary);
+  }
+
+  function readServiceAnswers() {
+    const form = document.querySelector("[data-service-form]");
+    const service = SERVICES[serviceId];
+    if (!form || !service) return { ok: false, rows: [] };
+    let ok = true;
+    const rows = service.fields.map((field) => {
+      const input = form.elements[field.name];
+      const value = input ? String(input.value || "").trim() : "";
+      const error = form.querySelector('[data-field-error="' + field.name + '"]');
+      if (!value) {
+        ok = false;
+        if (error) error.textContent = "این مورد را تکمیل کنید.";
+      } else if (error) error.textContent = "";
+      return { name: field.name, label: field.label, value };
+    });
+    const error = document.querySelector("[data-service-error]");
+    if (error) error.textContent = ok ? "" : "موارد مشخص‌شده را کامل کنید.";
+    return { ok, rows };
+  }
+
+  function showServiceSummary() {
+    const result = readServiceAnswers();
+    if (!result.ok) return;
+    serviceAnswers = result.rows;
+    const box = document.querySelector("[data-service-fields]");
+    if (box) {
+      box.innerHTML = '<p class="text-sm font-semibold">خلاصه اطلاعات</p><ul class="mt-3 space-y-2 text-sm">' + result.rows.map((row) => "<li class=\"rounded-2xl border border-white/10 px-3 py-2\"><span class=\"text-cream/50\">" + escText(row.label) + "</span><p class=\"mt-1\">" + escText(row.value) + "</p></li>").join("") + "</ul>";
+    }
+    serviceStep = "summary";
+    paintServiceStep();
+  }
+
+  function confirmService() {
+    const service = SERVICES[serviceId];
+    if (!service || serviceStep !== "summary" || !serviceAnswers.length) return;
+    const cart = readCart();
+    cart.items.push({
+      type: "service",
+      id: "service:" + serviceId + ":" + Date.now(),
+      serviceId,
+      title: service.title,
+      price: 0,
+      priceStatus: "quote",
+      answers: serviceAnswers,
+    });
+    writeCart(cart);
+    hideDialog("#service-order");
+    toast("سفارش خدمت به سبد اضافه شد.", true);
+  }
+
+  function openCheckout() {
+    const items = readCart().items;
+    if (!items.length) return;
+    const fields = document.querySelector("[data-checkout-fields]");
+    const done = document.querySelector("[data-checkout-done]");
+    const actions = document.querySelector("[data-checkout-actions]");
+    const summary = document.querySelector("[data-checkout-summary]");
+    const error = document.querySelector("[data-checkout-error]");
+    if (fields) fields.classList.remove("hidden");
+    if (done) {
+      done.classList.add("hidden");
+      done.innerHTML = "";
+    }
+    if (actions) actions.classList.remove("hidden");
+    if (error) error.textContent = "";
+    const session = readSession();
+    const form = document.querySelector("[data-checkout-form]");
+    if (form && session && session.currentUser) {
+      if (!form.elements.name.value) form.elements.name.value = session.currentUser.name || "";
+      if (!form.elements.phone.value) form.elements.phone.value = session.currentUser.phone || "";
+    }
+    if (summary) {
+      const pending = items.some((item) => item.type === "service");
+      summary.innerHTML = items.map((item) => '<p class="flex justify-between gap-3 py-1"><span>' + escText(item.title) + "</span><span>" + (item.type === "service" ? "برآورد بعدی" : toman(item.price)) + "</span></p>").join("") +
+        '<p class="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>مبلغ این مرحله</span><span>' + toman(pricedTotal(items)) + "</span></p>" +
+        (pending ? '<p class="mt-2 text-xs leading-6 text-cream/60">حداقل یک خدمت نیازمند بررسی و برآورد قیمت است.</p>' : "");
+    }
+    hideDialog("#cart-drawer");
+    showDialog("#checkout-order");
+  }
+
+  function placeOrder(form) {
+    const error = document.querySelector("[data-checkout-error]");
+    const name = form.elements.name.value.trim();
+    const phone = digits(form.elements.phone.value);
+    const notes = form.elements.notes.value.trim();
+    if (name.length < 2) {
+      if (error) error.textContent = "نام را کامل بنویسید.";
+      return;
+    }
+    if (!/^09\d{9}$/.test(phone)) {
+      if (error) error.textContent = "شماره موبایل را با ۰۹ و ۱۱ رقم وارد کنید.";
+      return;
+    }
+    const items = readCart().items;
+    if (!items.length) {
+      if (error) error.textContent = "سبد خرید خالی است.";
+      return;
+    }
+    const pending = items.some((item) => item.type === "service");
+    const order = {
+      id: "ORD-" + Math.floor(10000 + Math.random() * 90000),
+      at: new Date().toISOString(),
+      name,
+      phone,
+      notes,
+      items,
+      total: pricedTotal(items),
+      status: pending ? "pending_review" : "demo_paid",
+      message: pending ? "سفارش ثبت شد؛ منتظر بررسی کارشناسان و اعلام هزینه" : "سفارش آزمایشی با موفقیت ثبت شد",
+    };
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
+    orders.unshift(order);
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    grantPurchase(items);
+    clearCart();
+    const fields = document.querySelector("[data-checkout-fields]");
+    const done = document.querySelector("[data-checkout-done]");
+    const actions = document.querySelector("[data-checkout-actions]");
+    if (fields) fields.classList.add("hidden");
+    if (actions) actions.classList.add("hidden");
+    if (done) {
+      done.classList.remove("hidden");
+      done.innerHTML = '<p class="text-lg font-semibold text-gold">' + order.message + '</p><p class="mt-3 text-sm">شماره سفارش: <span dir="ltr">' + order.id + "</span></p><p class=\"mt-2 text-sm text-cream/70\">پرداخت واقعی انجام نشده است. دسترسی دوره‌ها و دقیقه‌های همین سفارش روی همین مرورگر فعال شد.</p>";
+    }
+  }
+
+  function grantPurchase(items) {
     const state = readPricing();
-    state.minutes += amount;
-    state.cashbackToman += Math.round((amount / STEP) * RATE * 0.05);
+    const ordered = items.slice().sort((a, b) => (a.type === "bundle" ? -1 : b.type === "bundle" ? 1 : 0));
+    ordered.forEach((item) => {
+      if (item.type === "bundle" && !state.bundle) {
+        state.bundle = true;
+        state.courses = PAID.slice();
+        state.minutes += GIFT;
+        state.cashbackToman += Math.round(BUNDLE_PRICE * 0.05);
+      }
+      if (item.type === "course" && !state.bundle && !state.courses.includes(item.courseId)) {
+        state.courses.push(item.courseId);
+        state.cashbackToman += Math.round(COURSE_PRICE * 0.05);
+      }
+      if (item.type === "copilot_minutes") {
+        state.minutes += clampMinutePick(item.minutes);
+        state.cashbackToman += Math.round(minuteCost(item.minutes) * 0.05);
+      }
+    });
     writePricing(state);
   }
 
@@ -577,23 +990,67 @@
       document.querySelector("[data-mobile-nav]").classList.toggle("hidden");
       return;
     }
+    if (event.target.closest("[data-open-cart], [data-toast-cart]")) {
+      const toastNode = document.querySelector("#cart-toast");
+      const menu = document.querySelector("[data-mobile-nav]");
+      if (toastNode) toastNode.hidden = true;
+      if (menu) menu.classList.add("hidden");
+      openCart();
+      return;
+    }
+    if (event.target.closest("[data-cart-close]") || event.target.id === "cart-drawer") {
+      hideDialog("#cart-drawer");
+      return;
+    }
+    const remove = event.target.closest("[data-cart-remove]");
+    if (remove) {
+      removeCartItem(remove.dataset.cartRemove);
+      return;
+    }
+    const step = event.target.closest("[data-minute-step]");
+    if (step) {
+      changeMinutes(Number(step.dataset.minuteStep));
+      return;
+    }
+    if (event.target.closest("[data-open-checkout]")) {
+      openCheckout();
+      return;
+    }
+    if (event.target.closest("[data-checkout-close]") || event.target.id === "checkout-order") {
+      hideDialog("#checkout-order");
+      return;
+    }
+    const orderService = event.target.closest("[data-order-service]");
+    if (orderService) {
+      openService(orderService.dataset.orderService);
+      return;
+    }
+    if (event.target.closest("[data-service-close]") || event.target.id === "service-order") {
+      hideDialog("#service-order");
+      return;
+    }
+    if (event.target.closest("[data-service-back]")) {
+      openService(serviceId);
+      return;
+    }
+    if (event.target.closest("[data-service-confirm]")) {
+      confirmService();
+      return;
+    }
     const buy = event.target.closest("[data-buy]");
     if (buy) {
-      buyCourse(buy.dataset.buy);
+      addCourse(buy.dataset.buy);
       return;
     }
     if (event.target.closest("#buy-bundle")) {
-      buyBundle();
+      addBundle();
       return;
     }
     const minutes = event.target.closest("#buy-minutes");
     if (minutes) {
-      const slider = document.querySelector("#minute-slider");
-      if (slider) {
-        buyMinutes(slider);
-        const note = document.querySelector("[data-minute-note]");
-        if (note) note.textContent = fa.format(Number(slider.value)) + " دقیقه به کیف کوپایلوت اضافه شد.";
-      }
+      const scope = minutes.closest("section") || document;
+      const slider = scope.querySelector("#minute-slider");
+      if (slider) addMinutes(Number(slider.value));
       return;
     }
     const tabLink = event.target.closest("[data-tab-link]");
@@ -1126,6 +1583,21 @@
         event.preventDefault();
         send.click();
       }
+    });
+  }
+
+  const serviceForm = document.querySelector("[data-service-form]");
+  if (serviceForm) {
+    serviceForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      showServiceSummary();
+    });
+  }
+  const checkoutForm = document.querySelector("[data-checkout-form]");
+  if (checkoutForm) {
+    checkoutForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      placeOrder(checkoutForm);
     });
   }
 
