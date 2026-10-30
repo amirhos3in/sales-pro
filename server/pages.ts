@@ -150,7 +150,6 @@ export function layout(base: string, active: string, title: string, body: string
   <main class="mx-auto w-full max-w-6xl px-4 py-8">${body}</main>
   <footer class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-cream/50 sm:flex-row sm:justify-between">
     <p>نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
-    <p>ساخته‌شده با Node.js.</p>
   </footer>
   ${commerceShell(base)}
   <script id="objections" type="application/json">${JSON.stringify(OBJECTIONS)}</script>
@@ -165,8 +164,9 @@ function commerceShell(_base: string) {
     <div class="flex h-full max-h-[100vh] flex-col">
       <div class="flex items-center justify-between gap-3 border-b border-white/10 p-4">
         <h2 id="cart-title" class="text-lg font-semibold">سبد خرید</h2>
-        <button type="button" data-cart-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن سبد">×</button>
+        <button type="button" data-cart-close class="h-10 rounded-full px-3 text-sm ring-1 ring-white/20" aria-label="بستن سبد">بستن</button>
       </div>
+      <div data-cart-toast-slot class="px-4 pt-3"></div>
       <div data-cart-body class="min-h-0 flex-1 overflow-y-auto p-4" data-lenis-prevent></div>
       <div data-cart-footer class="border-t border-white/10 p-4"></div>
     </div>
@@ -202,17 +202,17 @@ function commerceShell(_base: string) {
           <label class="text-sm">نام و نام خانوادگی<input name="name" class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label>
           <label class="text-sm">شماره موبایل<input name="phone" dir="ltr" inputmode="numeric" class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3 text-left" placeholder="0912xxxxxxx" /></label>
           <label class="text-sm">یادداشت (اختیاری)<textarea name="notes" class="mt-1 min-h-20 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label>
-          <div data-checkout-summary class="rounded-2xl border border-white/10 p-3 text-sm"></div>
           <p data-checkout-error class="text-sm text-rose-300" role="alert"></p>
         </div>
         <div data-checkout-done class="hidden"></div>
       </div>
       <div data-checkout-actions class="border-t border-white/10 p-5">
+        <div data-checkout-summary class="mb-3 rounded-2xl border border-white/10 p-3 text-sm"></div>
         <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>
       </div>
     </form>
   </dialog>
-  <div id="cart-toast" class="fixed bottom-4 z-[70] hidden max-w-sm items-center gap-3 rounded-2xl bg-navy px-4 py-3 text-sm text-cream ring-1 ring-gold/40" role="status">
+  <div id="cart-toast" class="fixed top-20 inset-x-4 z-[80] mx-auto hidden max-w-lg items-center gap-3 rounded-2xl bg-navy px-4 py-3 text-sm text-cream ring-1 ring-gold/40" role="status">
     <p data-toast-text class="flex-1"></p>
     <button type="button" data-toast-cart class="shrink-0 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-navy">مشاهده سبد</button>
   </div>`;
@@ -286,10 +286,9 @@ function homeCourseCards(base: string) {
       <h2 class="text-lg font-semibold"><a href="${enter}" class="hover:text-gold">${esc(category.title.fa)}</a></h2>
       <p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
       ${paid ? `<p class="mt-3 text-2xl font-semibold text-gold">${toman(COURSE_PRICE)}</p>` : `<p class="mt-3 text-sm text-emerald-300">آموزش رایگان</p>`}
-      <p class="mt-2 text-xs text-cream/50">${fa.format(count)} درس</p>
+      <a href="${enter}" class="mt-3 inline-flex text-sm text-gold">دیدن ${fa.format(count)} درس</a>
       <div class="mt-4">
-        ${paid ? `<button type="button" data-buy="${category.id}" class="h-11 w-full rounded-2xl bg-cream text-sm font-semibold text-navy">دسترسی آزمایشی روی همین مرورگر</button>
-        <a data-enter="${category.id}" href="${enter}" class="hidden h-11 w-full items-center justify-center rounded-2xl border-2 border-gold bg-navy text-sm font-semibold text-gold">ورود به دوره و مشاهده ویدیوها</a>`
+        ${paid ? `<button type="button" data-buy="${category.id}" class="h-11 w-full rounded-2xl bg-cream text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>`
           : `<a href="${enter}" class="inline-flex h-11 w-full items-center justify-center rounded-2xl border-2 border-gold bg-navy text-sm font-semibold text-gold">مشاهده ویدیوها</a>`}
       </div>
     </article>`;
@@ -383,7 +382,6 @@ function courseOverview() {
       </div>
       <div class="border-t border-white/10 p-5">
         <button type="button" data-buy data-ov-buy class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">دسترسی آزمایشی روی همین مرورگر</button>
-        <p class="mt-2 text-center text-xs text-cream/50">پرداخت بانکی نیست. دسترسی فقط روی همین مرورگر می‌ماند.</p>
         <p data-ov-price class="mt-2 text-center text-xs text-cream/50"></p>
       </div>
     </div>
@@ -401,14 +399,20 @@ export function homePage(base: string) {
   return layout(base, "home", "نکس‌سل | آکادمی فروش", `
     <section ${revealAttrs(0)} class="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-10">
       <p class="text-xs tracking-[0.18em] text-gold">نکس‌سل</p>
-      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">آکادمی فروش نکس‌سل</h1>
-      <p class="mt-4 max-w-2xl text-sm leading-8 text-cream/70">چهار مسیر فروش: آنلاین، حضوری، تلفنی و مذاکره. قیمت هر مسیر کنار همان مسیر است.</p>
+      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] text-cream sm:text-4xl">آکادمی فروش نکس‌سل</h1>
+      <p class="mt-4 max-w-2xl text-sm leading-8 text-cream">چهار مسیر فروش: آنلاین، حضوری، تلفنی و مذاکره.</p>
     </section>
     <section id="courses" class="mt-8">
       <h2 class="text-xl font-semibold">چهار مسیر فروش</h2>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>
-      <p class="mt-6 text-sm text-cream/50"><a href="${base}/subscription/">بستهٔ چهار دوره در صفحهٔ قیمت است.</a></p>
-      <p class="mt-2 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دموی دستیار در صفحهٔ جداست و جزو ثبت‌نام دوره نیست.</a></p>
+      <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold">بستهٔ چهار دوره</h2>
+          <p class="mt-2 text-2xl font-semibold text-gold">${toman(BUNDLE_PRICE)}</p>
+        </div>
+        <button type="button" id="buy-bundle" class="h-11 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+      </article>
+      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دموی دستیار در صفحهٔ جداست و جزو ثبت‌نام دوره نیست.</a></p>
     </section>
   `);
 }
@@ -522,28 +526,31 @@ export function contactPage(base: string) {
 }
 
 export function subscriptionPage(base: string) {
-  const paths = categories.filter((category) => category.tierRequired === "pro").map((category) => `
-    <article class="glass flex flex-col rounded-3xl p-5" data-course="${category.id}" data-paid="yes">
+  const paths = categories.filter((category) => category.tierRequired === "pro").map((category, index) => {
+    const count = lessonsOf(category).length;
+    const enter = `${base}/learn/${category.id}/`;
+    return `<article ${revealAttrs(index * 40)} class="glass flex flex-col rounded-3xl p-5" data-course="${category.id}" data-paid="yes">
       <h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2>
+      <p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
       <p class="mt-3 text-2xl font-semibold text-gold">${toman(COURSE_PRICE)}</p>
-      <button type="button" data-buy="${category.id}" class="mt-4 h-11 w-full rounded-2xl bg-cream text-sm font-semibold text-navy">دسترسی آزمایشی روی همین مرورگر</button>
-      <a data-enter="${category.id}" href="${base}/learn/${category.id}/" class="mt-2 hidden h-11 w-full items-center justify-center rounded-2xl border-2 border-gold text-sm font-semibold text-gold">ورود به دوره</a>
-    </article>`).join("");
+      <a href="${enter}" class="mt-3 inline-flex text-sm text-gold">دیدن ${fa.format(count)} درس</a>
+      <button type="button" data-buy="${category.id}" class="mt-4 h-11 w-full rounded-2xl bg-cream text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+    </article>`;
+  }).join("");
   return layout(base, "pricing", "قیمت | نکس‌سل", `
-    <header ${revealAttrs(0)}>
-      <p class="text-xs tracking-[0.16em] text-gold">فهرست زنده</p>
-      <h1 class="mt-2 text-3xl font-semibold">قیمت چهار مسیر</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">هر مسیر یک عدد دارد. بستهٔ چهار دوره یک عدد جداست. پرداخت بانکی نیست.</p>
+    <header>
+      <h1 class="text-3xl font-semibold text-cream">قیمت چهار مسیر</h1>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream">هر مسیر یک عدد دارد. بستهٔ چهار دوره یک عدد جداست.</p>
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${paths}</div>
-    <article ${revealAttrs(80)} class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5">
-      <h2 class="text-lg font-semibold">بستهٔ چهار دوره</h2>
-      <p class="mt-3 text-2xl font-semibold text-gold">${toman(BUNDLE_PRICE)}</p>
-      <p class="mt-2 text-sm leading-7 text-cream/60">${fa.format(BUNDLE_GIFT_MINUTES)} دقیقهٔ هوش مصنوعی همراه این بسته روی همین مرورگر می‌ماند.</p>
-      <button type="button" id="buy-bundle" class="mt-4 h-11 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">دسترسی آزمایشی بسته روی همین مرورگر</button>
+    <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">بستهٔ چهار دوره</h2>
+        <p class="mt-2 text-2xl font-semibold text-gold">${toman(BUNDLE_PRICE)}</p>
+      </div>
+      <button type="button" id="buy-bundle" class="h-11 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
     </article>
     <p class="mt-6 text-sm"><a class="text-gold" href="${base}/services/#ai-minutes">دقیقهٔ هوش مصنوعی در بخش خدمات است.</a></p>
-    <p class="mt-4 text-sm leading-7 text-cream/60">پلن‌های ماهانه، سه‌ماهه و سالانه پیشنهاد فعال نیستند.</p>
   `);
 }
 
@@ -664,7 +671,7 @@ function dashboardPage(base: string, initialTab = "overview") {
             <p class="text-xs tracking-[0.16em] text-gold">دوره‌های من</p>
             <h1 class="mt-2 text-2xl font-semibold">وضعیت خرید دوره‌ها</h1>
             <p class="mt-1 text-sm text-cream/60" dir="ltr" data-phone-line>—</p>
-            <p class="mt-2 text-sm leading-7 text-cream/60">هر دوره ${toman(COURSE_PRICE)} است. بستهٔ چهار دوره ${toman(BUNDLE_PRICE)} است. پرداخت بانکی نیست و دسترسی روی همین مرورگر می‌ماند.</p>
+            <p class="mt-2 text-sm leading-7 text-cream/60">هر دوره ${toman(COURSE_PRICE)} است. بستهٔ چهار دوره ${toman(BUNDLE_PRICE)} است.</p>
           </div>
           <article class="rounded-[28px] bg-navy p-5 ring-1 ring-gold/30" data-bundle-card>
             <div class="flex flex-wrap items-center gap-2">
@@ -767,7 +774,7 @@ export function learnCategoryPage(base: string, id: string) {
     <p class="mt-3 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
     </header>
     <div class="mt-4" data-course="${category.id}">
-      ${category.tierRequired === "pro" ? `<button type="button" data-buy="${category.id}" class="h-11 rounded-2xl bg-cream px-4 text-sm font-semibold text-navy">دسترسی آزمایشی روی همین مرورگر</button><p class="mt-2 text-xs text-cream/50">پرداخت بانکی نیست.</p>` : ""}
+      ${category.tierRequired === "pro" ? `<button type="button" data-buy="${category.id}" class="h-11 rounded-2xl bg-cream px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>` : ""}
     </div>
     <ol class="mt-6 space-y-3">${rows.map((row, index) => `<li ${revealAttrs(Math.min(index, 6) * 50)} class="glass rounded-2xl px-4 py-3"><a href="${base}/learn/${category.id}/${row.lesson.id}/" class="font-semibold">${fa.format(index + 1)}. ${esc(row.lesson.title.fa)}</a><p class="mt-1 text-xs text-cream/60">${esc(row.lesson.summary.fa)}</p></li>`).join("")}</ol>
   `);
@@ -788,7 +795,7 @@ export function learnLessonPage(base: string, categoryId: string, lessonId: stri
     <p class="mt-2 text-sm leading-7 text-cream/70">${esc(row.lesson.summary.fa)}</p>
     <div ${revealAttrs(80)} class="mt-4 aspect-video overflow-hidden rounded-2xl bg-black" data-course-gate="${category.id}" data-free="${category.tierRequired === "free" ? "yes" : "no"}">
       <iframe class="h-full w-full" title="ویدیوی آپارات" allowfullscreen data-aparat="${esc(row.lesson.aparat)}"></iframe>
-      <p data-locked class="grid h-full place-items-center p-6 text-center text-sm">این درس با دسترسی آزمایشی همین دوره روی این مرورگر باز می‌شود. پرداخت بانکی نیست.</p>
+      <p data-locked class="grid h-full place-items-center p-6 text-center text-sm">برای دیدن این درس، همین مسیر را به سبد اضافه کنید.</p>
     </div>
     <form ${revealAttrs(140)} data-quiz data-lesson="${esc(row.lesson.id)}" class="mt-5 space-y-3">
       <label class="flex items-center gap-2 text-sm"><input name="watched" type="checkbox" class="size-4 accent-gold" /> ویدیو را دیدم</label>
