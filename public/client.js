@@ -760,13 +760,27 @@
       const select = card.querySelector('[data-service-param="' + param.id + '"]');
       const picked = select ? select.value : "";
       const chosen = param.options.find((option) => option.id === picked) || param.options[0];
-      return { name: param.id, label: param.label, value: chosen.label, amount: Number(chosen.amount) || 0 };
+      const scale = Boolean(param.scale);
+      return {
+        name: param.id,
+        label: param.label,
+        value: chosen.label,
+        amount: scale ? 0 : Number(chosen.amount) || 0,
+        scale,
+        factor: scale ? Number(chosen.factor) || 1 : 1,
+      };
     });
-    return { lines, total: lines.reduce((sum, line) => sum + line.amount, 0) };
+    const base = lines.reduce((sum, line) => sum + (line.scale ? 0 : line.amount), 0);
+    const factor = lines.reduce((product, line) => product * (line.scale ? line.factor : 1), 1);
+    return { lines, total: base * factor };
   }
 
   function serviceBreakdown(lines) {
-    return lines.map((line) => (line.amount > 0 ? line.value + " · " + toman(line.amount) : line.value)).join(" + ");
+    const timed = lines.filter((line) => line.scale);
+    const priced = lines.filter((line) => !line.scale);
+    const body = priced.map((line) => (line.amount > 0 ? line.value + " · " + toman(line.amount) : line.value)).join(" + ");
+    if (!timed.length) return body;
+    return body + " × " + timed.map((line) => line.value).join(" × ");
   }
 
   function paintServiceCard(card) {

@@ -505,7 +505,10 @@ function serviceSelect(param: { id: string; label: string; options: Array<{ id: 
 function serviceRateList(offer: (typeof SERVICE_OFFERS)[number]) {
   return offer.params
     .map((param) => {
-      const rates = param.options.map((option) => `${esc(option.label)} ${option.amount ? esc(toman(option.amount)) : "بدون مبلغ اضافه"}`).join("، ");
+      const rates = param.options.map((option) => {
+        if (param.scale) return `${esc(option.label)}: جمع بقیه × ${fa.format(option.factor ?? 1)}`;
+        return `${esc(option.label)} ${option.amount ? esc(toman(option.amount)) : "بدون مبلغ اضافه"}`;
+      }).join("، ");
       return `<li><span class="text-cream/50">${esc(param.label)}:</span> ${rates}</li>`;
     })
     .join("");
@@ -528,7 +531,7 @@ export function servicesPage(base: string) {
       <button type="button" data-add-service="${esc(offer.id)}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">افزودن به سبد</button>
     </article>`;
   }).join("");
-  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت هر خدمت جمع پارامترهای همان کارت است. با عوض کردن اندازه تیم، مدت، کانال یا تعداد جلسه، مبلغ همان لحظه عوض می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${cards}</div><div class="mt-8">${aiMinutesOffer()}</div><script id="service-pricing" type="application/json">${model}</script>`);
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت هر خدمت جمع پارامترهای همان کارت است. آموزش حضوری و منتورینگ مدیر فروش پارامتر زمان دوره دارند و مبلغ با همان زمان عوض می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${cards}</div><div class="mt-8">${aiMinutesOffer()}</div><script id="service-pricing" type="application/json">${model}</script>`);
 }
 
 function supportForm() {

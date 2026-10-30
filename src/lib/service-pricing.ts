@@ -2,11 +2,13 @@ export type ServiceOption = {
   id: string;
   label: string;
   amount: number;
+  factor?: number;
 };
 
 export type ServiceParam = {
   id: string;
   label: string;
+  scale?: boolean;
   options: ServiceOption[];
 };
 
@@ -22,6 +24,8 @@ export type ServiceLine = {
   label: string;
   value: string;
   amount: number;
+  scale?: boolean;
+  factor?: number;
 };
 
 export const SERVICE_OFFERS: ServiceOffer[] = [
@@ -62,11 +66,11 @@ export const SERVICE_OFFERS: ServiceOffer[] = [
   {
     id: "workshop",
     title: "آموزش حضوری پرسنل",
-    text: "کارگاه زبان بدن، نیازسنجی و دمو برای سناریوهای همان تیم. مدت، تعداد نفر و محل برگزاری مبلغ را عوض می‌کند.",
+    text: "کارگاه زبان بدن، نیازسنجی و دمو برای سناریوهای همان تیم. زمان دوره، تعداد نفر و محل برگزاری مبلغ را عوض می‌کند.",
     params: [
       {
         id: "duration",
-        label: "مدت کارگاه",
+        label: "زمان دوره",
         options: [
           { id: "half", label: "نیم‌روز", amount: 8_000_000 },
           { id: "day", label: "یک روز", amount: 12_000_000 },
@@ -120,8 +124,18 @@ export const SERVICE_OFFERS: ServiceOffer[] = [
   {
     id: "mentor",
     title: "منتورینگ مدیر فروش",
-    text: "جلسهٔ یک‌به‌یک برای عارضه‌یابی تیم و شاخص‌ها. تعداد جلسه در ماه و اندازه تیم مبلغ را عوض می‌کند.",
+    text: "جلسهٔ یک‌به‌یک برای عارضه‌یابی تیم و شاخص‌ها. جلسه در ماه و اندازه تیم جمع یک ماه را می‌سازند و زمان دوره آن جمع را در تعداد ماه ضرب می‌کند.",
     params: [
+      {
+        id: "term",
+        label: "زمان دوره",
+        scale: true,
+        options: [
+          { id: "1", label: "۱ ماه", amount: 0, factor: 1 },
+          { id: "3", label: "۳ ماه", amount: 0, factor: 3 },
+          { id: "6", label: "۶ ماه", amount: 0, factor: 6 },
+        ],
+      },
       {
         id: "sessions",
         label: "جلسه در ماه",
@@ -147,19 +161,28 @@ export const SERVICE_OFFERS: ServiceOffer[] = [
 export function quoteService(offer: ServiceOffer, picks: Record<string, string>) {
   const lines: ServiceLine[] = offer.params.map((param) => {
     const chosen = param.options.find((option) => option.id === picks[param.id]) ?? param.options[0];
+    const scale = Boolean(param.scale);
     return {
       name: param.id,
       label: param.label,
       value: chosen.label,
-      amount: chosen.amount,
+      amount: scale ? 0 : chosen.amount,
+      scale,
+      factor: scale ? chosen.factor ?? 1 : 1,
     };
   });
+  const base = lines.reduce((sum, line) => sum + (line.scale ? 0 : line.amount), 0);
+  const factor = lines.reduce((product, line) => product * (line.scale ? line.factor ?? 1 : 1), 1);
   return {
     lines,
-    total: lines.reduce((sum, line) => sum + line.amount, 0),
+    total: base * factor,
   };
 }
 
-export function serviceBreakdown(lines: Array<{ value: string; amount: number }>, format: (amount: number) => string) {
-  return lines.map((line) => (line.amount > 0 ? `${line.value} · ${format(line.amount)}` : line.value)).join(" + ");
+export function serviceBreakdown(lines: Array<{ value: string; amount: number; scale?: boolean }>, format: (amount: number) => string) {
+  const timed = lines.filter((line) => line.scale);
+  const priced = lines.filter((line) => !line.scale);
+  const body = priced.map((line) => (line.amount > 0 ? `${line.value} · ${format(line.amount)}` : line.value)).join(" + ");
+  if (!timed.length) return body;
+  return `${body} × ${timed.map((line) => line.value).join(" × ")}`;
 }
