@@ -25,7 +25,6 @@ function esc(value: string) {
 const NAV = [
   ["/", "خانه", "home"],
   ["/academy/", "آموزش", "academy"],
-  ["/subscription/", "قیمت", "pricing"],
   ["/articles/", "مقالات", "articles"],
   ["/services/", "خدمات", "services"],
   ["/support/", "پشتیبانی", "support"],
@@ -396,7 +395,7 @@ export function homePage(base: string) {
       <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/70">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند. درس اول هر مسیر بدون سبد دیده می‌شود.</p>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>
       <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-lg font-semibold leading-8 text-cream">هر چهار مسیر، <span class="text-gold">${toman(BUNDLE_PRICE)}</span>. یکی رایگان است.</p>
+        <p class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></p>
         <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
       </article>
       <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دموی دستیار در صفحهٔ جداست و جزو ثبت‌نام دوره نیست.</a></p>
@@ -531,7 +530,7 @@ export function servicesPage(base: string) {
       <button type="button" data-add-service="${esc(offer.id)}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">افزودن به سبد</button>
     </article>`;
   }).join("");
-  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت هر خدمت جمع پارامترهای همان کارت است. آموزش حضوری و منتورینگ مدیر فروش پارامتر زمان دوره دارند و مبلغ با همان زمان عوض می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${cards}</div><div class="mt-8">${aiMinutesOffer()}</div><script id="service-pricing" type="application/json">${model}</script>`);
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت هر خدمت جمع پارامترهای همان کارت است. کارگاه حضوری تیم فروش و منتورینگ مدیر فروش پارامتر زمان دوره دارند و مبلغ با همان زمان عوض می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${cards}</div><div class="mt-8">${aiMinutesOffer()}</div><script id="service-pricing" type="application/json">${model}</script>`);
 }
 
 function supportForm() {
@@ -543,7 +542,7 @@ export function supportPage(base: string) {
 }
 
 export function aboutPage(base: string) {
-  return layout(base, "about", "درباره ما | نکس‌سل", `<header ${revealAttrs(0)}><p class="text-xs tracking-[0.18em] text-gold">آکادمی فروش نکس‌سل</p><h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45]">چهار مسیر ویدیویی فروش، با چالش پایان هر درس.</h1><p class="mt-3 max-w-2xl text-sm leading-8 text-cream/75">آنلاین، حضوری، تلفنی و مذاکره. هر مسیر ${toman(COURSE_PRICE)}. هر چهار مسیر، ${toman(BUNDLE_PRICE)} و یکی رایگان است. پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p><a class="mt-5 inline-flex text-sm text-gold" href="${base}/support/">پیام از صفحهٔ پشتیبانی</a></header>`);
+  return layout(base, "about", "درباره ما | نکس‌سل", `<header ${revealAttrs(0)}><p class="text-xs tracking-[0.18em] text-gold">آکادمی فروش نکس‌سل</p><h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45]">چهار مسیر ویدیویی فروش، با چالش پایان هر درس.</h1><p class="mt-3 max-w-2xl text-sm leading-8 text-cream/75">آنلاین، حضوری، تلفنی و مذاکره. هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}. پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p><a class="mt-5 inline-flex text-sm text-gold" href="${base}/support/">پیام از صفحهٔ پشتیبانی</a></header>`);
 }
 
 export function contactPage(base: string) {
@@ -569,7 +568,7 @@ export function subscriptionPage(base: string) {
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${paths}</div>
     <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-lg font-semibold leading-8 text-cream">هر چهار مسیر، <span class="text-gold">${toman(BUNDLE_PRICE)}</span>. یکی رایگان است.</p>
+      <p class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></p>
       <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
     </article>
   `);
@@ -678,12 +677,12 @@ function dashboardPage(base: string, initialTab = "overview") {
             <p class="text-xs tracking-[0.16em] text-gold">دوره‌های من</p>
             <h1 class="mt-2 text-2xl font-semibold">وضعیت دسترسی آزمایشی</h1>
             <p class="mt-1 text-sm text-cream/60" dir="ltr" data-phone-line>—</p>
-            <p class="mt-2 text-sm leading-7 text-cream/60">هر مسیر ${toman(COURSE_PRICE)}. هر چهار مسیر، ${toman(BUNDLE_PRICE)}.</p>
+            <p class="mt-2 text-sm leading-7 text-cream/60">هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}.</p>
           </div>
           <article class="rounded-[28px] bg-navy p-5 ring-1 ring-gold/30" data-bundle-card>
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-lg font-semibold">هر چهار مسیر</h2>
-              <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">هر چهار مسیر، ${toman(BUNDLE_PRICE)}</span>
+              <h2 class="text-lg font-semibold">آکادمی جامع</h2>
+              <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">آکادمی جامع، ${toman(BUNDLE_PRICE)}</span>
             </div>
             <button type="button" id="buy-bundle" data-bundle-buy class="mt-4 inline-flex h-11 items-center rounded-2xl bg-cream px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
           </article>

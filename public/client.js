@@ -189,7 +189,7 @@
       label.className = active ? "text-gold" : "text-cream/50";
     });
     document.querySelectorAll("[data-bundle-label]").forEach((node) => {
-      node.textContent = state.bundle ? "دسترسی آزمایشی هر چهار مسیر روی همین مرورگر است" : "هر چهار مسیر، " + toman(BUNDLE_PRICE);
+      node.textContent = state.bundle ? "دسترسی آزمایشی آکادمی جامع روی همین مرورگر است" : "آکادمی جامع، " + toman(BUNDLE_PRICE);
     });
     document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
     const codeNode = document.querySelector("[data-referral-code]");
@@ -631,7 +631,7 @@
     cart.items.unshift({
       type: "bundle",
       id: "bundle",
-      title: "هر چهار مسیر",
+      title: "آکادمی جامع",
       price: BUNDLE_PRICE,
     });
     writeCart(cart);
