@@ -222,20 +222,13 @@
       const id = card.dataset.course;
       const paid = card.dataset.paid !== "no";
       const open = !paid || owns(state, id);
-      const buy = card.querySelector("[data-buy]");
       const enter = card.querySelector("[data-enter]");
-      if (buy) buy.classList.toggle("hidden", open);
       if (enter) {
         enter.classList.toggle("hidden", !open);
         enter.classList.toggle("inline-flex", open);
       }
     });
-
-    const bundle = document.querySelector("#buy-bundle");
-    if (bundle) {
-      bundle.disabled = state.bundle;
-      bundle.textContent = state.bundle ? "دسترسی آزمایشی بسته روی همین مرورگر فعال است" : "دسترسی آزمایشی بسته روی همین مرورگر";
-    }
+    paintPathButtons();
 
     document.querySelectorAll("[data-dash-course]").forEach((card) => {
       const id = card.dataset.dashCourse;
@@ -559,6 +552,35 @@
   function writeCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify({ items: cart.items }));
     paintCart();
+    paintPathButtons();
+  }
+
+  function paintPathButtons() {
+    const items = readCart().items;
+    const held = new Set(items.filter((item) => item.type === "course").map((item) => item.courseId));
+    document.querySelectorAll("[data-course] [data-buy]").forEach((buy) => {
+      const inCart = held.has(buy.dataset.buy);
+      buy.disabled = inCart;
+      buy.textContent = inCart ? "در سبد" : "افزودن به سبد";
+    });
+    const bundleHeld = items.some((item) => item.type === "bundle");
+    document.querySelectorAll("#buy-bundle").forEach((bundle) => {
+      bundle.disabled = bundleHeld;
+      bundle.textContent = bundleHeld ? "در سبد" : "افزودن به سبد";
+    });
+  }
+
+  function parkToast(insideCart) {
+    const node = document.querySelector("#cart-toast");
+    const slot = document.querySelector("[data-cart-toast-slot]");
+    if (!node) return;
+    if (insideCart && slot) {
+      node.classList.remove("fixed", "top-20", "inset-x-4", "z-[80]", "mx-auto", "max-w-lg");
+      slot.appendChild(node);
+      return;
+    }
+    node.classList.add("fixed", "top-20", "inset-x-4", "z-[80]", "mx-auto", "max-w-lg");
+    document.body.appendChild(node);
   }
 
   function showDialog(id) {
@@ -587,6 +609,7 @@
     toastTimer = window.setTimeout(() => {
       node.classList.add("hidden");
       node.classList.remove("flex");
+      parkToast(false);
     }, 4200);
   }
 
@@ -615,7 +638,8 @@
     });
     writeCart(cart);
     closeOverview();
-    toast("دوره برای دسترسی آزمایشی روی همین مرورگر به سبد اضافه شد.", true);
+    toast("به سبد اضافه شد.", false);
+    openCart();
   }
 
   function addBundle() {
@@ -639,7 +663,8 @@
       giftMinutes: GIFT,
     });
     writeCart(cart);
-    toast("بسته برای دسترسی آزمایشی روی همین مرورگر به سبد اضافه شد.", true);
+    toast("به سبد اضافه شد.", false);
+    openCart();
   }
 
   function addMinutes(amount) {
@@ -689,6 +714,8 @@
     hideDialog("#service-order");
     hideDialog("#checkout-order");
     paintCart();
+    const toastNode = document.querySelector("#cart-toast");
+    parkToast(Boolean(toastNode && !toastNode.classList.contains("hidden")));
     showDialog("#cart-drawer");
   }
 
@@ -848,8 +875,7 @@
     if (summary) {
       const pending = items.some((item) => item.type === "service");
       summary.innerHTML = items.map((item) => '<p class="flex justify-between gap-3 py-1"><span>' + escText(item.title) + "</span><span>" + (item.type === "service" ? "برآورد بعدی" : toman(item.price)) + "</span></p>").join("") +
-        '<p class="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>جمع دسترسی آزمایشی</span><span>' + toman(pricedTotal(items)) + "</span></p>" +
-        '<p class="mt-2 text-xs leading-6 text-cream/60">پرداخت بانکی نیست.</p>' +
+        '<p class="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>جمع</span><span>' + toman(pricedTotal(items)) + "</span></p>" +
         (pending ? '<p class="mt-2 text-xs leading-6 text-cream/60">حداقل یک خدمت نیازمند بررسی و برآورد قیمت است.</p>' : "");
     }
     hideDialog("#cart-drawer");
@@ -1002,6 +1028,7 @@
     }
     if (event.target.closest("[data-cart-close]") || event.target.id === "cart-drawer") {
       hideDialog("#cart-drawer");
+      parkToast(false);
       return;
     }
     const remove = event.target.closest("[data-cart-remove]");
@@ -1732,5 +1759,7 @@
 
   mountSmoothScroll();
   mountReveal();
+  const cartDrawer = document.querySelector("#cart-drawer");
+  if (cartDrawer) cartDrawer.addEventListener("close", () => parkToast(false));
   render();
 })();
