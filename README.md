@@ -36,6 +36,8 @@ src/components/copilot/   دموی صفحهٔ اول و HUD
 src/components/lms/       نوار پیشرفت درس و پیوال کوپایلوت
 ```
 
-نسخهٔ عمومی: [https://amirhos3in.github.io/sales-pro/](https://amirhos3in.github.io/sales-pro/). گیت‌هاب پیجز فقط فایل ثابت اجرا می‌کند؛ همان صفحه‌ها را `npm run export:pages` از سرور Node می‌سازد.
+نسخهٔ عمومی گیت‌هاب پیجز: [https://amirhos3in.github.io/sales-pro/](https://amirhos3in.github.io/sales-pro/). گیت‌هاب پیجز فقط فایل ثابت اجرا می‌کند؛ همان صفحه‌ها را `npm run export:pages` از سرور Node می‌سازد.
+
+نسخهٔ لیارا، همان سرور Node: [https://gharisales.liara.run/](https://gharisales.liara.run/). صفحهٔ آموزش: [https://gharisales.liara.run/academy/](https://gharisales.liara.run/academy/).
 
 ورود با موبایل و کد آزمایشی است. هر کد ۴ تا ۶ رقمی، مثلاً `1234`، قبول می‌شود. درس رایگان بعد از ورود باز است. مسیر پولی اشتراک می‌خواهد. ویدیوی بعدی فقط بعد از حداقل دو پاسخ درست از سه سؤال باز می‌شود. پلن ماهانه فقط آکادمی است؛ پلن فصلی ۳۰۰ دقیقه کوپایلوت و پلن سالانه ۲۰۰۰ دقیقه می‌دهد. بدون `OPENAI_API_KEY` هم دمو و HUD جواب می‌دهند.
