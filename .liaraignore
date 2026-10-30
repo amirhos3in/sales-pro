@@ -1,0 +1,8 @@
+node_modules
+.git
+pages-out
+.next
+data
+*.pem
+.env*
+!/.env.example

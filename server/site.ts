@@ -24,7 +24,7 @@ import {
 
 const base = process.env.BASE_PATH || "";
 const port = Number(process.env.PORT || 43131);
-const host = process.env.HOST || "127.0.0.1";
+const host = process.env.HOST || "0.0.0.0";
 
 export function createApp() {
   const app = express();
