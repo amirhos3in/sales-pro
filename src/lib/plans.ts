@@ -16,6 +16,9 @@ export type Plan = {
   features: string[];
 };
 
+/** این سه پلن در رابط خرید دیده نمی‌شوند و پیشنهاد فعال نیستند. قیمت زنده در pricing.ts است. */
+export const PLANS_OFFER_ACTIVE = false;
+
 const fullAcademyAccess = "دسترسی کامل و بدون محدودیت به تمام دوره‌های ۴ گانه آکادمی";
 
 export const PLANS: Plan[] = [

@@ -4,7 +4,7 @@ import { PlanCard } from "@/components/pricing/PlanCard";
 import { CashbackGoalBar } from "@/components/wallet/CashbackGoalBar";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/hooks/useWallet";
-import { PLANS, type PlanId } from "@/lib/plans";
+import { PLANS, PLANS_OFFER_ACTIVE, type PlanId } from "@/lib/plans";
 import type { Milestone } from "@/types/wallet";
 
 export function PricingSection({ onSelect }: { onSelect: (planId: PlanId) => void }) {
@@ -12,6 +12,14 @@ export function PricingSection({ onSelect }: { onSelect: (planId: PlanId) => voi
   const { milestones } = useWallet();
   const ranked: Milestone[] = [...milestones].sort((left, right) => right.targetUsd - left.targetUsd);
   const best = ranked.find((milestone) => milestone.unlocked);
+
+  if (!PLANS_OFFER_ACTIVE) {
+    return (
+      <div id="pricing-plans" className="scroll-mt-24">
+        <p className="text-sm leading-7 text-muted-foreground">پلن‌های ماهانه، سه‌ماهه و سالانه پیشنهاد فعال نیستند.</p>
+      </div>
+    );
+  }
 
   return (
     <div id="pricing-plans" className="scroll-mt-24 space-y-4">

@@ -10,7 +10,9 @@ import {
   contactPage,
   copilotPage,
   dashboardPage,
+  demoPage,
   homePage,
+  minutesPage,
   learnCategoryPage,
   learnLessonPage,
   lessonPairs,
@@ -29,6 +31,8 @@ const out = path.join(process.cwd(), "pages-out");
 const files: Array<[string, string]> = [
   ["index.html", homePage(base)],
   ["academy/index.html", academyPage(base)],
+  ["demo/index.html", demoPage(base)],
+  ["minutes/index.html", minutesPage(base)],
   ["dashboard/copilot/index.html", copilotPage(base)],
   ["articles/index.html", articlesPage(base)],
   ["services/index.html", servicesPage(base)],

@@ -180,8 +180,8 @@
     });
     document.querySelectorAll("[data-wallet-lead]").forEach((node) => {
       node.textContent = state.bundle
-        ? "باندل کامل خریده شده و ۵۰۰ دقیقه هدیه داخل همین موجودی است."
-        : "دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط با خرید باندل اضافه می‌شود.";
+        ? "بستهٔ چهار دوره روی همین مرورگر است و ۵۰۰ دقیقهٔ همراهش همین‌جا مانده."
+        : "دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط همراه بستهٔ چهار دوره روی همین مرورگر می‌ماند.";
     });
     document.querySelectorAll("[data-hello]").forEach((node) => {
       node.textContent = new Date().getHours() < 17 ? "صبح بخیر" : "عصر بخیر";
@@ -194,7 +194,7 @@
       label.className = active ? "text-gold" : "text-cream/50";
     });
     document.querySelectorAll("[data-bundle-label]").forEach((node) => {
-      node.textContent = state.bundle ? "خریداری شده · هدیهٔ ۵۰۰ دقیقه فعال است" : "خریداری نشده · ۱۶ میلیون تومان به‌جای ۲۰ میلیون";
+      node.textContent = state.bundle ? "دسترسی آزمایشی بسته روی همین مرورگر فعال است" : "بستهٔ چهار دوره · " + toman(BUNDLE_PRICE);
     });
     document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
     const codeNode = document.querySelector("[data-referral-code]");
@@ -234,7 +234,7 @@
     const bundle = document.querySelector("#buy-bundle");
     if (bundle) {
       bundle.disabled = state.bundle;
-      bundle.textContent = state.bundle ? "باندل فعال است" : "خرید یکجای تمام دوره‌ها";
+      bundle.textContent = state.bundle ? "دسترسی آزمایشی بسته روی همین مرورگر فعال است" : "دسترسی آزمایشی بسته روی همین مرورگر";
     }
 
     document.querySelectorAll("[data-dash-course]").forEach((card) => {
@@ -581,10 +581,12 @@
     const button = node.querySelector("[data-toast-cart]");
     if (text) text.textContent = message;
     if (button) button.hidden = !withCart;
-    node.hidden = false;
+    node.classList.remove("hidden");
+    node.classList.add("flex");
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(() => {
-      node.hidden = true;
+      node.classList.add("hidden");
+      node.classList.remove("flex");
     }, 4200);
   }
 
@@ -613,7 +615,7 @@
     });
     writeCart(cart);
     closeOverview();
-    toast("دوره به سبد خرید اضافه شد.", true);
+    toast("دوره برای دسترسی آزمایشی روی همین مرورگر به سبد اضافه شد.", true);
   }
 
   function addBundle() {
@@ -637,7 +639,7 @@
       giftMinutes: GIFT,
     });
     writeCart(cart);
-    toast("پکیج و هدیهٔ ۵۰۰ دقیقه به سبد اضافه شد.", true);
+    toast("بسته برای دسترسی آزمایشی روی همین مرورگر به سبد اضافه شد.", true);
   }
 
   function addMinutes(amount) {
@@ -657,7 +659,7 @@
       existing.title = next.title;
     } else cart.items.push(next);
     writeCart(cart);
-    toast(existing ? "مقدار دقیقهٔ سبد به‌روز شد." : "دقیقه‌ها به سبد خرید اضافه شد.", true);
+    toast(existing ? "مقدار دقیقهٔ دسترسی آزمایشی در سبد به‌روز شد." : "دقیقه‌ها برای دسترسی آزمایشی روی همین مرورگر به سبد اضافه شد.", true);
   }
 
   function removeCartItem(id) {
@@ -717,11 +719,10 @@
     }).join("");
     const payable = pricedTotal(items);
     const pending = items.some((item) => item.type === "service");
-    const discount = items.some((item) => item.type === "bundle") ? 4000000 : 0;
-    footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع قابل پرداخت</span><span>' + toman(payable) + "</span></p>" +
-      (discount ? '<p class="flex justify-between text-gold"><span>سود خرید یکجا، داخل قیمت پکیج</span><span>' + toman(discount) + "</span></p>" : "") +
+    footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع دسترسی آزمایشی</span><span>' + toman(payable) + "</span></p>" +
+      '<p class="text-xs leading-6 text-cream/60">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p>' +
       (pending ? '<p class="text-xs leading-6 text-cream/60">خدمات سفارشی نیازمند بررسی و برآورد قیمت‌اند و در این مبلغ نیستند.</p>' : "") +
-      '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">تکمیل خرید و ثبت نهایی</button>';
+      '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>';
   }
 
   function cartRow(item) {
@@ -847,7 +848,8 @@
     if (summary) {
       const pending = items.some((item) => item.type === "service");
       summary.innerHTML = items.map((item) => '<p class="flex justify-between gap-3 py-1"><span>' + escText(item.title) + "</span><span>" + (item.type === "service" ? "برآورد بعدی" : toman(item.price)) + "</span></p>").join("") +
-        '<p class="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>مبلغ این مرحله</span><span>' + toman(pricedTotal(items)) + "</span></p>" +
+        '<p class="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>جمع دسترسی آزمایشی</span><span>' + toman(pricedTotal(items)) + "</span></p>" +
+        '<p class="mt-2 text-xs leading-6 text-cream/60">پرداخت بانکی نیست.</p>' +
         (pending ? '<p class="mt-2 text-xs leading-6 text-cream/60">حداقل یک خدمت نیازمند بررسی و برآورد قیمت است.</p>' : "");
     }
     hideDialog("#cart-drawer");
@@ -881,8 +883,8 @@
       notes,
       items,
       total: pricedTotal(items),
-      status: pending ? "pending_review" : "demo_paid",
-      message: pending ? "سفارش ثبت شد؛ منتظر بررسی کارشناسان و اعلام هزینه" : "سفارش آزمایشی با موفقیت ثبت شد",
+      status: pending ? "pending_review" : "browser_access",
+      message: pending ? "درخواست بررسی روی همین مرورگر ماند. پرداخت بانکی انجام نشده است." : "دسترسی آزمایشی روی همین مرورگر ذخیره شد. پرداخت بانکی انجام نشده است.",
     };
     const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
     orders.unshift(order);
@@ -896,7 +898,7 @@
     if (actions) actions.classList.add("hidden");
     if (done) {
       done.classList.remove("hidden");
-      done.innerHTML = '<p class="text-lg font-semibold text-gold">' + order.message + '</p><p class="mt-3 text-sm">شماره سفارش: <span dir="ltr">' + order.id + "</span></p><p class=\"mt-2 text-sm text-cream/70\">پرداخت واقعی انجام نشده است. دسترسی دوره‌ها و دقیقه‌های همین سفارش روی همین مرورگر فعال شد.</p>";
+      done.innerHTML = '<p class="text-lg font-semibold text-gold">' + order.message + "</p>";
     }
   }
 
@@ -1552,6 +1554,11 @@
         } catch {
           finishSession();
         }
+        return;
+      }
+      const consent = chat.querySelector("[data-voice-consent]");
+      if (!consent || !consent.checked) {
+        toastMessage("فایل صوت فقط برای تحلیل همان جلسه است و بدون تأیید ذخیره نمی‌شود.");
         return;
       }
       toastMessage("");
