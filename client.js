@@ -266,6 +266,7 @@
     paintTotals(progress);
     paintTabs();
     paintCart();
+    paintServiceCards();
   }
 
   function paintDashboardProgress(progress) {
@@ -483,47 +484,6 @@
     telefoni: "آموزش فروش تلفنی",
     mozakerah: "آموزش مذاکره",
   };
-  const SERVICES = {
-    script: {
-      title: "بازنویسی اسکریپت تیم فروش",
-      fields: [
-        { name: "team", label: "اندازه تیم فروش", type: "text", placeholder: "مثلاً ۸ نفر" },
-        { name: "calls", label: "نوع تماس", type: "select", options: ["تماس ورودی", "تماس سرد", "هر دو"] },
-        { name: "objections", label: "اعتراض‌های پرتکرار", type: "textarea", placeholder: "قیمت، تخفیف، باید فکر کنم" },
-        { name: "deadline", label: "بازۀ تحویل", type: "text", placeholder: "مثلاً تا پایان ماه" },
-      ],
-    },
-    workshop: {
-      title: "آموزش حضوری پرسنل",
-      fields: [
-        { name: "headcount", label: "تعداد شرکت‌کننده‌ها", type: "text", placeholder: "مثلاً ۱۲ نفر" },
-        { name: "city", label: "شهر برگزاری", type: "text", placeholder: "تهران" },
-        { name: "topics", label: "موضوع‌های لازم", type: "textarea", placeholder: "زبان بدن، نیازسنجی، دمو" },
-        { name: "when", label: "بازۀ زمانی کارگاه", type: "text", placeholder: "هفته سوم آبان" },
-      ],
-    },
-    funnel: {
-      title: "بهینه‌سازی قیف فروش",
-      fields: [
-        { name: "channel", label: "کانال اصلی", type: "select", options: ["اینستاگرام", "سایت", "تماس تلفنی", "چند کانال"] },
-        { name: "offer", label: "پیشنهاد فعلی", type: "textarea", placeholder: "محصول یا خدمتی که می‌فروشید" },
-        { name: "metric", label: "شاخصی که باید بهتر شود", type: "text", placeholder: "مثلاً نرخ پاسخ دایرکت" },
-        { name: "deadline", label: "مهلت", type: "text", placeholder: "مثلاً ۳۰ روز" },
-      ],
-    },
-    mentor: {
-      title: "منتورینگ مدیر فروش",
-      fields: [
-        { name: "role", label: "نقش شما", type: "text", placeholder: "مدیر فروش" },
-        { name: "team", label: "اندازه تیم", type: "text", placeholder: "مثلاً ۵ نفر" },
-        { name: "pain", label: "مسئله اصلی تیم", type: "textarea", placeholder: "کجا معامله می‌ایستد؟" },
-        { name: "start", label: "شروع همکاری", type: "text", placeholder: "ماه آینده" },
-      ],
-    },
-  };
-  let serviceId = "";
-  let serviceStep = "form";
-  let serviceAnswers = [];
   let toastTimer = 0;
 
   function digits(value) {
@@ -553,6 +513,7 @@
     paintCart();
     paintPathButtons();
     paintMinuteOffer();
+    paintServiceCards();
   }
 
   function paintPathButtons() {
@@ -719,7 +680,11 @@
   }
 
   function pricedTotal(items) {
-    return items.reduce((sum, item) => sum + (item.type === "service" ? 0 : Number(item.price) || 0), 0);
+    return items.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  }
+
+  function quotePending(items) {
+    return items.some((item) => item.type === "service" && !(Number(item.price) > 0));
   }
 
   function openCart() {
@@ -757,15 +722,17 @@
       return '<section class="mb-4"><h3 class="text-xs text-gold">' + label + "</h3>" + rows.map(cartRow).join("") + "</section>";
     }).join("");
     const payable = pricedTotal(items);
-    const pending = items.some((item) => item.type === "service");
+    const pending = quotePending(items);
+    const onlyServices = items.every((item) => item.type === "service");
+    const checkoutLabel = onlyServices ? "ثبت درخواست خدمت روی همین مرورگر" : "ثبت دسترسی آزمایشی روی همین مرورگر";
     footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع</span><span>' + toman(payable) + "</span></p>" +
-      '<p class="text-xs leading-6 text-cream/60">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p>' +
+      '<p class="text-xs leading-6 text-cream/60">پرداخت بانکی نیست. ثبت روی همین مرورگر می‌ماند.</p>' +
       (pending ? '<p class="text-xs leading-6 text-cream/60">خدمات سفارشی نیازمند بررسی و برآورد قیمت‌اند و در این مبلغ نیستند.</p>' : "") +
-      '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>';
+      '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">' + checkoutLabel + "</button>";
   }
 
   function cartRow(item) {
-    const price = item.type === "service"
+    const price = item.type === "service" && !(Number(item.price) > 0)
       ? "نیازمند بررسی و برآورد قیمت"
       : toman(item.price);
     const meta = item.type === "copilot_minutes"
@@ -777,88 +744,67 @@
     return '<article class="mt-2 rounded-2xl border border-white/10 p-3"><div class="flex items-start justify-between gap-3"><div><p class="text-sm font-semibold">' + escText(item.title) + "</p>" + meta + details + '</div><div class="text-end"><p class="text-xs text-gold">' + price + '</p><button type="button" data-cart-remove="' + escText(item.id) + '" class="mt-2 text-xs text-cream/50">حذف</button></div></div></article>';
   }
 
-  function fieldControl(field) {
-    const common = ' name="' + field.name + '" class="mt-1 w-full rounded-2xl border border-white/15 bg-white/5 px-3 text-sm outline-none focus:border-gold"';
-    if (field.type === "textarea") return '<textarea' + common + ' rows="3" placeholder="' + escText(field.placeholder || "") + '"></textarea>';
-    if (field.type === "select") return '<select' + common + '><option value="">انتخاب کنید</option>' + field.options.map((option) => '<option>' + escText(option) + "</option>").join("") + "</select>";
-    return '<input' + common + ' placeholder="' + escText(field.placeholder || "") + '" />';
-  }
-
-  function openService(id) {
-    const service = SERVICES[id];
-    if (!service) return;
-    serviceId = id;
-    serviceStep = "form";
-    const title = document.querySelector("[data-service-title]");
-    const box = document.querySelector("[data-service-fields]");
-    const error = document.querySelector("[data-service-error]");
-    if (title) title.textContent = service.title;
-    if (error) error.textContent = "";
-    if (box) {
-      box.innerHTML = service.fields.map((field) => '<label class="block text-sm">' + escText(field.label) + fieldControl(field) + '<span data-field-error="' + field.name + '" class="mt-1 block text-xs text-rose-300"></span></label>').join("");
+  function readServiceModel() {
+    const node = document.querySelector("#service-pricing");
+    if (!node) return [];
+    try {
+      const parsed = JSON.parse(node.textContent || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
     }
-    paintServiceStep();
-    showDialog("#service-order");
   }
 
-  function paintServiceStep() {
-    const next = document.querySelector("[data-service-next]");
-    const back = document.querySelector("[data-service-back]");
-    const confirm = document.querySelector("[data-service-confirm]");
-    const summary = serviceStep === "summary";
-    if (next) next.classList.toggle("hidden", summary);
-    if (back) back.classList.toggle("hidden", !summary);
-    if (confirm) confirm.classList.toggle("hidden", !summary);
-  }
-
-  function readServiceAnswers() {
-    const form = document.querySelector("[data-service-form]");
-    const service = SERVICES[serviceId];
-    if (!form || !service) return { ok: false, rows: [] };
-    let ok = true;
-    const rows = service.fields.map((field) => {
-      const input = form.elements[field.name];
-      const value = input ? String(input.value || "").trim() : "";
-      const error = form.querySelector('[data-field-error="' + field.name + '"]');
-      if (!value) {
-        ok = false;
-        if (error) error.textContent = "این مورد را تکمیل کنید.";
-      } else if (error) error.textContent = "";
-      return { name: field.name, label: field.label, value };
+  function quoteFromCard(service, card) {
+    const lines = service.params.map((param) => {
+      const select = card.querySelector('[data-service-param="' + param.id + '"]');
+      const picked = select ? select.value : "";
+      const chosen = param.options.find((option) => option.id === picked) || param.options[0];
+      return { name: param.id, label: param.label, value: chosen.label, amount: Number(chosen.amount) || 0 };
     });
-    const error = document.querySelector("[data-service-error]");
-    if (error) error.textContent = ok ? "" : "موارد مشخص‌شده را کامل کنید.";
-    return { ok, rows };
+    return { lines, total: lines.reduce((sum, line) => sum + line.amount, 0) };
   }
 
-  function showServiceSummary() {
-    const result = readServiceAnswers();
-    if (!result.ok) return;
-    serviceAnswers = result.rows;
-    const box = document.querySelector("[data-service-fields]");
-    if (box) {
-      box.innerHTML = '<p class="text-sm font-semibold">خلاصه اطلاعات</p><ul class="mt-3 space-y-2 text-sm">' + result.rows.map((row) => "<li class=\"rounded-2xl border border-white/10 px-3 py-2\"><span class=\"text-cream/50\">" + escText(row.label) + "</span><p class=\"mt-1\">" + escText(row.value) + "</p></li>").join("") + "</ul>";
-    }
-    serviceStep = "summary";
-    paintServiceStep();
+  function serviceBreakdown(lines) {
+    return lines.map((line) => (line.amount > 0 ? line.value + " · " + toman(line.amount) : line.value)).join(" + ");
   }
 
-  function confirmService() {
-    const service = SERVICES[serviceId];
-    if (!service || serviceStep !== "summary" || !serviceAnswers.length) return;
+  function paintServiceCard(card) {
+    const service = readServiceModel().find((item) => item.id === card.dataset.serviceCard);
+    if (!service) return;
+    const quote = quoteFromCard(service, card);
+    const price = card.querySelector("[data-service-price]");
+    const breakdown = card.querySelector("[data-service-breakdown]");
+    const button = card.querySelector("[data-add-service]");
+    if (price) price.textContent = toman(quote.total);
+    if (breakdown) breakdown.textContent = serviceBreakdown(quote.lines);
+    const held = readCart().items.some((item) => item.type === "service" && item.serviceId === service.id && Number(item.price) > 0);
+    if (button) button.textContent = held ? "به‌روزرسانی سبد" : "افزودن به سبد";
+  }
+
+  function paintServiceCards() {
+    document.querySelectorAll("[data-service-card]").forEach(paintServiceCard);
+  }
+
+  function addServiceToCart(id) {
+    const service = readServiceModel().find((item) => item.id === id);
+    const card = document.querySelector('[data-service-card="' + id + '"]');
+    if (!service || !card) return;
+    const quote = quoteFromCard(service, card);
     const cart = readCart();
+    const had = cart.items.some((item) => item.type === "service" && item.serviceId === id);
+    cart.items = cart.items.filter((item) => !(item.type === "service" && item.serviceId === id));
     cart.items.push({
       type: "service",
-      id: "service:" + serviceId + ":" + Date.now(),
-      serviceId,
+      id: "service:" + id,
+      serviceId: id,
       title: service.title,
-      price: 0,
-      priceStatus: "quote",
-      answers: serviceAnswers,
+      price: quote.total,
+      answers: quote.lines,
     });
     writeCart(cart);
-    hideDialog("#service-order");
-    toast("سفارش خدمت به سبد اضافه شد.", true);
+    toast(had ? "قیمت این خدمت در سبد به‌روز شد." : "به سبد اضافه شد.", false);
+    openCart();
   }
 
   function openCheckout() {
@@ -883,8 +829,8 @@
       if (!form.elements.phone.value) form.elements.phone.value = session.currentUser.phone || "";
     }
     if (summary) {
-      const pending = items.some((item) => item.type === "service");
-      summary.innerHTML = items.map((item) => '<p class="flex justify-between gap-3 py-1"><span>' + escText(item.title) + "</span><span>" + (item.type === "service" ? "برآورد بعدی" : toman(item.price)) + "</span></p>").join("") +
+      const pending = quotePending(items);
+      summary.innerHTML = items.map((item) => '<p class="flex justify-between gap-3 py-1"><span>' + escText(item.title) + "</span><span>" + (item.type === "service" && !(Number(item.price) > 0) ? "برآورد بعدی" : toman(item.price)) + "</span></p>").join("") +
         '<p class="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>جمع</span><span>' + toman(pricedTotal(items)) + "</span></p>" +
         (pending ? '<p class="mt-2 text-xs leading-6 text-cream/60">حداقل یک خدمت نیازمند بررسی و برآورد قیمت است.</p>' : "");
     }
@@ -910,7 +856,13 @@
       if (error) error.textContent = "سبد خرید خالی است.";
       return;
     }
-    const pending = items.some((item) => item.type === "service");
+    const pending = quotePending(items);
+    const hasService = items.some((item) => item.type === "service");
+    const hasAccess = items.some((item) => item.type !== "service");
+    let message = "دسترسی آزمایشی روی همین مرورگر ذخیره شد. پرداخت بانکی انجام نشده است.";
+    if (pending) message = "درخواست بررسی روی همین مرورگر ماند. پرداخت بانکی انجام نشده است.";
+    else if (hasService && hasAccess) message = "دسترسی آزمایشی و درخواست خدمت روی همین مرورگر ماند. پرداخت بانکی انجام نشده است.";
+    else if (hasService) message = "درخواست خدمت روی همین مرورگر ماند. پرداخت بانکی انجام نشده است.";
     const order = {
       id: "ORD-" + Math.floor(10000 + Math.random() * 90000),
       at: new Date().toISOString(),
@@ -920,7 +872,7 @@
       items,
       total: pricedTotal(items),
       status: pending ? "pending_review" : "browser_access",
-      message: pending ? "درخواست بررسی روی همین مرورگر ماند. پرداخت بانکی انجام نشده است." : "دسترسی آزمایشی روی همین مرورگر ذخیره شد. پرداخت بانکی انجام نشده است.",
+      message,
     };
     const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
     orders.unshift(order);
@@ -1058,21 +1010,13 @@
       hideDialog("#checkout-order");
       return;
     }
-    const orderService = event.target.closest("[data-order-service]");
-    if (orderService) {
-      openService(orderService.dataset.orderService);
+    const addService = event.target.closest("[data-add-service]");
+    if (addService) {
+      addServiceToCart(addService.dataset.addService);
       return;
     }
     if (event.target.closest("[data-service-close]") || event.target.id === "service-order") {
       hideDialog("#service-order");
-      return;
-    }
-    if (event.target.closest("[data-service-back]")) {
-      openService(serviceId);
-      return;
-    }
-    if (event.target.closest("[data-service-confirm]")) {
-      confirmService();
       return;
     }
     const buy = event.target.closest("[data-buy]");
@@ -1627,13 +1571,12 @@
     });
   }
 
-  const serviceForm = document.querySelector("[data-service-form]");
-  if (serviceForm) {
-    serviceForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      showServiceSummary();
-    });
-  }
+  document.addEventListener("change", (event) => {
+    const param = event.target.closest("[data-service-param]");
+    if (!param) return;
+    const card = param.closest("[data-service-card]");
+    if (card) paintServiceCard(card);
+  });
   const checkoutForm = document.querySelector("[data-checkout-form]");
   if (checkoutForm) {
     checkoutForm.addEventListener("submit", (event) => {
