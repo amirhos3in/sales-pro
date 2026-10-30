@@ -85,6 +85,29 @@ export function layout(base: string, active: string, title: string, body: string
       [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
       [data-voice-toggle][data-state="recording"] [data-voice-pulse] { animation: none; }
     }
+    #cart-drawer, #service-order, #checkout-order {
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      background: #0B132B;
+      color: #F6F1E4;
+      padding: 0;
+    }
+    #cart-drawer {
+      margin: 0;
+      margin-inline-start: auto;
+      height: 100vh;
+      max-height: 100vh;
+      width: min(26rem, 100vw);
+    }
+    #service-order, #checkout-order {
+      width: min(40rem, calc(100vw - 1.5rem));
+      max-height: min(90vh, 52rem);
+      margin: auto;
+      border-radius: 1.5rem;
+    }
+    #cart-drawer::backdrop, #service-order::backdrop, #checkout-order::backdrop { background: rgba(0, 0, 0, 0.66); }
+    @media (max-width: 640px) {
+      #service-order, #checkout-order { width: 100vw; max-height: 100vh; height: 100vh; border-radius: 0; }
+    }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased" data-base="${esc(base)}">
@@ -102,6 +125,10 @@ export function layout(base: string, active: string, title: string, body: string
         <a href="${href("/#courses")}" class="shrink-0 rounded-xl px-2 py-2 text-sm text-cream/70 hover:bg-white/5">اشتراک</a>
       </nav>
       <div class="ms-auto flex items-center gap-2">
+        <button type="button" data-open-cart class="relative grid size-10 place-items-center rounded-full ring-1 ring-gold/30" aria-label="سبد خرید">
+          <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
+          <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
+        </button>
         <a data-auth-guest href="${href("/login/")}" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / عضویت</a>
         <a data-auth-user="chip" href="${href("/dashboard/")}" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
           <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
@@ -111,6 +138,7 @@ export function layout(base: string, active: string, title: string, body: string
       </div>
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
+      <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
       <a data-auth-guest href="${href("/login/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / عضویت</a>
       <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
         <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
@@ -125,11 +153,70 @@ export function layout(base: string, active: string, title: string, body: string
     <p>نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
     <p>ساخته‌شده با Node.js.</p>
   </footer>
+  ${commerceShell(base)}
   <script id="objections" type="application/json">${JSON.stringify(OBJECTIONS)}</script>
   <script src="${href("/lenis.min.js")}"></script>
   <script src="${href("/client.js")}"></script>
 </body>
 </html>`;
+}
+
+function commerceShell(_base: string) {
+  return `<dialog id="cart-drawer" aria-labelledby="cart-title">
+    <div class="flex h-full max-h-[100vh] flex-col">
+      <div class="flex items-center justify-between gap-3 border-b border-white/10 p-4">
+        <h2 id="cart-title" class="text-lg font-semibold">سبد خرید</h2>
+        <button type="button" data-cart-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن سبد">×</button>
+      </div>
+      <div data-cart-body class="min-h-0 flex-1 overflow-y-auto p-4" data-lenis-prevent></div>
+      <div data-cart-footer class="border-t border-white/10 p-4"></div>
+    </div>
+  </dialog>
+  <dialog id="service-order" aria-labelledby="service-order-title">
+    <form data-service-form class="flex max-h-[min(90vh,52rem)] flex-col">
+      <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
+        <div>
+          <p class="text-xs text-gold">سفارش خدمت</p>
+          <h2 id="service-order-title" data-service-title class="mt-1 text-xl font-semibold"></h2>
+        </div>
+        <button type="button" data-service-close class="grid size-10 shrink-0 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن">×</button>
+      </div>
+      <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
+        <div data-service-fields class="grid gap-3"></div>
+        <p data-service-error class="mt-3 text-sm text-rose-300" role="alert"></p>
+      </div>
+      <div class="flex flex-wrap gap-2 border-t border-white/10 p-5">
+        <button type="submit" data-service-next class="h-11 flex-1 rounded-2xl bg-gold text-sm font-semibold text-navy">ادامه و مشاهده خلاصه</button>
+        <button type="button" data-service-back class="hidden h-11 rounded-2xl px-4 text-sm ring-1 ring-white/20">بازگشت</button>
+        <button type="button" data-service-confirm class="hidden h-11 flex-1 rounded-2xl bg-gold text-sm font-semibold text-navy">تأیید و افزودن به سبد خرید</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="checkout-order" aria-labelledby="checkout-title">
+    <form data-checkout-form class="flex max-h-[min(90vh,52rem)] flex-col">
+      <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
+        <h2 id="checkout-title" class="text-xl font-semibold">تکمیل خرید و ثبت نهایی</h2>
+        <button type="button" data-checkout-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن">×</button>
+      </div>
+      <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
+        <div data-checkout-fields class="grid gap-3">
+          <label class="text-sm">نام و نام خانوادگی<input name="name" class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label>
+          <label class="text-sm">شماره موبایل<input name="phone" dir="ltr" inputmode="numeric" class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3 text-left" placeholder="0912xxxxxxx" /></label>
+          <label class="text-sm">یادداشت (اختیاری)<textarea name="notes" class="mt-1 min-h-20 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label>
+          <div data-checkout-summary class="rounded-2xl border border-white/10 p-3 text-sm"></div>
+          <p data-checkout-error class="text-sm text-rose-300" role="alert"></p>
+        </div>
+        <div data-checkout-done class="hidden"></div>
+      </div>
+      <div data-checkout-actions class="border-t border-white/10 p-5">
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش آزمایشی</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="cart-toast" hidden class="fixed bottom-4 z-[70] flex max-w-sm items-center gap-3 rounded-2xl bg-navy px-4 py-3 text-sm text-cream ring-1 ring-gold/40" role="status">
+    <p data-toast-text class="flex-1"></p>
+    <button type="button" data-toast-cart class="shrink-0 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-navy">مشاهده سبد</button>
+  </div>`;
 }
 
 function voiceChat() {
@@ -421,12 +508,12 @@ export function articlePage(base: string, slug: string) {
 
 export function servicesPage(base: string) {
   const items = [
-    ["بازنویسی اسکریپت تیم فروش", "تماس ورودی، تماس سرد و اعتراض‌های پرتکرار تیم را به چارچوب قابل گفتن تبدیل می‌کنیم."],
-    ["آموزش حضوری پرسنل", "کارگاه زبان بدن، نیازسنجی و دمو برای تیم فروش مستقیم."],
-    ["بهینه‌سازی قیف فروش", "صفحهٔ فرود، پیشنهاد و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم."],
-    ["منتورینگ مدیر فروش", "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم و شاخص‌ها."],
+    ["script", "بازنویسی اسکریپت تیم فروش", "تماس ورودی، تماس سرد و اعتراض‌های پرتکرار تیم را به چارچوب قابل گفتن تبدیل می‌کنیم."],
+    ["workshop", "آموزش حضوری پرسنل", "کارگاه زبان بدن، نیازسنجی و دمو برای تیم فروش مستقیم."],
+    ["funnel", "بهینه‌سازی قیف فروش", "صفحهٔ فرود، پیشنهاد و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم."],
+    ["mentor", "منتورینگ مدیر فروش", "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم و شاخص‌ها."],
   ];
-  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([title, text], index) => `<article ${revealAttrs(index * 80)} class="glass rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 text-sm leading-7 text-cream/70">${text}</p></article>`).join("")}</div><p ${revealAttrs(160)} class="mt-6 text-sm text-cream/60">درخواست را از <a class="text-gold" href="${base}/contact/">ارتباط با ما</a> بفرستید.</p>`);
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت این خدمات بعد از دیدن پاسخ‌ها برآورد می‌شود. سفارش را در سبد می‌گذارید و هزینه را کارشناس اعلام می‌کند.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([id, title, text], index) => `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${text}</p><p class="mt-3 text-xs text-gold">نیازمند بررسی و برآورد قیمت</p><button type="button" data-order-service="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button></article>`).join("")}</div>`);
 }
 
 export function supportPage(base: string) {
