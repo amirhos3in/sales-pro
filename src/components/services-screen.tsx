@@ -8,26 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SERVICE_OFFERS, quoteService, serviceBreakdown, type ServiceOffer } from "@/lib/service-pricing";
 import { cn } from "@/lib/utils";
 
-const services = [
-  {
-    title: "بازنویسی اسکریپت تیم فروش",
-    text: "تماس ورودی، تماس سرد و اعتراض‌های پرتکرار تیم را به چارچوب قابل گفتن تبدیل می‌کنیم.",
-  },
-  {
-    title: "آموزش حضوری پرسنل",
-    text: "کارگاه زبان بدن، نیازسنجی و دمو برای تیم فروش مستقیم، همراه رول‌پلی همان سناریوهای شرکت.",
-  },
-  {
-    title: "بهینه‌سازی قیف فروش",
-    text: "صفحهٔ فرود، پیشنهاد، سبد رهاشده و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم.",
-  },
-  {
-    title: "منتورینگ مدیر فروش",
-    text: "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم، شاخص‌ها و معرفی نیروهای برتر دوره.",
-  },
-];
+const services = SERVICE_OFFERS.map((offer) => ({ title: offer.title, text: offer.text }));
+
+function toman(value: number) {
+  return `${new Intl.NumberFormat("fa-IR").format(value)} تومان`;
+}
 
 export function ServicesScreen() {
   const [sent, setSent] = useState(false);
@@ -51,16 +39,13 @@ export function ServicesScreen() {
       <header className="print-hide">
         <h1 className="text-2xl font-semibold">خدمات</h1>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
-          برای تیم‌ها و فروشگاه‌هایی که به‌جای دورهٔ عمومی، اسکریپت، قیف و آموزش نیروی خودشان را می‌خواهند.
+          قیمت هر خدمت جمع پارامترهای همان کارت است. با عوض کردن هر مورد، مبلغ همان لحظه عوض می‌شود.
         </p>
       </header>
       <CallAnalyzer />
       <div className="print-hide grid gap-3 md:grid-cols-2">
-        {services.map((service) => (
-          <article key={service.title} className="rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
-            <h2 className="font-semibold">{service.title}</h2>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">{service.text}</p>
-          </article>
+        {SERVICE_OFFERS.map((offer) => (
+          <ServicePriceCard key={offer.id} offer={offer} />
         ))}
       </div>
       <form onSubmit={submit} className="print-hide max-w-xl space-y-3 rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
@@ -94,6 +79,39 @@ export function ServicesScreen() {
         )}
       </form>
     </div>
+  );
+}
+
+function ServicePriceCard({ offer }: { offer: ServiceOffer }) {
+  const [picks, setPicks] = useState<Record<string, string>>(() =>
+    Object.fromEntries(offer.params.map((param) => [param.id, param.options[0].id])),
+  );
+  const quote = quoteService(offer, picks);
+  return (
+    <article className="rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
+      <h2 className="font-semibold">{offer.title}</h2>
+      <p className="mt-2 text-sm leading-7 text-muted-foreground">{offer.text}</p>
+      <div className="mt-4 grid gap-3">
+        {offer.params.map((param) => (
+          <label key={param.id} className="block text-sm">
+            {param.label}
+            <select
+              value={picks[param.id]}
+              onChange={(event) => setPicks((current) => ({ ...current, [param.id]: event.target.value }))}
+              className="mt-1 h-11 w-full rounded-2xl border border-[#0F1C3F]/12 bg-white/80 px-3 text-sm dark:border-[#D4AF37]/30 dark:bg-[#0B132B] dark:text-slate-100"
+            >
+              {param.options.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+      <p className="mt-4 text-2xl font-semibold text-[#B89020] dark:text-[#D4AF37]">{toman(quote.total)}</p>
+      <p className="mt-2 text-xs leading-6 text-muted-foreground">{serviceBreakdown(quote.lines, toman)}</p>
+    </article>
   );
 }
 

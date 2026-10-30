@@ -2,6 +2,7 @@ import { articles } from "@/lib/articles";
 import { OBJECTIONS, counterFor } from "@/lib/copilot/playbook";
 import { categories, lessonsOf, type Category } from "@/lib/courses-data";
 import { BUNDLE_PRICE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
+import { SERVICE_OFFERS, quoteService, serviceBreakdown } from "@/lib/service-pricing";
 
 export const fa = new Intl.NumberFormat("fa-IR");
 
@@ -494,14 +495,40 @@ export function articlePage(base: string, slug: string) {
   return layout(base, "articles", `${article.title.fa} | نکس‌سل`, `<article ${revealAttrs(0)}><a href="${base}/articles/" class="text-sm text-gold">بازگشت به مقالات</a><h1 class="mt-3 text-3xl font-semibold">${esc(article.title.fa)}</h1><p class="mt-2 text-sm text-cream/50">${esc(article.author.name.fa)} · ${esc(article.publishedAt.fa)}</p>${blocks}</article>`);
 }
 
+function serviceSelect(param: { id: string; label: string; options: Array<{ id: string; label: string }> }) {
+  const options = param.options
+    .map((option, index) => `<option value="${esc(option.id)}"${index === 0 ? " selected" : ""}>${esc(option.label)}</option>`)
+    .join("");
+  return `<label class="block text-sm">${esc(param.label)}<select data-service-param="${esc(param.id)}" class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold">${options}</select></label>`;
+}
+
+function serviceRateList(offer: (typeof SERVICE_OFFERS)[number]) {
+  return offer.params
+    .map((param) => {
+      const rates = param.options.map((option) => `${esc(option.label)} ${option.amount ? esc(toman(option.amount)) : "بدون مبلغ اضافه"}`).join("، ");
+      return `<li><span class="text-cream/50">${esc(param.label)}:</span> ${rates}</li>`;
+    })
+    .join("");
+}
+
 export function servicesPage(base: string) {
-  const items = [
-    ["script", "بازنویسی اسکریپت تیم فروش", "تماس ورودی، تماس سرد و اعتراض‌های پرتکرار تیم را به چارچوب قابل گفتن تبدیل می‌کنیم."],
-    ["workshop", "آموزش حضوری پرسنل", "کارگاه زبان بدن، نیازسنجی و دمو برای تیم فروش مستقیم."],
-    ["funnel", "بهینه‌سازی قیف فروش", "صفحهٔ فرود، پیشنهاد و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم."],
-    ["mentor", "منتورینگ مدیر فروش", "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم و شاخص‌ها."],
-  ];
-  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">چهار خدمت تیمی بعد از دیدن پاسخ‌ها برآورد می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([id, title, text], index) => `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${text}</p><p class="mt-3 text-xs text-gold">نیازمند بررسی و برآورد قیمت</p><button type="button" data-order-service="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button></article>`).join("")}</div><div class="mt-8">${aiMinutesOffer()}</div>`);
+  const model = JSON.stringify(SERVICE_OFFERS).replaceAll("<", "\\u003c");
+  const cards = SERVICE_OFFERS.map((offer, index) => {
+    const quote = quoteService(offer, {});
+    return `<article ${revealAttrs(index * 80)} data-service-card="${esc(offer.id)}" class="glass flex flex-col rounded-3xl p-5">
+      <h2 class="font-semibold">${esc(offer.title)}</h2>
+      <p class="mt-2 text-sm leading-7 text-cream/70">${esc(offer.text)}</p>
+      <div class="mt-4 grid gap-3">${offer.params.map(serviceSelect).join("")}</div>
+      <p class="mt-4 text-2xl font-semibold text-gold" data-service-price>${toman(quote.total)}</p>
+      <p class="mt-2 text-xs leading-6 text-cream/60" data-service-breakdown>${esc(serviceBreakdown(quote.lines, toman))}</p>
+      <details class="mt-3 text-xs leading-6 text-cream/70">
+        <summary class="cursor-pointer text-gold">جدول پارامترهای این خدمت</summary>
+        <ul class="mt-2 space-y-1">${serviceRateList(offer)}</ul>
+      </details>
+      <button type="button" data-add-service="${esc(offer.id)}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">افزودن به سبد</button>
+    </article>`;
+  }).join("");
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت هر خدمت جمع پارامترهای همان کارت است. با عوض کردن اندازه تیم، مدت، کانال یا تعداد جلسه، مبلغ همان لحظه عوض می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${cards}</div><div class="mt-8">${aiMinutesOffer()}</div><script id="service-pricing" type="application/json">${model}</script>`);
 }
 
 function supportForm() {
