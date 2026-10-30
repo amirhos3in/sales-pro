@@ -3,8 +3,7 @@
   const PROGRESS = "nexsell-progress-v1";
   const SESSION = "academy_user_session";
   const COURSE_PRICE = 5000000;
-  const BUNDLE_PRICE = 16000000;
-  const GIFT = 500;
+  const BUNDLE_PRICE = 15000000;
   const STEP = 1000;
   const RATE = 3000000;
   const PAID = ["online", "hozuri", "telefoni", "mozakerah"];
@@ -65,9 +64,7 @@
   }
 
   function remaining(state) {
-    if (state.minutes > 0) return state.minutes;
-    if (state.bundle) return GIFT;
-    return 0;
+    return state.minutes > 0 ? state.minutes : 0;
   }
 
   function owns(state, id) {
@@ -171,17 +168,15 @@
     document.querySelectorAll("[data-status-badge]").forEach((node) => {
       node.textContent = node.dataset.statusBadge === "short" ? status : statusLong;
     });
-    document.querySelectorAll("[data-gift-badge]").forEach((node) => node.classList.toggle("hidden", !state.bundle));
+    document.querySelectorAll("[data-gift-badge]").forEach((node) => node.classList.add("hidden"));
     document.querySelectorAll("[data-owned-hint]").forEach((node) => {
       node.textContent = state.bundle ? "باندل کامل" : "از ۴ دوره تخصصی";
     });
     document.querySelectorAll("[data-minute-hint]").forEach((node) => {
-      node.textContent = state.bundle ? "شامل هدیهٔ " + fa.format(GIFT) + " دقیقه" : "هدیه فقط با باندل";
+      node.textContent = "جدا از دوره";
     });
     document.querySelectorAll("[data-wallet-lead]").forEach((node) => {
-      node.textContent = state.bundle
-        ? "بستهٔ چهار دوره روی همین مرورگر است و ۵۰۰ دقیقهٔ همراهش همین‌جا مانده."
-        : "دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط همراه بستهٔ چهار دوره روی همین مرورگر می‌ماند.";
+      node.textContent = "تحلیل تماس تیم جدا از دوره است.";
     });
     document.querySelectorAll("[data-hello]").forEach((node) => {
       node.textContent = new Date().getHours() < 17 ? "صبح بخیر" : "عصر بخیر";
@@ -194,7 +189,7 @@
       label.className = active ? "text-gold" : "text-cream/50";
     });
     document.querySelectorAll("[data-bundle-label]").forEach((node) => {
-      node.textContent = state.bundle ? "دسترسی آزمایشی بسته روی همین مرورگر فعال است" : "بستهٔ چهار دوره · " + toman(BUNDLE_PRICE);
+      node.textContent = state.bundle ? "هر چهار مسیر روی همین مرورگر فعال است" : "هر چهار مسیر، " + toman(BUNDLE_PRICE);
     });
     document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
     const codeNode = document.querySelector("[data-referral-code]");
@@ -229,6 +224,7 @@
       }
     });
     paintPathButtons();
+    paintMinuteOffer();
 
     document.querySelectorAll("[data-dash-course]").forEach((card) => {
       const id = card.dataset.dashCourse;
@@ -553,6 +549,7 @@
     localStorage.setItem(CART_KEY, JSON.stringify({ items: cart.items }));
     paintCart();
     paintPathButtons();
+    paintMinuteOffer();
   }
 
   function paintPathButtons() {
@@ -568,6 +565,15 @@
       bundle.disabled = bundleHeld;
       bundle.textContent = bundleHeld ? "در سبد" : "افزودن به سبد";
     });
+  }
+
+  function paintMinuteOffer() {
+    const held = readCart().items.some((item) => item.type === "copilot_minutes");
+    document.querySelectorAll("#buy-minutes").forEach((button) => {
+      button.disabled = held;
+      button.textContent = held ? "در سبد" : "افزودن به سبد";
+    });
+    document.querySelectorAll("[data-minute-extra]").forEach((node) => node.classList.toggle("hidden", !held));
   }
 
   function parkToast(insideCart) {
@@ -657,10 +663,8 @@
     cart.items.unshift({
       type: "bundle",
       id: "bundle",
-      title: "پکیج جامع ۴ دوره تخصصی",
+      title: "هر چهار مسیر",
       price: BUNDLE_PRICE,
-      listPrice: 20000000,
-      giftMinutes: GIFT,
     });
     writeCart(cart);
     toast("به سبد اضافه شد.", false);
@@ -674,7 +678,7 @@
     const next = {
       type: "copilot_minutes",
       id: "copilot",
-      title: "دقیقهٔ کوپایلوت",
+      title: "تحلیل تماس تیم",
       minutes,
       price: minuteCost(minutes),
     };
@@ -684,7 +688,8 @@
       existing.title = next.title;
     } else cart.items.push(next);
     writeCart(cart);
-    toast(existing ? "مقدار دقیقهٔ دسترسی آزمایشی در سبد به‌روز شد." : "دقیقه‌ها برای دسترسی آزمایشی روی همین مرورگر به سبد اضافه شد.", true);
+    toast(existing ? "هزار دقیقهٔ اضافه به سبد نشست." : "به سبد اضافه شد.", false);
+    openCart();
   }
 
   function removeCartItem(id) {
@@ -746,7 +751,7 @@
     }).join("");
     const payable = pricedTotal(items);
     const pending = items.some((item) => item.type === "service");
-    footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع دسترسی آزمایشی</span><span>' + toman(payable) + "</span></p>" +
+    footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع</span><span>' + toman(payable) + "</span></p>" +
       '<p class="text-xs leading-6 text-cream/60">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p>' +
       (pending ? '<p class="text-xs leading-6 text-cream/60">خدمات سفارشی نیازمند بررسی و برآورد قیمت‌اند و در این مبلغ نیستند.</p>' : "") +
       '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>';
@@ -756,9 +761,7 @@
     const price = item.type === "service"
       ? "نیازمند بررسی و برآورد قیمت"
       : toman(item.price);
-    const meta = item.type === "bundle"
-      ? '<p class="mt-1 text-xs text-gold">هدیه: ' + fa.format(item.giftMinutes || GIFT) + " دقیقه کوپایلوت</p>"
-      : item.type === "copilot_minutes"
+    const meta = item.type === "copilot_minutes"
         ? '<div class="mt-2 flex items-center gap-2 text-xs"><button type="button" data-minute-step="-1000" class="grid size-8 place-items-center rounded-full ring-1 ring-gold/40" aria-label="کم کردن دقیقه">−</button><span>' + fa.format(item.minutes) + ' دقیقه</span><button type="button" data-minute-step="1000" class="grid size-8 place-items-center rounded-full ring-1 ring-gold/40" aria-label="زیاد کردن دقیقه">+</button></div>'
         : "";
     const details = item.type === "service"
@@ -935,7 +938,6 @@
       if (item.type === "bundle" && !state.bundle) {
         state.bundle = true;
         state.courses = PAID.slice();
-        state.minutes += GIFT;
         state.cashbackToman += Math.round(BUNDLE_PRICE * 0.05);
       }
       if (item.type === "course" && !state.bundle && !state.courses.includes(item.courseId)) {
@@ -1075,11 +1077,13 @@
       addBundle();
       return;
     }
-    const minutes = event.target.closest("#buy-minutes");
-    if (minutes) {
-      const scope = minutes.closest("section") || document;
-      const slider = scope.querySelector("#minute-slider");
-      if (slider) addMinutes(Number(slider.value));
+    if (event.target.closest("#buy-minutes")) {
+      addMinutes(1000);
+      return;
+    }
+    if (event.target.closest("#add-extra-minutes")) {
+      const current = readCart().items.find((item) => item.type === "copilot_minutes");
+      if (current) addMinutes(Number(current.minutes) + 1000);
       return;
     }
     const tabLink = event.target.closest("[data-tab-link]");

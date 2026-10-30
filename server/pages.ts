@@ -1,7 +1,7 @@
 import { articles } from "@/lib/articles";
 import { OBJECTIONS, counterFor } from "@/lib/copilot/playbook";
 import { categories, lessonsOf, type Category } from "@/lib/courses-data";
-import { BUNDLE_GIFT_MINUTES, BUNDLE_PRICE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
+import { BUNDLE_PRICE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
 
 export const fa = new Intl.NumberFormat("fa-IR");
 
@@ -406,11 +406,8 @@ export function homePage(base: string) {
       <h2 class="text-xl font-semibold">چهار مسیر فروش</h2>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>
       <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-lg font-semibold">بستهٔ چهار دوره</h2>
-          <p class="mt-2 text-2xl font-semibold text-gold">${toman(BUNDLE_PRICE)}</p>
-        </div>
-        <button type="button" id="buy-bundle" class="h-11 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+        <p class="text-lg font-semibold leading-8 text-cream">هر چهار مسیر، <span class="text-gold">${toman(BUNDLE_PRICE)}</span>. یکی رایگان است.</p>
+        <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
       </article>
       <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دموی دستیار در صفحهٔ جداست و جزو ثبت‌نام دوره نیست.</a></p>
     </section>
@@ -419,16 +416,13 @@ export function homePage(base: string) {
 
 function aiMinutesOffer() {
   return `<section id="ai-minutes" class="scroll-mt-24 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
-      <p class="text-xs tracking-[0.16em] text-gold">یکی از خدمات، جدا از دوره</p>
-      <h2 class="mt-2 text-2xl font-semibold">دقیقهٔ هوش مصنوعی</h2>
-      <p class="mt-3 text-2xl font-semibold text-gold">هر ۱٬۰۰۰ دقیقه ${toman(PRICE_PER_THOUSAND)}</p>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">پرداخت بانکی نیست. با دکمهٔ پایین، دسترسی آزمایشی همین مقدار روی همین مرورگر ذخیره می‌شود. این بخش جزو ثبت‌نام دوره نیست.</p>
-      <div class="mt-5 flex items-end justify-between gap-3">
-        <p class="text-3xl font-semibold" data-selected-minutes>۱٬۰۰۰ دقیقه</p>
-        <p class="text-lg font-semibold text-gold" data-minute-price>${toman(PRICE_PER_THOUSAND)}</p>
+      <h2 class="text-2xl font-semibold">تحلیل تماس تیم</h2>
+      <p class="mt-3 text-lg font-semibold leading-8 text-cream">هر ۱٬۰۰۰ دقیقه، <span class="text-gold">${toman(PRICE_PER_THOUSAND)}</span></p>
+      <button type="button" id="buy-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+      <div data-minute-extra class="mt-4 hidden">
+        <p class="text-sm leading-7 text-cream">هر هزار دقیقهٔ اضافه ${toman(PRICE_PER_THOUSAND)}</p>
+        <button type="button" id="add-extra-minutes" class="mt-3 h-11 rounded-2xl px-4 text-sm ring-1 ring-gold/40">هزار دقیقهٔ اضافه</button>
       </div>
-      <input id="minute-slider" type="range" min="1000" max="20000" step="1000" value="1000" class="mt-4 h-2 w-full cursor-pointer accent-gold" aria-label="انتخاب دقیقه کوپایلوت" />
-      <button type="button" id="buy-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">دسترسی آزمایشی این دقیقه‌ها روی همین مرورگر</button>
     </section>`;
 }
 
@@ -510,7 +504,7 @@ export function servicesPage(base: string) {
     ["funnel", "بهینه‌سازی قیف فروش", "صفحهٔ فرود، پیشنهاد و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم."],
     ["mentor", "منتورینگ مدیر فروش", "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم و شاخص‌ها."],
   ];
-  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">چهار خدمت تیمی بعد از دیدن پاسخ‌ها برآورد می‌شود. دقیقهٔ هوش مصنوعی پایین همین صفحه است و یک عدد ثابت دارد.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([id, title, text], index) => `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${text}</p><p class="mt-3 text-xs text-gold">نیازمند بررسی و برآورد قیمت</p><button type="button" data-order-service="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button></article>`).join("")}</div><div class="mt-8">${aiMinutesOffer()}</div>`);
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">چهار خدمت تیمی بعد از دیدن پاسخ‌ها برآورد می‌شود. تحلیل تماس تیم پایین همین صفحه یک عدد دارد.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([id, title, text], index) => `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${text}</p><p class="mt-3 text-xs text-gold">نیازمند بررسی و برآورد قیمت</p><button type="button" data-order-service="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button></article>`).join("")}</div><div class="mt-8">${aiMinutesOffer()}</div>`);
 }
 
 export function supportPage(base: string) {
@@ -540,17 +534,13 @@ export function subscriptionPage(base: string) {
   return layout(base, "pricing", "قیمت | نکس‌سل", `
     <header>
       <h1 class="text-3xl font-semibold text-cream">قیمت چهار مسیر</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream">هر مسیر یک عدد دارد. بستهٔ چهار دوره یک عدد جداست.</p>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream">هر مسیر یک عدد کنار خودش دارد.</p>
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${paths}</div>
     <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h2 class="text-lg font-semibold">بستهٔ چهار دوره</h2>
-        <p class="mt-2 text-2xl font-semibold text-gold">${toman(BUNDLE_PRICE)}</p>
-      </div>
-      <button type="button" id="buy-bundle" class="h-11 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+      <p class="text-lg font-semibold leading-8 text-cream">هر چهار مسیر، <span class="text-gold">${toman(BUNDLE_PRICE)}</span>. یکی رایگان است.</p>
+      <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
     </article>
-    <p class="mt-6 text-sm"><a class="text-gold" href="${base}/services/#ai-minutes">دقیقهٔ هوش مصنوعی در بخش خدمات است.</a></p>
   `);
 }
 
@@ -634,7 +624,7 @@ function dashboardPage(base: string, initialTab = "overview") {
           </section>
           <div class="grid gap-3 sm:grid-cols-3">
             <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دوره‌های فعال</p><p class="mt-3 text-2xl font-semibold" data-owned-count>۰</p><p class="mt-1 text-xs text-cream/50" data-owned-hint>از ۴ دوره تخصصی</p></article>
-            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دقیقهٔ باقی‌مانده کوپایلوت</p><p class="mt-3 text-2xl font-semibold" data-minute-balance>۰</p><p class="mt-1 text-xs text-cream/50" data-minute-hint>هدیه فقط با باندل</p></article>
+            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دقیقهٔ تحلیل تماس</p><p class="mt-3 text-2xl font-semibold" data-minute-balance>۰</p><p class="mt-1 text-xs text-cream/50" data-minute-hint>جدا از دوره</p></article>
             <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">کش‌بک تومانی</p><p class="mt-3 text-2xl font-semibold" data-cashback>۰</p><p class="mt-1 text-xs text-cream/50">۵٪ خرید و پاداش معرفی</p></article>
           </div>
           <section class="glass rounded-[28px] p-5">
@@ -671,14 +661,14 @@ function dashboardPage(base: string, initialTab = "overview") {
             <p class="text-xs tracking-[0.16em] text-gold">دوره‌های من</p>
             <h1 class="mt-2 text-2xl font-semibold">وضعیت خرید دوره‌ها</h1>
             <p class="mt-1 text-sm text-cream/60" dir="ltr" data-phone-line>—</p>
-            <p class="mt-2 text-sm leading-7 text-cream/60">هر دوره ${toman(COURSE_PRICE)} است. بستهٔ چهار دوره ${toman(BUNDLE_PRICE)} است.</p>
+            <p class="mt-2 text-sm leading-7 text-cream/60">هر مسیر ${toman(COURSE_PRICE)}. هر چهار مسیر، ${toman(BUNDLE_PRICE)}.</p>
           </div>
           <article class="rounded-[28px] bg-navy p-5 ring-1 ring-gold/30" data-bundle-card>
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-lg font-semibold">باندل کامل</h2>
-              <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">بستهٔ چهار دوره · ${toman(BUNDLE_PRICE)}</span>
+              <h2 class="text-lg font-semibold">هر چهار مسیر</h2>
+              <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">هر چهار مسیر، ${toman(BUNDLE_PRICE)}</span>
             </div>
-            <button type="button" id="buy-bundle" data-bundle-buy class="mt-4 inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">دسترسی آزمایشی بسته روی همین مرورگر</button>
+            <button type="button" id="buy-bundle" data-bundle-buy class="mt-4 inline-flex h-11 items-center rounded-2xl bg-cream px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
           </article>
           <div class="grid gap-3 sm:grid-cols-2">${cards}</div>
         </section>
@@ -687,8 +677,8 @@ function dashboardPage(base: string, initialTab = "overview") {
             <p class="text-xs tracking-[0.16em] text-gold">کیف دقیقه</p>
             <h1 class="mt-2 text-2xl font-semibold">کیف پول دقایق کوپایلوت هوش مصنوعی</h1>
             <p class="mt-6 text-4xl font-semibold text-gold"><span data-minute-balance>۰</span> <span class="text-lg font-medium text-cream">دقیقه</span></p>
-            <p class="mt-3 text-sm leading-7 text-cream/70" data-wallet-lead>دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط همراه بستهٔ چهار دوره روی همین مرورگر می‌ماند.</p>
-            <a href="${base}/services/#ai-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">دقیقهٔ هوش مصنوعی در بخش خدمات</a>
+            <p class="mt-3 text-sm leading-7 text-cream/70" data-wallet-lead>تحلیل تماس تیم جدا از دوره است.</p>
+            <a href="${base}/services/#ai-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">تحلیل تماس تیم در خدمات</a>
           </section>
           <section class="glass rounded-[28px] p-6">
             <p class="text-xs tracking-[0.16em] text-gold">وفاداری تومانی</p>

@@ -1,6 +1,6 @@
 export const COURSE_PRICE = 5_000_000;
 export const BUNDLE_LIST_PRICE = 20_000_000;
-export const BUNDLE_PRICE = 16_000_000;
+export const BUNDLE_PRICE = 15_000_000;
 export const BUNDLE_SAVE = BUNDLE_LIST_PRICE - BUNDLE_PRICE;
 export const BUNDLE_GIFT_MINUTES = 500;
 export const MINUTE_STEP = 1_000;
@@ -93,7 +93,6 @@ export function writePricing(next: PricingState) {
 
 export function remainingCopilotMinutes(state: PricingState) {
   const minutes = Number.isFinite(state.minutes) ? Math.max(0, Math.round(state.minutes)) : 0;
-  if (minutes === 0 && state.bundle) return BUNDLE_GIFT_MINUTES;
   return minutes;
 }
 
@@ -126,7 +125,7 @@ export function buyBundle() {
     ...state,
     courses: PAID_COURSES.map((course) => course.id),
     bundle: true,
-    minutes: state.minutes + BUNDLE_GIFT_MINUTES,
+    minutes: state.minutes,
     cashbackToman: addCashback(state, BUNDLE_PRICE),
   };
   writePricing(next);
