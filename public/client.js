@@ -1721,8 +1721,47 @@
     });
   }
 
+  function mountMetrics() {
+    const nodes = document.querySelectorAll("[data-count]");
+    if (!nodes.length) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const paint = (node, current) => {
+      const prefix = node.dataset.prefix || "";
+      const suffix = node.dataset.suffix || "";
+      node.textContent = prefix + fa.format(current) + suffix;
+    };
+    nodes.forEach((node) => {
+      const value = Number(node.dataset.count) || 0;
+      const run = () => {
+        if (reduce) {
+          paint(node, value);
+          return;
+        }
+        const start = performance.now();
+        const tick = (now) => {
+          const progress = Math.min(1, (now - start) / 1300);
+          const eased = 1 - (1 - progress) ** 3;
+          paint(node, Math.round(value * eased));
+          if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+      if (!("IntersectionObserver" in window)) {
+        run();
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        run();
+      }, { threshold: 0.4 });
+      observer.observe(node);
+    });
+  }
+
   mountSmoothScroll();
   mountReveal();
+  mountMetrics();
   const cartDrawer = document.querySelector("#cart-drawer");
   if (cartDrawer) cartDrawer.addEventListener("close", () => parkToast(false));
   render();
