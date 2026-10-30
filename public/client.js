@@ -163,12 +163,12 @@
       node.textContent = (name || "ن").slice(0, 1);
     });
     const ownedCount = PAID.filter((id) => owns(state, id)).length;
-    const status = state.bundle ? "باندل کامل" : ownedCount ? fa.format(ownedCount) + " دوره" : "بدون دوره";
-    const statusLong = state.bundle ? "باندل کامل" : ownedCount ? fa.format(ownedCount) + " دوره فعال" : "هنوز دوره‌ای خریداری نشده";
+    const status = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر" : "بدون دوره";
+    const statusLong = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر با دسترسی آزمایشی" : "هنوز دسترسی آزمایشی ثبت نشده";
     document.querySelectorAll("[data-status-badge]").forEach((node) => {
       node.textContent = node.dataset.statusBadge === "short" ? status : statusLong;
     });
-    document.querySelectorAll("[data-gift-badge]").forEach((node) => node.classList.add("hidden"));
+    document.querySelectorAll("[data-gift-badge]").forEach((node) => node.remove());
     document.querySelectorAll("[data-owned-hint]").forEach((node) => {
       node.textContent = state.bundle ? "باندل کامل" : "از ۴ دوره تخصصی";
     });
@@ -185,11 +185,11 @@
       const active = owns(state, row.dataset.courseStatus);
       const label = row.querySelector("[data-owned-label]");
       if (!label) return;
-      label.textContent = active ? "فعال" : "خریداری نشده";
+      label.textContent = active ? "دسترسی آزمایشی" : "ثبت نشده";
       label.className = active ? "text-gold" : "text-cream/50";
     });
     document.querySelectorAll("[data-bundle-label]").forEach((node) => {
-      node.textContent = state.bundle ? "هر چهار مسیر روی همین مرورگر فعال است" : "هر چهار مسیر، " + toman(BUNDLE_PRICE);
+      node.textContent = state.bundle ? "دسترسی آزمایشی هر چهار مسیر روی همین مرورگر است" : "هر چهار مسیر، " + toman(BUNDLE_PRICE);
     });
     document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
     const codeNode = document.querySelector("[data-referral-code]");
@@ -232,7 +232,7 @@
       const lessons = card.parentElement ? Array.from(document.querySelectorAll("[data-lesson]")).length : 0;
       const lock = card.querySelector("[data-lock]");
       if (lock) {
-        lock.textContent = open ? "خریداری شده" : "قفل";
+        lock.textContent = open ? "دسترسی آزمایشی" : "قفل";
         lock.className = open ? "rounded-full bg-gold px-2 py-1 text-[11px] font-semibold text-navy" : "rounded-full bg-white/10 px-2 py-1 text-[11px]";
       }
       const enter = card.querySelector("[data-enter]");
@@ -245,7 +245,7 @@
     });
 
     document.querySelectorAll("[data-course-gate]").forEach((gate) => {
-      const open = gate.dataset.free === "yes" || owns(state, gate.dataset.courseGate);
+      const open = gate.dataset.free === "yes" || gate.dataset.preview === "yes" || owns(state, gate.dataset.courseGate);
       const frame = gate.querySelector("iframe");
       const locked = gate.querySelector("[data-locked]");
       if (!frame) return;
@@ -345,7 +345,9 @@
     const list = document.querySelector("[data-live-tickets]");
     if (!list) return;
     const rows = user && Array.isArray(user.tickets) ? user.tickets : [];
-    list.innerHTML = rows.map((ticket) => "<article class=\"glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2></div><span class=\"rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy\">در حال بررسی</span></article>").join("");
+    list.innerHTML = rows.map((ticket) => "<article class=\"glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2></div><span class=\"rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy\">روی همین مرورگر</span></article>").join("");
+    const empty = document.querySelector("[data-ticket-empty]");
+    if (empty) empty.classList.toggle("hidden", rows.length > 0);
   }
 
   function paintProfile(user) {
@@ -456,7 +458,8 @@
     if (list) {
       const lessons = Array.isArray(meta.lessons) ? meta.lessons : [];
       list.innerHTML = lessons.map((lesson, index) => {
-        return '<li class="flex items-center justify-between gap-3 rounded-2xl border border-white/10 px-3 py-3 text-sm"><span>' + fa.format(index + 1) + ". " + escText(lesson.title) + '</span><span class="inline-flex items-center gap-1 text-xs text-cream/50"><svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>قفل</span></li>';
+        const mark = index === 0 ? "بدون سبد" : "قفل";
+        return '<li class="flex items-center justify-between gap-3 rounded-2xl border border-white/10 px-3 py-3 text-sm"><span>' + fa.format(index + 1) + ". " + escText(lesson.title) + '</span><span class="text-xs text-cream/50">' + mark + "</span></li>";
       }).join("");
     }
     if (buy) buy.dataset.buy = id;
@@ -555,8 +558,10 @@
   function paintPathButtons() {
     const items = readCart().items;
     const held = new Set(items.filter((item) => item.type === "course").map((item) => item.courseId));
-    document.querySelectorAll("[data-course] [data-buy]").forEach((buy) => {
-      const inCart = held.has(buy.dataset.buy);
+    document.querySelectorAll("[data-buy]").forEach((buy) => {
+      const id = buy.dataset.buy;
+      if (!PAID.includes(id)) return;
+      const inCart = held.has(id);
       buy.disabled = inCart;
       buy.textContent = inCart ? "در سبد" : "افزودن به سبد";
     });
@@ -568,12 +573,14 @@
   }
 
   function paintMinuteOffer() {
-    const held = readCart().items.some((item) => item.type === "copilot_minutes");
+    const held = readCart().items.find((item) => item.type === "copilot_minutes");
+    const slider = document.querySelector("#minute-slider");
+    if (held && slider && document.activeElement !== slider) slider.value = String(held.minutes);
+    paintSlider();
     document.querySelectorAll("#buy-minutes").forEach((button) => {
-      button.disabled = held;
-      button.textContent = held ? "در سبد" : "افزودن به سبد";
+      button.disabled = false;
+      button.textContent = held ? "به‌روزرسانی سبد" : "افزودن به سبد";
     });
-    document.querySelectorAll("[data-minute-extra]").forEach((node) => node.classList.toggle("hidden", !held));
   }
 
   function parkToast(insideCart) {
@@ -623,7 +630,7 @@
     if (!PAID.includes(id)) return;
     const state = readPricing();
     if (owns(state, id)) {
-      toast("این دوره برای شما فعال است.", false);
+      toast("دسترسی آزمایشی این مسیر روی همین مرورگر است.", false);
       return;
     }
     const cart = readCart();
@@ -651,7 +658,7 @@
   function addBundle() {
     const state = readPricing();
     if (state.bundle) {
-      toast("پکیج جامع برای شما فعال است.", false);
+      toast("دسترسی آزمایشی هر چهار مسیر روی همین مرورگر است.", false);
       return;
     }
     const cart = readCart();
@@ -688,7 +695,7 @@
       existing.title = next.title;
     } else cart.items.push(next);
     writeCart(cart);
-    toast(existing ? "هزار دقیقهٔ اضافه به سبد نشست." : "به سبد اضافه شد.", false);
+    toast(existing ? "مقدار تحلیل تماس در سبد به‌روز شد." : "به سبد اضافه شد.", false);
     openCart();
   }
 
@@ -1078,12 +1085,8 @@
       return;
     }
     if (event.target.closest("#buy-minutes")) {
-      addMinutes(1000);
-      return;
-    }
-    if (event.target.closest("#add-extra-minutes")) {
-      const current = readCart().items.find((item) => item.type === "copilot_minutes");
-      if (current) addMinutes(Number(current.minutes) + 1000);
+      const slider = document.querySelector("#minute-slider");
+      addMinutes(slider ? Number(slider.value) : 1000);
       return;
     }
     const tabLink = event.target.closest("[data-tab-link]");
@@ -1691,7 +1694,7 @@
       const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
       session.currentUser.tickets = [{ id: "TK-" + String(Date.now()).slice(-4), subject: title, at: stamp }].concat(session.currentUser.tickets || []);
       panelTicket.reset();
-      if (note) note.textContent = "تیکت روی همین مرورگر ثبت شد.";
+      if (note) note.textContent = "تیکت روی همین مرورگر ثبت شد. پاسخ واقعی از سرور نمی‌آید.";
       writeSession(session);
     });
   }
