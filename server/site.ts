@@ -11,7 +11,6 @@ import {
   demoPage,
   homePage,
   learnCategoryPage,
-  minutesPage,
   learnLessonPage,
   loginPage,
   registerPage,
@@ -54,7 +53,7 @@ export function createApp() {
   app.get(["/", "/index.html"], (_req, res) => send(homePage(base), res));
   app.get(["/academy", "/academy/"], (_req, res) => send(academyPage(base), res));
   app.get(["/demo", "/demo/"], (_req, res) => send(demoPage(base), res));
-  app.get(["/minutes", "/minutes/"], (_req, res) => send(minutesPage(base), res));
+  app.get(["/minutes", "/minutes/"], (_req, res) => res.redirect(302, `${base}/services/#ai-minutes`));
   app.get(["/dashboard/copilot", "/dashboard/copilot/"], (_req, res) => send(copilotPage(base), res));
   app.get(["/articles", "/articles/"], (_req, res) => send(articlesPage(base), res));
   const one = (value: string | string[]) => (Array.isArray(value) ? value[0] : value);

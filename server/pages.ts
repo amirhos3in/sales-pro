@@ -407,28 +407,30 @@ export function homePage(base: string) {
     <section id="courses" class="mt-8">
       <h2 class="text-xl font-semibold">چهار مسیر فروش</h2>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>
-      <p class="mt-6 text-sm text-cream/70"><a class="text-gold" href="${base}/minutes/">دقیقهٔ هوش مصنوعی، جدا از دوره: هر ۱٬۰۰۰ دقیقه ${toman(PRICE_PER_THOUSAND)}</a></p>
-      <p class="mt-2 text-sm text-cream/50"><a href="${base}/subscription/">بستهٔ چهار دوره در صفحهٔ قیمت است.</a></p>
+      <p class="mt-6 text-sm text-cream/50"><a href="${base}/subscription/">بستهٔ چهار دوره در صفحهٔ قیمت است.</a></p>
       <p class="mt-2 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دموی دستیار در صفحهٔ جداست و جزو ثبت‌نام دوره نیست.</a></p>
     </section>
   `);
 }
 
-export function minutesPage(base: string) {
-  return layout(base, "minutes", "دقیقهٔ هوش مصنوعی | نکس‌سل", `
-    <section ${revealAttrs(0)} class="rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
-      <p class="text-xs tracking-[0.16em] text-gold">جدا از آکادمی</p>
-      <h1 class="mt-2 text-3xl font-semibold">دقیقهٔ هوش مصنوعی</h1>
+function aiMinutesOffer() {
+  return `<section id="ai-minutes" class="scroll-mt-24 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
+      <p class="text-xs tracking-[0.16em] text-gold">یکی از خدمات، جدا از دوره</p>
+      <h2 class="mt-2 text-2xl font-semibold">دقیقهٔ هوش مصنوعی</h2>
       <p class="mt-3 text-2xl font-semibold text-gold">هر ۱٬۰۰۰ دقیقه ${toman(PRICE_PER_THOUSAND)}</p>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">پرداخت بانکی نیست. با دکمهٔ پایین، دسترسی آزمایشی همین مقدار روی همین مرورگر ذخیره می‌شود.</p>
+      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">پرداخت بانکی نیست. با دکمهٔ پایین، دسترسی آزمایشی همین مقدار روی همین مرورگر ذخیره می‌شود. این بخش جزو ثبت‌نام دوره نیست.</p>
       <div class="mt-5 flex items-end justify-between gap-3">
         <p class="text-3xl font-semibold" data-selected-minutes>۱٬۰۰۰ دقیقه</p>
         <p class="text-lg font-semibold text-gold" data-minute-price>${toman(PRICE_PER_THOUSAND)}</p>
       </div>
       <input id="minute-slider" type="range" min="1000" max="20000" step="1000" value="1000" class="mt-4 h-2 w-full cursor-pointer accent-gold" aria-label="انتخاب دقیقه کوپایلوت" />
       <button type="button" id="buy-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">دسترسی آزمایشی این دقیقه‌ها روی همین مرورگر</button>
-    </section>
-  `);
+    </section>`;
+}
+
+export function minutesPage(base: string) {
+  const target = `${base}/services/#ai-minutes`;
+  return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=${target}"><link rel="canonical" href="${target}"><title>دقیقهٔ هوش مصنوعی | نکس‌سل</title></head><body><p><a href="${target}">دقیقهٔ هوش مصنوعی در بخش خدمات است.</a></p></body></html>`;
 }
 
 export function demoPage(base: string) {
@@ -504,7 +506,7 @@ export function servicesPage(base: string) {
     ["funnel", "بهینه‌سازی قیف فروش", "صفحهٔ فرود، پیشنهاد و مسیر دایرکت را با یک شاخص مشخص اصلاح می‌کنیم."],
     ["mentor", "منتورینگ مدیر فروش", "دو جلسهٔ یک‌به‌یک در ماه برای عارضه‌یابی تیم و شاخص‌ها."],
   ];
-  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت این خدمات بعد از دیدن پاسخ‌ها برآورد می‌شود. سفارش را در سبد می‌گذارید و هزینه را کارشناس اعلام می‌کند.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([id, title, text], index) => `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${text}</p><p class="mt-3 text-xs text-gold">نیازمند بررسی و برآورد قیمت</p><button type="button" data-order-service="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button></article>`).join("")}</div>`);
+  return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">چهار خدمت تیمی بعد از دیدن پاسخ‌ها برآورد می‌شود. دقیقهٔ هوش مصنوعی پایین همین صفحه است و یک عدد ثابت دارد.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${items.map(([id, title, text], index) => `<article ${revealAttrs(index * 80)} class="glass flex flex-col rounded-3xl p-5"><h2 class="font-semibold">${title}</h2><p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${text}</p><p class="mt-3 text-xs text-gold">نیازمند بررسی و برآورد قیمت</p><button type="button" data-order-service="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button></article>`).join("")}</div><div class="mt-8">${aiMinutesOffer()}</div>`);
 }
 
 export function supportPage(base: string) {
@@ -531,7 +533,7 @@ export function subscriptionPage(base: string) {
     <header ${revealAttrs(0)}>
       <p class="text-xs tracking-[0.16em] text-gold">فهرست زنده</p>
       <h1 class="mt-2 text-3xl font-semibold">قیمت چهار مسیر</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">هر مسیر یک عدد دارد. بستهٔ چهار دوره یک عدد جداست. دقیقهٔ هوش مصنوعی در صفحهٔ خودش است. پرداخت بانکی نیست.</p>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">هر مسیر یک عدد دارد. بستهٔ چهار دوره یک عدد جداست. پرداخت بانکی نیست.</p>
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${paths}</div>
     <article ${revealAttrs(80)} class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5">
@@ -540,7 +542,7 @@ export function subscriptionPage(base: string) {
       <p class="mt-2 text-sm leading-7 text-cream/60">${fa.format(BUNDLE_GIFT_MINUTES)} دقیقهٔ هوش مصنوعی همراه این بسته روی همین مرورگر می‌ماند.</p>
       <button type="button" id="buy-bundle" class="mt-4 h-11 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">دسترسی آزمایشی بسته روی همین مرورگر</button>
     </article>
-    <p class="mt-6 text-sm"><a class="text-gold" href="${base}/minutes/">دقیقهٔ هوش مصنوعی، جدا: هر ۱٬۰۰۰ دقیقه ${toman(PRICE_PER_THOUSAND)}</a></p>
+    <p class="mt-6 text-sm"><a class="text-gold" href="${base}/services/#ai-minutes">دقیقهٔ هوش مصنوعی در بخش خدمات است.</a></p>
     <p class="mt-4 text-sm leading-7 text-cream/60">پلن‌های ماهانه، سه‌ماهه و سالانه پیشنهاد فعال نیستند.</p>
   `);
 }
@@ -679,7 +681,7 @@ function dashboardPage(base: string, initialTab = "overview") {
             <h1 class="mt-2 text-2xl font-semibold">کیف پول دقایق کوپایلوت هوش مصنوعی</h1>
             <p class="mt-6 text-4xl font-semibold text-gold"><span data-minute-balance>۰</span> <span class="text-lg font-medium text-cream">دقیقه</span></p>
             <p class="mt-3 text-sm leading-7 text-cream/70" data-wallet-lead>دقیقه جدا از دوره است. هدیهٔ ۵۰۰ دقیقه فقط همراه بستهٔ چهار دوره روی همین مرورگر می‌ماند.</p>
-            <a href="${base}/minutes/" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">دقیقهٔ هوش مصنوعی در صفحهٔ جدا</a>
+            <a href="${base}/services/#ai-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">دقیقهٔ هوش مصنوعی در بخش خدمات</a>
           </section>
           <section class="glass rounded-[28px] p-6">
             <p class="text-xs tracking-[0.16em] text-gold">وفاداری تومانی</p>
