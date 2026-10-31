@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مدیریت مشتریان | نکس‌سل</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D4AF37'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ["Vazirmatn", "Tahoma", "sans-serif"] }
+    } } }
+  </script>
+  <script>
+    (function () {
+      var next = "/sales-pro" + "/login/?role=admin";
+      try {
+        var raw = JSON.parse(localStorage.getItem("academy_user_session") || "null");
+        if (raw && raw.isAuthenticated === true && raw.role === "admin" && raw.currentUser) return;
+      } catch (error) {}
+      location.replace(next);
+    })();
+  </script>
+  <style>
+    [hidden] { display: none !important; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #D4AF37; outline-offset: 3px; }
+    #admin-customer-dialog, #admin-delete-dialog {
+      width: min(32rem, calc(100vw - 1.5rem));
+      margin: auto;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1.5rem;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 1.25rem;
+    }
+    #admin-customer-dialog::backdrop, #admin-delete-dialog::backdrop { background: rgba(0,0,0,0.66); }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0f172a] font-sans text-slate-100 antialiased" data-base="/sales-pro" data-admin-app data-admin-view="customers">
+  <div class="lg:grid lg:min-h-screen lg:grid-cols-[16.5rem_1fr]">
+    <aside class="border-b border-white/10 bg-[#020617] lg:border-b-0 lg:border-e lg:border-white/10">
+      <a href="/sales-pro/" class="flex items-center gap-2 px-4 py-4">
+        <span class="grid size-9 place-items-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-[#0B132B]">ن</span>
+        <span><span class="block text-sm font-bold">نکس‌سل</span><span class="block text-[11px] text-slate-400">پنل مدیریت</span></span>
+      </a>
+      <nav class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible" aria-label="بخش‌های مدیریت">
+        <a data-admin-link="dashboard" href="/sales-pro/admin/dashboard/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>داشبورد</a>
+        <a data-admin-link="customers" href="/sales-pro/admin/customers/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>مدیریت مشتریان</a>
+        <a data-admin-link="settings" href="/sales-pro/admin/settings/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8.6 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1-.33H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 .33 1 1.65 1.65 0 0 0 1 .6 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.3.45.64.6 1a1.65 1.65 0 0 0 1 .33H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1 .33 1.65 1.65 0 0 0-.51 1z"/></svg>تنظیمات سیستم</a>
+        <button type="button" data-sign-out class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-start text-sm text-rose-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>خروج</button>
+      </nav>
+    </aside>
+    <div class="min-w-0 px-4 py-5 sm:px-6">
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold sm:text-3xl">مدیریت مشتریان</h1>
+        <p class="mt-2 text-sm leading-7 text-slate-400">جستجو، فیلتر و ویرایش فهرست مشتریان همین مرورگر.</p>
+      </div>
+      <button type="button" data-customer-add class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">افزودن مشتری جدید</button>
+    </header>
+    <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+      <label class="block min-w-0 flex-1 text-sm">جستجو<input data-customer-search type="search" placeholder="نام یا شماره موبایل" class="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-3 text-sm outline-none focus:border-[#D4AF37]" /></label>
+      <label class="block text-sm sm:w-52">وضعیت
+        <select data-customer-filter class="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-3 text-sm outline-none focus:border-[#D4AF37]">
+          <option value="all">همه</option>
+          <option value="active">فعال</option>
+          <option value="blocked">مسدود</option>
+        </select>
+      </label>
+    </div>
+    <div class="mt-4 overflow-x-auto rounded-3xl border border-white/10">
+      <table class="w-full min-w-[46rem] text-right">
+        <thead class="bg-white/5 text-xs text-slate-400">
+          <tr>
+            <th class="px-3 py-3 font-medium">نام و نام خانوادگی</th>
+            <th class="px-3 py-3 font-medium">شماره موبایل</th>
+            <th class="px-3 py-3 font-medium">وضعیت</th>
+            <th class="px-3 py-3 font-medium">تاریخ ثبت‌نام</th>
+            <th class="px-3 py-3 font-medium">اقدامات</th>
+          </tr>
+        </thead>
+        <tbody data-customer-rows></tbody>
+      </table>
+    </div>
+    <p data-customer-empty class="mt-4 text-sm text-slate-400" hidden>مشتری‌ای با این مشخصات نیست.</p>
+    <dialog id="admin-customer-dialog" aria-labelledby="customer-dialog-title">
+      <form data-customer-form class="space-y-3">
+        <h2 id="customer-dialog-title" data-customer-title class="text-lg font-semibold">افزودن مشتری جدید</h2>
+        <input name="customerId" type="hidden" />
+        <label class="block text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" class="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-3 text-sm outline-none focus:border-[#D4AF37]" /></label>
+        <label class="block text-sm">شماره موبایل<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-3 text-sm outline-none focus:border-[#D4AF37] text-left" /></label>
+        <label class="block text-sm">وضعیت
+          <select name="status" class="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-3 text-sm outline-none focus:border-[#D4AF37]">
+            <option value="active">فعال</option>
+            <option value="blocked">مسدود</option>
+          </select>
+        </label>
+        <p data-customer-note class="text-sm text-rose-300" role="status"></p>
+        <div class="flex gap-2">
+          <button type="submit" class="h-11 flex-1 rounded-2xl bg-[#D4AF37] text-sm font-semibold text-[#0B132B]">ذخیره</button>
+          <button type="button" data-customer-cancel class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/15">انصراف</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="admin-delete-dialog" aria-labelledby="delete-dialog-title">
+      <h2 id="delete-dialog-title" class="text-lg font-semibold">حذف مشتری</h2>
+      <p class="mt-2 text-sm leading-7 text-slate-300">«<span data-delete-name></span>» از فهرست همین مرورگر حذف شود؟</p>
+      <div class="mt-4 flex gap-2">
+        <button type="button" data-delete-confirm class="h-11 flex-1 rounded-2xl bg-rose-500 text-sm font-semibold text-white">حذف</button>
+        <button type="button" data-delete-cancel class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/15">انصراف</button>
+      </div>
+    </dialog>
+  </div>
+  </div>
+  <script src="/sales-pro/client.js"></script>
+</body>
+</html>

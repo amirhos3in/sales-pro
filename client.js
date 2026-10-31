@@ -102,9 +102,26 @@
     }
   }
 
+  function sessionRole(session) {
+    if (!session || session.isAuthenticated !== true || !session.currentUser) return "guest";
+    return session.role === "admin" ? "admin" : "customer";
+  }
+
+  function syncRoleCookie(role) {
+    const value = role === "admin" || role === "customer" ? role : "";
+    const maxAge = value ? 60 * 60 * 24 * 30 : 0;
+    document.cookie = "nexsell_role=" + value + "; Path=/; Max-Age=" + maxAge + "; SameSite=Lax";
+  }
+
   function writeSession(session) {
     localStorage.setItem(SESSION, JSON.stringify(session));
+    syncRoleCookie(sessionRole(session));
     render();
+  }
+
+  function clearSession() {
+    localStorage.removeItem(SESSION);
+    syncRoleCookie("guest");
   }
 
   function currentTab() {
@@ -119,12 +136,17 @@
   }
 
   const panelPath = location.pathname.replace(/\/$/, "");
-  if (panelPath.endsWith("/dashboard")) {
-    const session = readSession();
-    if (!session || !session.isAuthenticated || !session.currentUser) {
-      location.replace(base + "/login/");
+  const adminArea = /\/admin(?:\/|$)/.test(panelPath);
+  if (panelPath.endsWith("/dashboard") && !adminArea) {
+    const role = sessionRole(readSession());
+    if (role !== "customer") {
+      location.replace(role === "admin" ? base + "/admin/dashboard/" : base + "/login/");
       return;
     }
+  }
+  if (adminArea && sessionRole(readSession()) !== "admin") {
+    location.replace(base + "/login/?role=admin");
+    return;
   }
 
   function render() {
@@ -163,16 +185,22 @@
     document.querySelectorAll("[data-account-name]").forEach((node) => {
       node.textContent = name || "کاربر";
     });
-    const signedIn = Boolean(session && session.isAuthenticated && user && name);
+    const role = sessionRole(session);
+    const signedIn = role === "customer" && Boolean(name);
     document.querySelectorAll("[data-auth-guest]").forEach((node) => {
-      node.hidden = signedIn;
+      node.hidden = role !== "guest";
     });
-    document.querySelectorAll("[data-auth-user]").forEach((node) => {
-      node.hidden = !signedIn;
-      if (node.dataset.authUser === "chip") node.style.display = signedIn ? "inline-flex" : "none";
+    document.querySelectorAll("[data-auth-user], [data-auth-customer]").forEach((node) => {
+      node.hidden = role !== "customer";
+    });
+    document.querySelectorAll("[data-auth-admin]").forEach((node) => {
+      node.hidden = role !== "admin";
+    });
+    document.querySelectorAll("[data-header-phone]").forEach((node) => {
+      node.textContent = signedIn && phone ? faDigits(phone) : "—";
     });
     document.querySelectorAll("[data-header-name]").forEach((node) => {
-      node.textContent = name || "کاربر";
+      node.textContent = role === "admin" ? "مدیر" : (name || "کاربر");
     });
     document.querySelectorAll("[data-header-letter]").forEach((node) => {
       node.textContent = (name || "ن").slice(0, 1);
@@ -331,7 +359,7 @@
   function signedAccount() {
     const session = readSession();
     const user = session && session.currentUser;
-    return Boolean(session && session.isAuthenticated && user && user.name);
+    return sessionRole(session) === "customer" && Boolean(user && user.name);
   }
 
   function rememberFreeEnroll(id) {
@@ -1362,7 +1390,7 @@
       return;
     }
     if (event.target.closest("[data-logout-confirm]")) {
-      localStorage.removeItem(SESSION);
+      clearSession();
       location.href = base + "/login/";
       return;
     }
@@ -1377,7 +1405,7 @@
         if (!dialog.open) dialog.showModal();
         return;
       }
-      localStorage.removeItem(SESSION);
+      clearSession();
       location.href = base + "/login/";
       return;
     }
@@ -1473,13 +1501,25 @@
   }
 
   function mountAuth() {
-    const root = document.querySelector("[data-auth]");
-    if (!root) return;
-    const existing = readSession();
-    if (existing && existing.isAuthenticated && existing.currentUser) {
-      location.replace(base + "/dashboard/");
+    const root = document.querySelector("[data-auth='login'], [data-auth='register']");
+    const adminRoot = document.querySelector("[data-auth='admin']");
+    if (!root && !adminRoot) return;
+    const wantAdmin = new URLSearchParams(location.search).get("role") === "admin";
+    const role = sessionRole(readSession());
+    if (role === "admin") {
+      location.replace(base + "/admin/dashboard/");
       return;
     }
+    if (role === "customer" && !wantAdmin) {
+      location.replace(base + "/");
+      return;
+    }
+    if (adminRoot) bindAdminAuth(adminRoot);
+    if (!root) return;
+    if (wantAdmin) setAuthMode("admin");
+    document.querySelectorAll("[data-auth-tab]").forEach((tab) => {
+      tab.addEventListener("click", () => setAuthMode(tab.dataset.authTab === "admin" ? "admin" : "user"));
+    });
     const mode = root.dataset.auth;
     const phoneInput = root.querySelector("[data-auth-phone]");
     const otpStep = root.querySelector("[data-auth-otp]");
@@ -1507,7 +1547,7 @@
 
     function startTimer() {
       window.clearInterval(timerId);
-      left = 119;
+      left = mode === "login" ? 60 : 119;
       if (timerNode) timerNode.textContent = clock(left);
       if (resend) resend.disabled = true;
       timerId = window.setInterval(() => {
@@ -1567,8 +1607,13 @@
         return;
       }
       const otp = otpValue();
-      if (!/^\d{5}$/.test(otp)) {
-        say("کد باید ۵ رقم باشد.");
+      if (!/^\d{4,5}$/.test(otp)) {
+        say("کد تأیید را کامل وارد کنید.");
+        return;
+      }
+      const known = readCustomers().find((item) => item.phone === confirmed);
+      if (known && known.status === "blocked") {
+        say("این شماره مسدود است.");
         return;
       }
       const accounts = readAccounts();
@@ -1591,7 +1636,8 @@
       } else if (accounts[confirmed]) {
         user = { ...accounts[confirmed], phone: confirmed };
       }
-      localStorage.setItem(SESSION, JSON.stringify({ isAuthenticated: true, currentUser: user }));
+      writeSession({ isAuthenticated: true, role: "customer", currentUser: user });
+      upsertCustomerFromUser(user);
       const pending = sessionStorage.getItem("nexsell-free-enroll");
       if (pending && MINI.includes(pending)) {
         rememberFreeEnroll(pending);
@@ -1599,7 +1645,7 @@
         location.href = base + "/learn/" + pending + "/";
         return;
       }
-      location.href = base + "/dashboard/";
+      location.href = base + (mode === "register" ? "/dashboard/" : "/");
     }
 
     root.addEventListener("submit", (event) => {
@@ -1632,7 +1678,371 @@
     });
   }
 
+  const CUSTOMERS_KEY = "nexsell-admin-customers-v1";
+  const ACTIVITY_KEY = "nexsell-admin-activity-v1";
+  const ADMIN_CREDS_KEY = "nexsell-admin-credentials-v1";
+  const ADMIN_SEEN_KEY = "nexsell-admin-seen-v1";
+  const CUSTOMER_SEED = [
+    { id: "c1", name: "سارا محمدی", phone: "09121234567", status: "active", registeredAt: "2026-08-12" },
+    { id: "c2", name: "علی رضایی", phone: "09351239876", status: "active", registeredAt: "2026-09-03" },
+    { id: "c3", name: "نگار حسینی", phone: "09197771234", status: "blocked", registeredAt: "2026-07-21" },
+    { id: "c4", name: "مهدی کریمی", phone: "09031236789", status: "active", registeredAt: "2026-10-02" },
+    { id: "c5", name: "فاطمه نوری", phone: "09211234501", status: "active", registeredAt: "2026-10-18" },
+  ];
+
+  function faDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return faDigits(String(value || "—"));
+    return new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(date);
+  }
+
+  function readCustomers() {
+    try {
+      const raw = localStorage.getItem(CUSTOMERS_KEY);
+      if (raw === null) {
+        localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(CUSTOMER_SEED));
+        if (localStorage.getItem(ACTIVITY_KEY) === null) {
+          localStorage.setItem(ACTIVITY_KEY, JSON.stringify(CUSTOMER_SEED.map((row) => ({
+            id: "seed-" + row.id,
+            at: row.registeredAt,
+            text: row.name + " در فهرست مشتریان ثبت شد",
+          }))));
+        }
+        return CUSTOMER_SEED.map((row) => ({ ...row }));
+      }
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function writeCustomers(list) {
+    localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(list));
+  }
+
+  function readActivity() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function pushActivity(text) {
+    const next = [{ id: "a-" + Date.now(), at: new Date().toISOString(), text }].concat(readActivity()).slice(0, 30);
+    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(next));
+  }
+
+  function readAdminCreds() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ADMIN_CREDS_KEY) || "null");
+      if (parsed && typeof parsed.username === "string" && typeof parsed.password === "string" && parsed.username && parsed.password) {
+        return parsed;
+      }
+    } catch {
+      /* keep the built-in pair */
+    }
+    return { username: "admin", password: "adminPassword123" };
+  }
+
+  function upsertCustomerFromUser(user) {
+    if (!user || !/^09\d{9}$/.test(user.phone || "")) return;
+    const list = readCustomers();
+    const found = list.find((item) => item.phone === user.phone);
+    if (found) {
+      if (user.name && user.name !== "کاربر نکس‌سل") found.name = user.name;
+      writeCustomers(list);
+      return;
+    }
+    list.unshift({
+      id: "u-" + user.phone,
+      name: user.name || "کاربر نکس‌سل",
+      phone: user.phone,
+      status: "active",
+      registeredAt: new Date().toISOString(),
+    });
+    writeCustomers(list);
+    pushActivity(user.name + " با شماره " + user.phone + " به فهرست مشتریان اضافه شد");
+  }
+
+  function purchaseOrders() {
+    try {
+      const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
+      return (Array.isArray(orders) ? orders : []).filter((order) => order && Number(order.total) > 0 && order.status !== "support" && order.status !== "lead");
+    } catch {
+      return [];
+    }
+  }
+
+  function setAuthMode(mode) {
+    const adminOn = mode === "admin";
+    const userPanel = document.querySelector("[data-auth-panel='user']");
+    const adminPanel = document.querySelector("[data-auth-panel='admin']");
+    if (userPanel) userPanel.hidden = adminOn;
+    if (adminPanel) adminPanel.hidden = !adminOn;
+    document.querySelectorAll("[data-auth-tab]").forEach((tab) => {
+      const on = (tab.dataset.authTab === "admin") === adminOn;
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+      tab.classList.toggle("bg-gold", on);
+      tab.classList.toggle("font-semibold", on);
+      tab.classList.toggle("text-navy", on);
+      tab.classList.toggle("text-cream/80", !on);
+      tab.classList.toggle("ring-1", !on);
+      tab.classList.toggle("ring-gold/30", !on);
+    });
+    const url = new URL(location.href);
+    if (adminOn) url.searchParams.set("role", "admin");
+    else url.searchParams.delete("role");
+    history.replaceState(null, "", url.pathname + url.search);
+  }
+
+  function bindAdminAuth(root) {
+    const note = root.querySelector("[data-admin-note]");
+    root.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const creds = readAdminCreds();
+      const username = String(new FormData(root).get("username") || "").trim();
+      const password = String(new FormData(root).get("password") || "");
+      if (username !== creds.username || password !== creds.password) {
+        if (note) note.textContent = "نام کاربری یا رمز عبور درست نیست.";
+        return;
+      }
+      if (note) note.textContent = "";
+      readCustomers();
+      localStorage.setItem(ADMIN_SEEN_KEY, new Date().toISOString());
+      pushActivity("ورود مدیر به پنل");
+      writeSession({
+        isAuthenticated: true,
+        role: "admin",
+        currentUser: { name: "مدیر نکس‌سل", username, phone: "" },
+      });
+      location.href = base + "/admin/dashboard/";
+    });
+  }
+
+  function mountAdminApp() {
+    const app = document.querySelector("[data-admin-app]");
+    if (!app || sessionRole(readSession()) !== "admin") return;
+    const view = app.dataset.adminView || "dashboard";
+    document.querySelectorAll("[data-admin-link]").forEach((link) => {
+      const on = link.dataset.adminLink === view;
+      link.classList.toggle("bg-white/10", on);
+      link.classList.toggle("text-white", on);
+      link.setAttribute("aria-current", on ? "page" : "false");
+    });
+
+    if (view === "dashboard") {
+      const customers = readCustomers();
+      const orders = purchaseOrders();
+      const active = customers.filter((item) => item.status !== "blocked").length;
+      const revenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+      const set = (key, value) => {
+        const node = document.querySelector("[data-kpi='" + key + "']");
+        if (node) node.textContent = value;
+      };
+      set("users", fa.format(customers.length));
+      set("active", fa.format(active));
+      set("orders", fa.format(orders.length));
+      set("revenue", toman(revenue));
+      const host = document.querySelector("[data-admin-activity]");
+      const empty = document.querySelector("[data-admin-activity-empty]");
+      const events = readActivity().map((item) => ({ at: item.at, text: item.text })).concat(orders.map((order) => ({
+        at: order.at,
+        text: "سفارش " + (order.id || "") + " به مبلغ " + toman(Number(order.total) || 0) + " در همین مرورگر ثبت شد",
+      })));
+      events.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+      if (host) {
+        host.innerHTML = events.slice(0, 8).map((item) => `<li class="flex items-start justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3"><span class="text-sm leading-7">${escText(item.text)}</span><time class="shrink-0 text-xs text-slate-400">${escText(faDate(item.at))}</time></li>`).join("");
+      }
+      if (empty) empty.hidden = events.length > 0;
+    }
+
+    if (view === "customers") mountCustomers();
+    if (view === "settings") mountAdminSettings();
+  }
+
+  function mountCustomers() {
+    const rows = document.querySelector("[data-customer-rows]");
+    const empty = document.querySelector("[data-customer-empty]");
+    const search = document.querySelector("[data-customer-search]");
+    const filter = document.querySelector("[data-customer-filter]");
+    const dialog = document.querySelector("#admin-customer-dialog");
+    const removeDialog = document.querySelector("#admin-delete-dialog");
+    const form = document.querySelector("[data-customer-form]");
+    if (!rows || !form || !dialog) return;
+    let deleteId = "";
+
+    function paint() {
+      const query = (search && search.value || "").trim();
+      const digitsOnly = phoneKey(query);
+      const status = filter ? filter.value : "all";
+      const list = readCustomers().filter((item) => {
+        const statusOk = status === "all" || item.status === status;
+        if (!statusOk) return false;
+        if (!query) return true;
+        const nameHit = String(item.name || "").includes(query);
+        const phoneHit = digitsOnly ? String(item.phone || "").includes(digitsOnly) : false;
+        return nameHit || phoneHit;
+      });
+      rows.innerHTML = list.map((item) => {
+        const blocked = item.status === "blocked";
+        return `<tr class="border-t border-white/10">
+          <td class="px-3 py-3 text-sm">${escText(item.name)}</td>
+          <td class="px-3 py-3 text-sm" dir="ltr">${escText(faDigits(item.phone))}</td>
+          <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-xs ${blocked ? "bg-rose-500/15 text-rose-300" : "bg-emerald-500/15 text-emerald-300"}">${blocked ? "مسدود" : "فعال"}</span></td>
+          <td class="px-3 py-3 text-sm text-slate-300">${escText(faDate(item.registeredAt))}</td>
+          <td class="px-3 py-3">
+            <div class="flex gap-2">
+              <button type="button" data-customer-edit="${escText(item.id)}" class="rounded-xl px-3 py-1.5 text-xs ring-1 ring-white/15">ویرایش</button>
+              <button type="button" data-customer-delete="${escText(item.id)}" class="rounded-xl px-3 py-1.5 text-xs text-rose-300 ring-1 ring-rose-400/30">حذف</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join("");
+      if (empty) empty.hidden = list.length > 0;
+    }
+
+    function openForm(row) {
+      form.dataset.mode = row ? "edit" : "add";
+      const title = dialog.querySelector("[data-customer-title]");
+      if (title) title.textContent = row ? "ویرایش مشتری" : "افزودن مشتری جدید";
+      form.elements.customerId.value = row ? row.id : "";
+      form.elements.name.value = row ? row.name : "";
+      form.elements.phone.value = row ? row.phone : "";
+      form.elements.status.value = row && row.status === "blocked" ? "blocked" : "active";
+      const note = form.querySelector("[data-customer-note]");
+      if (note) note.textContent = "";
+      if (!dialog.open) dialog.showModal();
+      form.elements.name.focus();
+    }
+
+    document.querySelector("[data-customer-add]").addEventListener("click", () => openForm(null));
+    search.addEventListener("input", paint);
+    filter.addEventListener("change", paint);
+    rows.addEventListener("click", (event) => {
+      const edit = event.target.closest("[data-customer-edit]");
+      const remove = event.target.closest("[data-customer-delete]");
+      if (edit) {
+        const row = readCustomers().find((item) => item.id === edit.dataset.customerEdit);
+        if (row) openForm(row);
+      }
+      if (remove) {
+        deleteId = remove.dataset.customerDelete || "";
+        const row = readCustomers().find((item) => item.id === deleteId);
+        const name = removeDialog && removeDialog.querySelector("[data-delete-name]");
+        if (name) name.textContent = row ? row.name : "";
+        if (removeDialog && !removeDialog.open) removeDialog.showModal();
+      }
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const note = form.querySelector("[data-customer-note]");
+      const name = String(form.elements.name.value || "").trim();
+      const phone = phoneKey(form.elements.phone.value);
+      const status = form.elements.status.value === "blocked" ? "blocked" : "active";
+      if (name.length < 3) {
+        if (note) note.textContent = "نام و نام خانوادگی را کامل بنویسید.";
+        return;
+      }
+      if (!/^09\d{9}$/.test(phone)) {
+        if (note) note.textContent = "شماره موبایل را با ۰۹ و ۱۱ رقم وارد کنید.";
+        return;
+      }
+      const list = readCustomers();
+      const id = String(form.elements.customerId.value || "");
+      if (list.some((item) => item.phone === phone && item.id !== id)) {
+        if (note) note.textContent = "این شماره قبلاً ثبت شده است.";
+        return;
+      }
+      if (form.dataset.mode === "edit") {
+        const row = list.find((item) => item.id === id);
+        if (!row) return;
+        row.name = name;
+        row.phone = phone;
+        row.status = status;
+        writeCustomers(list);
+        pushActivity("مشخصات " + name + " ویرایش شد");
+      } else {
+        list.unshift({ id: "c-" + Date.now(), name, phone, status, registeredAt: new Date().toISOString() });
+        writeCustomers(list);
+        pushActivity(name + " به فهرست مشتریان اضافه شد");
+      }
+      dialog.close();
+      paint();
+    });
+    document.querySelectorAll("[data-customer-cancel]").forEach((button) => {
+      button.addEventListener("click", () => dialog.close());
+    });
+    const confirmDelete = document.querySelector("[data-delete-confirm]");
+    if (confirmDelete) {
+      confirmDelete.addEventListener("click", () => {
+        const list = readCustomers();
+        const row = list.find((item) => item.id === deleteId);
+        writeCustomers(list.filter((item) => item.id !== deleteId));
+        if (row) pushActivity(row.name + " از فهرست مشتریان حذف شد");
+        if (removeDialog) removeDialog.close();
+        deleteId = "";
+        paint();
+      });
+    }
+    const cancelDelete = document.querySelector("[data-delete-cancel]");
+    if (cancelDelete && removeDialog) cancelDelete.addEventListener("click", () => removeDialog.close());
+    paint();
+  }
+
+  function mountAdminSettings() {
+    const form = document.querySelector("[data-admin-settings]");
+    if (!form) return;
+    const creds = readAdminCreds();
+    form.elements.username.value = creds.username;
+    const customers = readCustomers();
+    const orders = purchaseOrders();
+    const seen = localStorage.getItem(ADMIN_SEEN_KEY);
+    const set = (key, value) => {
+      const node = document.querySelector("[data-admin-stat='" + key + "']");
+      if (node) node.textContent = value;
+    };
+    set("users", fa.format(customers.length));
+    set("active", fa.format(customers.filter((item) => item.status !== "blocked").length));
+    set("orders", fa.format(orders.length));
+    set("seen", seen ? faDate(seen) : "هنوز ورودی ثبت نشده");
+    set("username", creds.username);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const note = form.querySelector("[data-admin-settings-note]");
+      const username = String(form.elements.username.value || "").trim();
+      const password = String(form.elements.password.value || "");
+      const again = String(form.elements.again.value || "");
+      if (username.length < 3) {
+        if (note) note.textContent = "نام کاربری را کامل بنویسید.";
+        return;
+      }
+      if (password.length < 8) {
+        if (note) note.textContent = "رمز عبور باید حداقل ۸ نویسه باشد.";
+        return;
+      }
+      if (password !== again) {
+        if (note) note.textContent = "تکرار رمز با رمز جدید یکی نیست.";
+        return;
+      }
+      localStorage.setItem(ADMIN_CREDS_KEY, JSON.stringify({ username, password }));
+      const session = readSession();
+      if (session && session.currentUser) {
+        session.currentUser.username = username;
+        writeSession(session);
+      }
+      form.elements.password.value = "";
+      form.elements.again.value = "";
+      set("username", username);
+      if (note) note.textContent = "مشخصات ورود مدیر ذخیره شد.";
+      pushActivity("مشخصات ورود مدیر تغییر کرد");
+    });
+  }
+
   mountAuth();
+  mountAdminApp();
 
   document.querySelectorAll("[data-fill-subject]").forEach((link) => {
     link.addEventListener("click", () => {

@@ -125,21 +125,30 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
-        <a data-auth-user="chip" href="/sales-pro/dashboard/" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
-          <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
-          <span data-header-name class="max-w-28 truncate">کاربر</span>
-        </a>
+        <a data-auth-guest href="/sales-pro/login/" class="whitespace-nowrap rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / ثبت‌نام</a>
+        <div data-auth-customer class="flex items-center gap-2" hidden>
+          <a href="/sales-pro/dashboard/" dir="ltr" data-header-phone class="max-w-36 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">—</a>
+          <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
+        </div>
+        <div data-auth-admin class="flex items-center gap-2" hidden>
+          <a href="/sales-pro/admin/dashboard/" class="whitespace-nowrap rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-navy">ورود به پنل مدیریت</a>
+          <span class="grid size-8 place-items-center rounded-full bg-[#1C2541] text-xs font-bold text-gold" aria-label="مدیر">م</span>
+          <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
+        </div>
         <button type="button" data-menu class="rounded-xl px-3 py-2 text-sm ring-1 ring-gold/30 md:hidden">منو</button>
       </div>
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
-      <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
-        <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
+      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / ثبت‌نام</a>
+      <div data-auth-customer class="mb-2 border-b border-white/10 pb-2" hidden>
+        <p class="px-3 py-2 text-sm font-semibold" dir="ltr" data-header-phone>—</p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
-        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج از حساب</button>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
+      </div>
+      <div data-auth-admin class="mb-2 border-b border-white/10 pb-2" hidden>
+        <a href="/sales-pro/admin/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-gold">ورود به پنل مدیریت</a>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
       </div>
       <a href="/sales-pro/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">خانه</a><a href="/sales-pro/academy/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">آموزش</a><a href="/sales-pro/assistant/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">دستیار</a><a href="/sales-pro/articles/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">مقالات</a><a href="/sales-pro/services/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">خدمات</a><a href="/sales-pro/support/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پشتیبانی</a><a href="/sales-pro/about/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">درباره ما</a><a href="/sales-pro/contact/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ارتباط با ما</a>
     </div>
@@ -162,6 +171,7 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
           دسترسی سریع به دستیار هوش مصنوعی
         </a>
+        <a data-auth-admin href="/sales-pro/admin/dashboard/" hidden class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#F3E5AB] to-gold px-8 text-sm font-semibold text-navy">ورود به پنل مدیریت</a>
         <ul class="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-cream/55 sm:text-sm">
           <li class="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1"><svg viewBox="0 0 24 24" class="size-3.5 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>فروش تلفنی</li><li class="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1"><svg viewBox="0 0 24 24" class="size-3.5 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>فروش حضوری</li><li class="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1"><svg viewBox="0 0 24 24" class="size-3.5 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>فروش آنلاین</li><li class="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1"><svg viewBox="0 0 24 24" class="size-3.5 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>اصول مذاکره</li>
         </ul>

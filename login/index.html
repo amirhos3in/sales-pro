@@ -125,53 +125,83 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
-        <a data-auth-user="chip" href="/sales-pro/dashboard/" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
-          <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
-          <span data-header-name class="max-w-28 truncate">کاربر</span>
-        </a>
+        <a data-auth-guest href="/sales-pro/login/" class="whitespace-nowrap rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / ثبت‌نام</a>
+        <div data-auth-customer class="flex items-center gap-2" hidden>
+          <a href="/sales-pro/dashboard/" dir="ltr" data-header-phone class="max-w-36 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">—</a>
+          <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
+        </div>
+        <div data-auth-admin class="flex items-center gap-2" hidden>
+          <a href="/sales-pro/admin/dashboard/" class="whitespace-nowrap rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-navy">ورود به پنل مدیریت</a>
+          <span class="grid size-8 place-items-center rounded-full bg-[#1C2541] text-xs font-bold text-gold" aria-label="مدیر">م</span>
+          <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
+        </div>
         <button type="button" data-menu class="rounded-xl px-3 py-2 text-sm ring-1 ring-gold/30 md:hidden">منو</button>
       </div>
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
-      <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
-        <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
+      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / ثبت‌نام</a>
+      <div data-auth-customer class="mb-2 border-b border-white/10 pb-2" hidden>
+        <p class="px-3 py-2 text-sm font-semibold" dir="ltr" data-header-phone>—</p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
-        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج از حساب</button>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
+      </div>
+      <div data-auth-admin class="mb-2 border-b border-white/10 pb-2" hidden>
+        <a href="/sales-pro/admin/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-gold">ورود به پنل مدیریت</a>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
       </div>
       <a href="/sales-pro/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">خانه</a><a href="/sales-pro/academy/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">آموزش</a><a href="/sales-pro/assistant/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">دستیار</a><a href="/sales-pro/articles/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">مقالات</a><a href="/sales-pro/services/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">خدمات</a><a href="/sales-pro/support/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پشتیبانی</a><a href="/sales-pro/about/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">درباره ما</a><a href="/sales-pro/contact/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ارتباط با ما</a>
     </div>
   </header>
   <main class="mx-auto w-full max-w-6xl px-4 py-8">
-    <form data-auth="login" class="glass mx-auto w-full max-w-[420px] space-y-4 rounded-[28px] p-6 sm:p-8">
-      <div class="grid grid-cols-2 gap-2"><a href="/sales-pro/login/" class="flex h-11 items-center justify-center rounded-2xl text-sm bg-gold font-semibold text-navy">ورود</a><a href="/sales-pro/register/" class="flex h-11 items-center justify-center rounded-2xl text-sm text-cream/80 ring-1 ring-gold/30">ثبت‌نام</a></div>
-      <div>
-        <p class="text-xs tracking-[0.18em] text-gold">ورود</p>
-        <h1 class="mt-2 text-2xl font-semibold">ورود</h1>
-        <p class="mt-2 text-sm leading-7 text-cream/70">شماره موبایل را وارد کنید و کد تایید را بنویسید.</p>
-      </div>
-      <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold text-left" /></label>
-      <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تایید شماره و دریافت کد</button>
-      <div data-auth-otp class="hidden space-y-4">
-    <p class="text-sm leading-7 text-cream/80">کد تایید را برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> وارد کنید.</p>
+    <section class="mx-auto w-full max-w-[440px]">
+      <div role="tablist" aria-label="نوع ورود" class="grid grid-cols-2 gap-2"><button type="button" data-auth-tab="user" role="tab" aria-selected="true" class="flex h-11 items-center justify-center rounded-2xl text-sm bg-gold font-semibold text-navy">ورود کاربران</button><button type="button" data-auth-tab="admin" role="tab" aria-selected="false" class="flex h-11 items-center justify-center rounded-2xl text-sm text-cream/80 ring-1 ring-gold/30">ورود ادمین</button></div>
+      <form data-auth="login" data-auth-panel="user" class="glass mt-4 space-y-4 rounded-[28px] p-6 sm:p-8">
+        <div>
+          <p class="text-xs tracking-[0.18em] text-gold">ورود کاربران</p>
+          <h1 class="mt-2 text-2xl font-semibold">ورود با کد تأیید</h1>
+          <p class="mt-2 text-sm leading-7 text-cream/70">شماره موبایل را وارد کنید. کد تأیید را در مرحله بعد بنویسید.</p>
+        </div>
+        <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold text-left" /></label>
+        <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ارسال کد تأیید</button>
+        <div data-auth-otp class="hidden space-y-4">
+    <p class="text-sm leading-7 text-cream/80">کد تأیید را برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> وارد کنید.</p>
     <div>
-      <p class="mb-3 text-sm font-medium">کد تایید</p>
+      <p class="mb-3 text-sm font-medium">کد تأیید</p>
       <div dir="ltr" class="flex justify-between gap-2">
-        <input data-otp-digit inputmode="numeric" autocomplete="one-time-code" aria-label="رقم ۱ کد تایید" maxlength="5" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۲ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۳ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۴ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۵ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" />
+        <input data-otp-digit inputmode="numeric" autocomplete="one-time-code" aria-label="رقم ۱ کد تأیید" maxlength="5" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۲ کد تأیید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۳ کد تأیید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۴ کد تأیید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۵ کد تأیید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" />
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 text-sm">
-      <span data-otp-timer dir="ltr" class="font-mono text-base tabular-nums text-gold">01:59</span>
+      <span data-otp-timer dir="ltr" class="font-mono text-base tabular-nums text-gold">01:00</span>
       <button type="button" data-otp-resend disabled class="text-gold disabled:opacity-40">ارسال دوباره</button>
     </div>
   </div>
-      <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ورود</button>
-      <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
-      <p data-auth-note class="text-sm text-cream/80" role="status"></p>
-      <a href="/sales-pro/register/" class="block text-sm text-gold">حساب کاربری ندارید؟ ثبت‌نام کنید</a>
-    </form>
+        <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تأیید و ورود</button>
+        <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
+        <p data-auth-note class="text-sm text-cream/80" role="status"></p>
+        <a href="/sales-pro/register/" class="block text-sm text-gold">حساب کاربری ندارید؟ ثبت‌نام کنید</a>
+      </form>
+      <form data-auth="admin" data-auth-panel="admin" class="glass mt-4 space-y-4 rounded-[28px] p-6 sm:p-8" hidden>
+        <div>
+          <p class="text-xs tracking-[0.18em] text-gold">ورود ادمین</p>
+          <h1 class="mt-2 text-2xl font-semibold">پنل مدیریت</h1>
+          <p class="mt-2 text-sm leading-7 text-cream/70">نام کاربری و رمز عبور مدیریت را وارد کنید.</p>
+        </div>
+        <label class="block text-sm">نام کاربری<input name="username" dir="ltr" autocomplete="username" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold text-left" /></label>
+        <label class="block text-sm">رمز عبور<input name="password" type="password" dir="ltr" autocomplete="current-password" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold text-left" /></label>
+        <p data-admin-note class="text-sm text-rose-300" role="alert"></p>
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ورود به پنل مدیریت</button>
+      </form>
+    </section>
+    <script>
+      if (new URLSearchParams(location.search).get("role") === "admin") {
+        var userPanel = document.querySelector("[data-auth-panel='user']");
+        var adminPanel = document.querySelector("[data-auth-panel='admin']");
+        if (userPanel) userPanel.hidden = true;
+        if (adminPanel) adminPanel.hidden = false;
+      }
+    </script>
   </main>
   <footer class="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
     <p class="text-xs leading-6 text-cream/50">نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
