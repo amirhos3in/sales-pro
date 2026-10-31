@@ -414,18 +414,40 @@
       </div>
     </section>
   </section>
-      <article class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
-        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div class="min-w-0">
-            <h2 class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">۱۵٬۰۰۰٬۰۰۰ تومان</span></h2>
-            <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/80">برای کسی که می‌خواهد فروش را یاد بگیرد، فروشش را بالاتر ببرد و در مسیر فروش جلو برود.</p>
-    <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/75">هر چهار مسیر با هم است: فروش آنلاین، فروش حضوری، فروش تلفنی و اصول مذاکره. هر درس ویدیو دارد و با کوییز تمام می‌شود.</p>
-    <p class="mt-3 text-sm leading-7 text-cream/70">خرید جدا <span class="line-through decoration-cream/40">۲۰٬۰۰۰٬۰۰۰ تومان</span>. با هم <span class="font-semibold text-gold">۱۵٬۰۰۰٬۰۰۰ تومان</span>؛ ۵٬۰۰۰٬۰۰۰ تومان کمتر.</p>
+      <style>
+        @keyframes bundle-glow { 0%, 100% { box-shadow: 0 0 22px rgba(212,175,55,0.12); } 50% { box-shadow: 0 0 36px rgba(212,175,55,0.28); } }
+        .bundle-showcase { animation: bundle-glow 3.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .bundle-showcase { animation: none; } }
+      </style>
+      <article class="bundle-showcase relative mt-6 overflow-hidden rounded-3xl border border-gold/40 bg-[#070B18] p-4 sm:p-6">
+        <div class="pointer-events-none absolute inset-0" style="background: radial-gradient(ellipse at 18% 45%, rgba(212,175,55,0.16), transparent 58%)"></div>
+        <div class="relative grid items-center gap-6 lg:grid-cols-2">
+          <div>
+            <p class="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-[#F3E5AB]">💎 پیشنهاد ویژه آکادمی — جامع‌ترین مسیر ورود به دنیای فروش حرفه‌ای</p>
+            <h2 class="mt-4 text-2xl font-semibold leading-[1.55] sm:text-3xl">آکادمی جامع نکس‌سل؛ هر چهار مهارت فروش در یک بسته یکپارچه</h2>
+            <p class="mt-3 text-sm leading-8 text-cream/75">برای کسی که می‌خواهد تمام کانال‌های فروش (آنلاین، حضوری، تلفنی و مذاکره) را یک‌جا مسلط شود و در هر موقعیتی مشتری را به نتیجه برساند.</p>
+            <ul class="mt-5 space-y-3 text-sm leading-7">
+              <li class="flex items-start gap-2"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>دسترسی به ۱۶ درس ویدیویی چهار مسیر</span></li><li class="flex items-start gap-2"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>کوییز سناریومحور در پایان هر درس</span></li><li class="flex items-start gap-2"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>هر درس روی یک موقعیت مکالمه ساخته شده است</span></li><li class="flex items-start gap-2"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>بعد از ثبت سفارش، هر چهار مسیر در همین مرورگر باز می‌شود</span></li>
+            </ul>
           </div>
-          <button type="button" id="buy-bundle" class="h-11 w-full shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">افزودن به سبد</button>
+          <div class="flex flex-col gap-4">
+            <figure class="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#070B18]">
+              <img src="/sales-pro/present/bundle-monolith.webp" alt="چهار مکعب شیشه‌ای تیره با نور طلایی؛ نماد تماس، جلسه، گفتگو و توافق" width="1400" height="1050" class="aspect-[4/3] w-full object-cover" />
+              <span class="absolute bottom-3 start-3 rounded-full border border-gold/40 bg-[#070B18]/80 px-3 py-1 text-xs text-[#F3E5AB] backdrop-blur">بسته جامع ۴ مسیر تخصصی</span>
+            </figure>
+            <div class="rounded-3xl border border-gold/40 bg-white/[0.05] p-5 backdrop-blur-md">
+              <p class="text-sm text-cream/50 line-through decoration-cream/40 opacity-60">مجموع خرید جداگانه: ۲۰٬۰۰۰٬۰۰۰ تومان</p>
+              <p class="mt-3 inline-flex rounded-full bg-gold px-3 py-1 text-xs font-semibold text-navy">🔥 ۵٬۰۰۰٬۰۰۰ تومان صرفه‌جویی</p>
+              <p class="mt-4 text-4xl font-black tracking-tight text-cream">۱۵٬۰۰۰٬۰۰۰ <span class="text-base font-semibold text-cream/70">تومان</span></p>
+              <button type="button" id="buy-bundle" data-bundle-idle="ثبت‌نام در آکادمی جامع با تخفیف ۵ میلیونی" class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gold px-5 text-sm font-semibold text-navy shadow-[0_0_24px_rgba(212,175,55,0.35)] disabled:cursor-not-allowed disabled:opacity-60">
+                <span data-bundle-label>ثبت‌نام در آکادمی جامع با تخفیف ۵ میلیونی</span>
+                <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 6 8 12l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <p class="mt-3 text-xs leading-6 text-cream/50">دقیقهٔ دستیار هوش مصنوعی و خدمات سازمانی جدا از آموزش‌هاست.</p>
+            </div>
+          </div>
         </div>
       </article>
-      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="/sales-pro/assistant/">دستیار پشت خط جدا از آموزش است و از همان صفحه می‌شود باهاش کار کرد.</a></p>
     </section>
   </main>
   <footer class="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
