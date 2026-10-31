@@ -96,9 +96,34 @@ export function layout(base: string, active: string, title: string, body: string
     [data-voice-toggle][data-state="recording"] [data-voice-pulse] {
       animation: voice-pulse 1.1s ease-out infinite;
     }
+    [data-quote-scroller] {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    [data-quote-scroller]::-webkit-scrollbar { display: none; }
+    [data-quote-card] { flex: 0 0 100%; scroll-snap-align: start; }
+    @media (min-width: 1024px) {
+      [data-quote-card] { flex-basis: calc((100% - 1rem) / 2); }
+    }
+    @media (min-width: 1280px) {
+      [data-quote-card] { flex-basis: calc((100% - 2rem) / 3); }
+    }
+    [data-impact-stars] [data-star] { color: rgba(246, 241, 228, 0.28); }
+    [data-impact-stars] [data-star][data-on="yes"] {
+      color: #D4AF37;
+      filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.55));
+    }
     @media (prefers-reduced-motion: reduce) {
       [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
       [data-voice-toggle][data-state="recording"] [data-voice-pulse] { animation: none; }
+      [data-quote-scroller] { scroll-behavior: auto; }
     }
     #cart-drawer, #service-order, #checkout-order {
       border: 1px solid rgba(212, 175, 55, 0.35);
@@ -566,6 +591,109 @@ function offeringLanes(base: string) {
   </section>`;
 }
 
+const IMPACT_STAR = `<svg viewBox="0 0 24 24" class="size-4" fill="currentColor" aria-hidden="true"><path d="M12 2.6 14.8 8.7l6.6.8-4.8 4.5 1.3 6.5L12 17.4 6.1 20.5l1.3-6.5L2.6 9.5l6.6-.8L12 2.6z"/></svg>`;
+
+function academyImpact(base: string) {
+  const before = [
+    "قطع تماس‌های سرد توسط منشی‌ها در کمتر از ۱۵ ثانیه",
+    "دادن تخفیف سریع و عجولانه در مواجهه با اعتراض «قیمت بالاست»",
+    "جلسات حضوری طولانی که با «بررسی می‌کنیم تماس می‌گیریم» بی‌نتیجه می‌مانند",
+    "پیگیری‌های پیامکی اصرارگونه که ارزش برند را پایین می‌آورد",
+  ];
+  const after = [
+    "قلاب‌های ۱۵ ثانیه‌ای هدفمند برای عبور مقتدرانه از گیت‌کیپر",
+    "دفاع از ارزش محصول و تکنیک‌های مهار اعتراض به قیمت بدون باختن حاشیه سود",
+    "بستن قطعی جلسه با تعیین گام بعدی شفاف و زمان‌بندی‌شده",
+    "سناریوهای پیگیری ارزش‌محور که احساس پیگیری مشاوره‌ای ایجاد می‌کنند",
+  ];
+  const mark = (tone: "before" | "after") => tone === "before"
+    ? `<svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-rose-200/70" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg>`
+    : `<svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const column = (tone: "before" | "after", title: string, items: string[]) => `<article class="rounded-[1.75rem] p-5 ${tone === "before" ? "border border-rose-200/25 bg-[#070B18]" : "border border-gold bg-[#070B18] shadow-[0_0_36px_rgba(212,175,55,0.16)]"}">
+    <h3 class="text-lg font-semibold">${title}</h3>
+    <ul class="mt-4 grid gap-3">${items.map((item) => `<li class="flex items-start gap-2 text-sm leading-7 text-cream/80">${mark(tone)}<span>${item}</span></li>`).join("")}</ul>
+  </article>`;
+  const quotes = [
+    ["ع", "#0B132B", "#D4AF37", "علیرضا کریمی", "مدیر فروش تجهیزات پزشکی", "قبل از نکس‌سل، تیم ما همیشه در جلسه دوم به بعد به بن‌بست می‌خورد و مشتریان سر قیمت چک‌وچانه می‌زدند. سناریوهای بستن جلسه حضوری باعث شد بدون تخفیف‌های عجیب، قراردادها را در همان جلسه دوم نهایی کنیم."],
+    ["س", "#D4AF37", "#0B132B", "سارا منصوری", "سرپرست فروش تلفنی (خدمات B2B)", "بزرگ‌ترین دردسر ما تماس سرد بود. منشی‌ها یا قطع می‌کردند یا می‌گفتند رزومه بفرستید. تکنیک قلاب تماس باعث شد میانگین زمان مکالمه بچه‌ها از ۲۰ ثانیه به ۳ دقیقه برسد."],
+    ["م", "#1C2541", "#F6F1E4", "مهدی سلطانی", "مدیر بازرگانی قطعات صنعتی", "دستیار صوتی و سناریوهای اعتراض به قیمت مثل یک آچارفرانسه برای تیم ما بودند. قبلاً فروشنده‌های جدید تا ۲ ماه ضرر می‌زدند، الان در هفته اول مسلط مکالمه می‌کنند."],
+    ["ن", "#F3E5AB", "#0B132B", "نیما پرویزی", "بنیان‌گذار استارتاپ خدمات دیجیتال", "سیستم پیگیری پیامکی و دایرکتی نکس‌سل دقیقاً همان گره کوری بود که لیدهای ما در آن گیر می‌کردند. نرخ تبدیل دایرکت‌ها بیش از دو برابر رشد کرد."],
+  ] as const;
+  const quoteCards = quotes.map(([letter, bg, fg, name, role, text]) => `<article data-quote-card class="flex h-auto flex-col rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+    <p class="flex gap-0.5 text-gold" aria-label="۵ از ۵">${IMPACT_STAR.repeat(5)}</p>
+    <blockquote class="mt-4 flex-1 text-sm leading-8 text-cream/85">${esc(text)}</blockquote>
+    <footer class="mt-5 flex items-center gap-3">
+      <span class="grid size-12 shrink-0 place-items-center rounded-full text-sm font-bold" style="background:${bg};color:${fg}" aria-hidden="true">${letter}</span>
+      <div>
+        <p class="text-sm font-semibold">${esc(name)}</p>
+        <p class="text-xs leading-6 text-cream/60">${esc(role)}</p>
+      </div>
+    </footer>
+  </article>`).join("");
+  const stars = [1, 2, 3, 4, 5].map((value) => `<button type="button" role="radio" data-star="${value}" aria-checked="false" aria-label="${fa.format(value)} از ۵" class="grid size-10 place-items-center rounded-full">${IMPACT_STAR.replace('class="size-4"', 'class="size-6"')}</button>`).join("");
+  return `<section class="relative mt-8 overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] p-5 sm:p-7" aria-label="اثر آکادمی" data-impact>
+    <div class="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+    <p class="text-xs tracking-[0.18em] text-gold">اثر آکادمی</p>
+    <h2 class="mt-2 text-2xl font-semibold">قبل و بعد از نکس‌سل</h2>
+    <div class="mt-5 grid gap-4 lg:grid-cols-2">
+      ${column("before", "فروش سنتی و بدون ساختار", before)}
+      ${column("after", "سیستم فروش مدرن نکس‌سل", after)}
+    </div>
+    <h2 class="mt-8 text-xl font-semibold">بنچ‌مارک‌ها و نتایج کلیدی بازار</h2>
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+      <article class="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+        <h3 class="text-lg font-semibold">تیم‌های بازرگانی و فروش سازمانی</h3>
+        <p class="mt-3 text-sm leading-8 text-cream/75">کوتاه شدن چرخه مذاکره و تصمیم‌گیری مشتریان شرکتی از ۴ هفته به زیر ۱۰ روز با سناریوهای مهار بهانه‌ها و بستن فرضی.</p>
+      </article>
+      <article class="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+        <h3 class="text-lg font-semibold">مراکز تماس و فروشگاه‌های تخصصی</h3>
+        <p class="mt-3 text-sm leading-8 text-cream/75">افزایش نرخ تبدیل لیدهای تماس سرد به پیش‌فاکتور با استفاده از سناریوی بازنویسی‌شده مکالمه در ۳۰ ثانیه ابتدایی.</p>
+      </article>
+    </div>
+    <h2 class="mt-8 text-xl font-semibold">شاخص‌های اثرگذاری</h2>
+    <div class="mt-4 grid gap-3 md:grid-cols-3">
+      <article class="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+        <svg viewBox="0 0 24 24" class="size-6 text-gold" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14c2.2-1 3.4-3.2 4.2-6.2.6 2.2 2 3.6 4.2 4.2C10.2 13 8.4 14.2 6.8 16.4 6 15.2 5.2 14.4 4 14z"/><path d="M12 13.2c1.6-3.4 3.6-5.2 7-6.2-1 3.4-2.8 5.4-6.2 7L12 13.2z" stroke-linejoin="round"/></svg>
+        <p class="mt-4 flex items-baseline gap-2 text-3xl font-semibold text-[#F3E5AB]"><span dir="ltr" data-count="3.2" data-decimals="1">۳٫۲</span><span class="text-xl">برابر</span></p>
+        <p class="mt-2 text-sm leading-7 text-cream/70">افزایش نگه‌داشت مشتری پای مکالمه در ۳۰ ثانیه اول تماس سرد</p>
+      </article>
+      <article class="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+        <svg viewBox="0 0 24 24" class="size-6 text-gold" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 8h6l2 3 3-6 2 4h3" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 14l-3 4" stroke-linecap="round"/></svg>
+        <p class="mt-4 text-3xl font-semibold text-[#F3E5AB]" dir="ltr" data-count="55" data-prefix="−" data-suffix="٪">−۵۵٪</p>
+        <p class="mt-2 text-sm leading-7 text-cream/70">کاهش ریزش لیدها در مرحله اعلام قیمت و پیش‌فاکتور</p>
+      </article>
+      <article class="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+        <svg viewBox="0 0 24 24" class="size-6 text-gold" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+        <p class="mt-4 flex items-baseline gap-2 text-3xl font-semibold text-[#F3E5AB]"><span dir="ltr" data-count="14">۱۴</span><span class="text-xl">روز</span></p>
+        <p class="mt-2 text-sm leading-7 text-cream/70">میانگین زمان تسلط تیم فروش بر سناریوهای پاسخ به اعتراضات</p>
+      </article>
+    </div>
+    <div class="mt-8" data-impact-quotes>
+      <div class="flex items-end justify-between gap-3">
+        <h2 class="text-xl font-semibold">نظر تیم‌ها</h2>
+        <div class="flex gap-2">
+          <button type="button" data-quote-prev class="grid size-10 place-items-center rounded-full border border-white/10 text-cream" aria-label="نظر قبلی"><svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" data-quote-next class="grid size-10 place-items-center rounded-full border border-white/10 text-cream" aria-label="نظر بعدی"><svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="mt-4" data-quote-scroller data-lenis-prevent tabindex="0" aria-label="اسلایدر نظرات">${quoteCards}</div>
+      <div class="mt-4 flex justify-center gap-2" data-quote-dots></div>
+    </div>
+    <form data-impact-rate class="mt-4 rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5" data-impact-stars>
+      <p class="text-sm font-semibold leading-7">شما چه امتیازی به اثربخشی این سناریوها می‌دهید؟</p>
+      <div class="mt-3 flex" role="radiogroup" aria-label="امتیاز اثربخشی سناریوها">${stars}</div>
+      <p data-impact-rate-note class="mt-3 min-h-6 text-sm leading-7 text-gold" role="status"></p>
+    </form>
+    <section class="mt-4 rounded-[1.75rem] border border-gold/30 bg-gold/10 p-5 sm:p-6">
+      <p class="text-lg font-semibold leading-8">آماده‌اید سیستم فروش تیم‌تان را بر پایه این نتایج بازسازی کنید؟</p>
+      <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+        <a href="${base}/academy/" class="inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-l from-[#F3E5AB] to-gold px-5 text-sm font-semibold text-navy">مشاهده دوره‌ها و سناریوهای عملیاتی</a>
+        <a href="${base}/contact/#b2b" class="inline-flex h-12 items-center justify-center rounded-2xl border border-white/10 px-5 text-sm font-semibold text-cream">درخواست ارزیابی عملکرد فروش</a>
+      </div>
+    </section>
+  </section>`;
+}
+
 export function homePage(base: string) {
   return layout(base, "home", "نکس‌سل | آکادمی فروش", `
     <section ${revealAttrs(0)} class="relative overflow-hidden rounded-[2rem] border border-gold/25 bg-[#070B18] px-6 py-16 text-center sm:px-10 sm:py-24">
@@ -596,28 +724,7 @@ export function homePage(base: string) {
       <h2 class="text-xl font-semibold">چهار مسیر فروش</h2>
       <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/70">درس اول هر مسیر بدون سبد دیده می‌شود.</p>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>
-      <section class="glass relative mt-8 overflow-hidden rounded-[2rem] p-5 sm:p-7" aria-label="اثر آکادمی">
-        <div class="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"></div>
-        <h2 class="text-lg font-semibold">اثر آکادمی</h2>
-        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <article class="rounded-2xl border border-gold/35 bg-white/5 px-4 py-4">
-            <p class="text-2xl font-semibold text-[#F3E5AB] sm:text-3xl"><span data-count="5000" data-prefix="+" data-suffix="">+۵٬۰۰۰</span></p>
-            <p class="mt-2 text-xs leading-6 text-cream/70">دانش‌پذیر فعال</p>
-          </article>
-          <article class="rounded-2xl border border-gold/35 bg-white/5 px-4 py-4">
-            <p class="text-2xl font-semibold text-[#F3E5AB] sm:text-3xl"><span data-count="120" data-prefix="+" data-suffix="">+۱۲۰</span></p>
-            <p class="mt-2 text-xs leading-6 text-cream/70">ساعت آموزش تخصصی فروش و مذاکره</p>
-          </article>
-          <article class="rounded-2xl border border-gold/35 bg-white/5 px-4 py-4">
-            <p class="text-2xl font-semibold text-[#F3E5AB] sm:text-3xl"><span data-count="98" data-prefix="" data-suffix="٪">۹۸٪</span></p>
-            <p class="mt-2 text-xs leading-6 text-cream/70">رضایت فارغ‌التحصیلان</p>
-          </article>
-          <article class="rounded-2xl border border-gold/35 bg-white/5 px-4 py-4">
-            <p class="text-2xl font-semibold text-[#F3E5AB] sm:text-3xl"><span data-count="300" data-prefix="+" data-suffix="">+۳۰۰</span></p>
-            <p class="mt-2 text-xs leading-6 text-cream/70">بیزنس و تیم آموزش‌دیده</p>
-          </article>
-        </div>
-      </section>
+      ${academyImpact(base)}
       <article class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
         <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div class="min-w-0">
