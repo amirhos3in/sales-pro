@@ -171,7 +171,7 @@ export function layout(base: string, active: string, title: string, body: string
         </button>
         <a data-auth-guest href="${href("/login/")}" class="whitespace-nowrap rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / ثبت‌نام</a>
         <div data-auth-customer class="flex items-center gap-2" hidden>
-          <a href="${href("/dashboard/")}" dir="ltr" data-header-phone class="max-w-36 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">—</a>
+          <a href="${href("/dashboard/")}" data-header-name class="max-w-40 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">کاربر</a>
           <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
         </div>
         <div data-auth-admin class="flex items-center gap-2" hidden>
@@ -186,7 +186,7 @@ export function layout(base: string, active: string, title: string, body: string
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
       <a data-auth-guest href="${href("/login/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / ثبت‌نام</a>
       <div data-auth-customer class="mb-2 border-b border-white/10 pb-2" hidden>
-        <p class="px-3 py-2 text-sm font-semibold" dir="ltr" data-header-phone>—</p>
+        <p class="px-3 py-2 text-sm font-semibold" data-header-name>کاربر</p>
         <a href="${href("/dashboard/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
         <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
       </div>
@@ -1819,6 +1819,10 @@ export function loginPage(base: string) {
         <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${authField} text-left" /></label>
         <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ارسال کد تأیید</button>
         ${otpFields("01:00")}
+        <div data-auth-name class="hidden space-y-2">
+          <label class="block text-sm">نام و نام خانوادگی<input data-auth-fullname name="fullName" autocomplete="name" class="${authField}" /></label>
+          <p class="text-xs leading-6 text-cream/60">برای ساخت حساب، نام و نام خانوادگی لازم است.</p>
+        </div>
         <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تأیید و ورود</button>
         <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
         <p data-auth-note class="text-sm text-cream/80" role="status"></p>
@@ -1889,12 +1893,13 @@ function adminIcon(body: string) {
 const ADMIN_ICONS = {
   dashboard: adminIcon(`<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>`),
   users: adminIcon(`<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`),
+  tickets: adminIcon(`<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`),
   settings: adminIcon(`<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8.6 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1-.33H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 .33 1 1.65 1.65 0 0 0 1 .6 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.3.45.64.6 1a1.65 1.65 0 0 0 1 .33H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1 .33 1.65 1.65 0 0 0-.51 1z"/>`),
   logout: adminIcon(`<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>`),
 };
 
-function adminLayout(base: string, view: "dashboard" | "customers" | "settings", title: string, body: string) {
-  const item = (id: "dashboard" | "customers" | "settings", href: string, label: string, icon: string) =>
+function adminLayout(base: string, view: "dashboard" | "customers" | "settings" | "tickets" | "profile", title: string, body: string) {
+  const item = (id: "dashboard" | "customers" | "settings" | "tickets", href: string, label: string, icon: string) =>
     `<a data-admin-link="${id}" href="${base}${href}" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300">${icon}${label}</a>`;
   return `<!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -1941,11 +1946,12 @@ function adminLayout(base: string, view: "dashboard" | "customers" | "settings",
     <aside class="border-b border-white/10 bg-[#020617] lg:border-b-0 lg:border-e lg:border-white/10">
       <a href="${base}/" class="flex items-center gap-2 px-4 py-4">
         <span class="grid size-9 place-items-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-[#0B132B]">ن</span>
-        <span><span class="block text-sm font-bold">نکس‌سل</span><span class="block text-[11px] text-slate-400">پنل مدیریت</span></span>
+        <span><span class="block text-sm font-bold">Next Cell</span><span class="block text-[11px] text-slate-400">مدیریت: <span data-admin-username>—</span></span></span>
       </a>
       <nav class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible" aria-label="بخش‌های مدیریت">
         ${item("dashboard", "/admin/dashboard/", "داشبورد", ADMIN_ICONS.dashboard)}
         ${item("customers", "/admin/customers/", "مدیریت مشتریان", ADMIN_ICONS.users)}
+        ${item("tickets", "/admin/tickets/", "تیکت‌ها", ADMIN_ICONS.tickets)}
         ${item("settings", "/admin/settings/", "تنظیمات سیستم", ADMIN_ICONS.settings)}
         <button type="button" data-sign-out class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-start text-sm text-rose-300">${ADMIN_ICONS.logout}خروج</button>
       </nav>
@@ -1989,7 +1995,7 @@ export function adminCustomersPage(base: string) {
     <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 class="text-2xl font-bold sm:text-3xl">مدیریت مشتریان</h1>
-        <p class="mt-2 text-sm leading-7 text-slate-400">جستجو، فیلتر و ویرایش فهرست مشتریان همین مرورگر.</p>
+        <p class="mt-2 text-sm leading-7 text-slate-400">جستجو و فیلتر همین فهرست. با کلیک روی ردیف، پروندهٔ مشتری باز می‌شود.</p>
       </div>
       <button type="button" data-customer-add class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">افزودن مشتری جدید</button>
     </header>
@@ -2070,6 +2076,73 @@ export function adminSettingsPage(base: string) {
       <p data-admin-settings-note class="text-sm text-slate-300" role="status"></p>
       <button type="submit" class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">ذخیرهٔ مشخصات</button>
     </form>
+  `);
+}
+
+export function adminTicketsPage(base: string) {
+  return adminLayout(base, "tickets", "تیکت‌ها | نکس‌سل", `
+    <header>
+      <h1 class="text-2xl font-bold sm:text-3xl">تیکت‌ها</h1>
+      <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-400">گفتگوهای پشتیبانی ذخیره‌شده در همین مرورگر. وضعیت را عوض کنید یا پاسخ بنویسید.</p>
+    </header>
+    <div class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <ul data-ticket-list class="space-y-2"></ul>
+      <section data-ticket-detail class="rounded-3xl border border-white/10 bg-white/5 p-4" hidden>
+        <p data-ticket-subject class="text-lg font-semibold"></p>
+        <p data-ticket-who class="mt-1 text-sm text-slate-400"></p>
+        <label class="mt-4 block text-sm">وضعیت
+          <select data-ticket-status class="${adminField}">
+            <option value="open">باز</option>
+            <option value="review">در حال بررسی</option>
+            <option value="closed">بسته</option>
+          </select>
+        </label>
+        <ol data-ticket-thread class="mt-4 space-y-2"></ol>
+        <form data-ticket-reply class="mt-4 space-y-2">
+          <label class="block text-sm">پاسخ<textarea name="reply" rows="3" class="${adminField}"></textarea></label>
+          <p data-ticket-note class="text-sm text-rose-300" role="status"></p>
+          <button type="submit" class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">ارسال پاسخ</button>
+        </form>
+      </section>
+      <p data-ticket-empty class="text-sm text-slate-400 lg:col-start-2">یک تیکت را از فهرست انتخاب کنید.</p>
+    </div>
+  `);
+}
+
+export function adminCustomerProfilePage(base: string) {
+  return adminLayout(base, "profile", "پرونده مشتری | نکس‌سل", `
+    <a href="${base}/admin/customers/" class="text-sm text-[#D4AF37]">بازگشت به فهرست مشتریان</a>
+    <header class="mt-3">
+      <h1 data-customer-file-name class="text-2xl font-bold sm:text-3xl">پرونده مشتری</h1>
+      <p data-profile-phone dir="ltr" class="mt-2 text-sm text-slate-400"></p>
+      <p data-profile-missing class="mt-4 text-sm text-slate-400" hidden>این مشتری در فهرست همین مرورگر نیست.</p>
+    </header>
+    <div data-profile-body class="mt-5 space-y-4" hidden>
+      <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
+        <h2 class="text-lg font-semibold">دقیقهٔ دستیار</h2>
+        <p class="mt-1 text-xs leading-6 text-slate-500">اعداد از پروندهٔ ذخیره‌شده در همین مرورگر است.</p>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <div class="flex items-center justify-between text-sm"><span>دقیقهٔ کل</span><span data-profile-minutes-total>—</span></div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-profile-minutes-total-bar class="h-full rounded-full bg-slate-300" style="width:0%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-sm"><span>دقیقهٔ مصرف‌شده</span><span data-profile-minutes-used>—</span></div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-profile-minutes-used-bar class="h-full rounded-full bg-[#D4AF37]" style="width:0%"></div></div>
+          </div>
+        </div>
+      </section>
+      <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
+        <h2 class="text-lg font-semibold">خدمات دریافت‌شده</h2>
+        <ul data-profile-services class="mt-3 space-y-2"></ul>
+        <p data-profile-services-empty class="mt-3 text-sm text-slate-400" hidden>خدمتی در این پرونده ثبت نشده است.</p>
+      </section>
+      <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
+        <h2 class="text-lg font-semibold">پیشرفت آموزش</h2>
+        <ul data-profile-courses class="mt-3 space-y-3"></ul>
+        <p data-profile-courses-empty class="mt-3 text-sm text-slate-400" hidden>دوره‌ای در این پرونده ثبت نشده است.</p>
+      </section>
+    </div>
   `);
 }
 

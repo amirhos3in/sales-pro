@@ -18,6 +18,8 @@ import {
   adminDashboardPage,
   adminCustomersPage,
   adminSettingsPage,
+  adminTicketsPage,
+  adminCustomerProfilePage,
   notFoundPage,
   profilePage,
   progressPage,
@@ -75,6 +77,8 @@ export function createApp() {
   app.get(["/admin/dashboard", "/admin/dashboard/"], (_req, res) => send(adminDashboardPage(base), res));
   app.get(["/admin/customers", "/admin/customers/"], (_req, res) => send(adminCustomersPage(base), res));
   app.get(["/admin/settings", "/admin/settings/"], (_req, res) => send(adminSettingsPage(base), res));
+  app.get(["/admin/tickets", "/admin/tickets/"], (_req, res) => send(adminTicketsPage(base), res));
+  app.get(["/admin/customers/profile", "/admin/customers/profile/"], (_req, res) => send(adminCustomerProfilePage(base), res));
   app.get(["/register", "/register/"], (_req, res) => send(registerPage(base), res));
   app.get(["/progress", "/progress/"], (_req, res) => send(progressPage(base), res));
   app.get(["/profile", "/profile/", "/me", "/me/"], (_req, res) => send(profilePage(base), res));
