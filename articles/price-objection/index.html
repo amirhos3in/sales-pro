@@ -23,10 +23,11 @@
   <style>
     html { scroll-behavior: auto; }
     [hidden] { display: none !important; }
-    a:focus-visible, button:focus-visible {
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
       outline: 2px solid #D4AF37;
       outline-offset: 3px;
     }
+    summary::-webkit-details-marker { display: none; }
     body {
       background: #0B132B;
       color: #F6F1E4;

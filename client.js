@@ -1465,6 +1465,63 @@
     });
   }
 
+  const lead = document.querySelector("[data-lead]");
+  if (lead) {
+    lead.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const note = lead.querySelector("[data-lead-note]");
+      const name = lead.elements.name.value.trim();
+      const phone = digits(lead.elements.phone.value);
+      const kind = lead.elements.kind.value;
+      const size = lead.querySelector("[name=size]:checked");
+      const body = lead.elements.body.value.trim();
+      if (!kind) {
+        note.textContent = "نوع درخواست را انتخاب کنید.";
+        return;
+      }
+      if (name.length < 2) {
+        note.textContent = "نام را کامل بنویسید.";
+        return;
+      }
+      if (!/^09\d{9}$/.test(phone)) {
+        note.textContent = "شماره موبایل را با ۰۹ و ۱۱ رقم وارد کنید.";
+        return;
+      }
+      if (!size) {
+        note.textContent = "تعداد پرسنل فروش را انتخاب کنید.";
+        return;
+      }
+      if (body.length < 8) {
+        note.textContent = "چالش اصلی را کمی روشن‌تر بنویسید.";
+        return;
+      }
+      const id = "LD-" + Math.floor(10000 + Math.random() * 90000);
+      const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
+      orders.unshift({
+        id,
+        at: new Date().toISOString(),
+        name,
+        phone,
+        notes: body,
+        items: [{ type: "lead", title: kind, size: size.value, price: 0 }],
+        total: 0,
+        status: "lead",
+        message: "درخواست ارزیابی ثبت شد.",
+      });
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      const session = readSession();
+      let message = "درخواست ثبت شد. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم.";
+      if (session && session.isAuthenticated && session.currentUser) {
+        const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
+        session.currentUser.tickets = [{ id, subject: kind, at: stamp }].concat(session.currentUser.tickets || []);
+        writeSession(session);
+        message = "درخواست ثبت شد و در تیکت‌های حساب قرار گرفت. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم.";
+      }
+      lead.reset();
+      note.textContent = message;
+    });
+  }
+
   function mountVoice() {
     const chat = document.querySelector("[data-voice-chat]");
     if (!chat) return;
