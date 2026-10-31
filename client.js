@@ -17,10 +17,14 @@
     wine: ["#6E2B3A", "#F6F1E4"],
   };
   const TABS = ["overview", "profile", "courses", "wallet", "audits", "tickets"];
+  let ticketFilter = "all";
 
   const fa = new Intl.NumberFormat("fa-IR");
   function toman(value) {
     return fa.format(value) + " تومان";
+  }
+  function faDigits(value) {
+    return String(value).replace(/[0-9]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
   }
 
   function escText(value) {
@@ -149,10 +153,13 @@
     const phone = user ? user.phone : "";
     const name = user ? user.name : "";
     document.querySelectorAll("[data-phone-line]").forEach((node) => {
-      node.textContent = phone || "—";
+      node.textContent = phone ? faDigits(phone) : "—";
     });
-    document.querySelectorAll("[data-profile-name], [data-account-name]").forEach((node) => {
-      node.textContent = name || "—";
+    document.querySelectorAll("[data-profile-name]").forEach((node) => {
+      node.textContent = name || "کاربر عزیز";
+    });
+    document.querySelectorAll("[data-account-name]").forEach((node) => {
+      node.textContent = name || "کاربر";
     });
     const signedIn = Boolean(session && session.isAuthenticated && user && name);
     document.querySelectorAll("[data-auth-guest]").forEach((node) => {
@@ -169,6 +176,9 @@
       node.textContent = (name || "ن").slice(0, 1);
     });
     const ownedCount = PAID.filter((id) => owns(state, id)).length;
+    document.querySelectorAll("[data-owned-bar]").forEach((node) => {
+      node.style.width = Math.round((ownedCount / PAID.length) * 100) + "%";
+    });
     const status = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر" : "بدون دوره";
     const statusLong = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر" : "هنوز دوره‌ای ثبت نشده";
     document.querySelectorAll("[data-status-badge]").forEach((node) => {
@@ -197,7 +207,9 @@
     document.querySelectorAll("[data-bundle-label]").forEach((node) => {
       node.textContent = state.bundle ? "آکادمی جامع فعال است" : "آکادمی جامع، " + toman(BUNDLE_PRICE);
     });
-    document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
+    document.querySelectorAll("[data-bundle-buy]").forEach((node) => {
+      node.hidden = Boolean(state.bundle);
+    });
     const codeNode = document.querySelector("[data-referral-code]");
     if (codeNode) {
       if (!state.referralCode && document.querySelector("[data-user-panel]")) {
@@ -233,22 +245,41 @@
     paintPathButtons();
     paintMinuteOffer();
 
+    const activeHost = document.querySelector("[data-course-active]");
+    const lockedHost = document.querySelector("[data-course-locked]");
+    const activeWrap = document.querySelector("[data-course-active-wrap]");
+    const lockedWrap = document.querySelector("[data-course-locked-wrap]");
+    const coursesEmpty = document.querySelector("[data-courses-empty]");
+    if (coursesEmpty) coursesEmpty.hidden = ownedCount > 0;
+    if (activeWrap) activeWrap.hidden = ownedCount === 0;
+    if (lockedWrap) lockedWrap.hidden = ownedCount >= PAID.length;
     document.querySelectorAll("[data-dash-course]").forEach((card) => {
       const id = card.dataset.dashCourse;
       const open = owns(state, id);
-      const lessons = card.parentElement ? Array.from(document.querySelectorAll("[data-lesson]")).length : 0;
+      const host = open ? activeHost : lockedHost;
+      if (host && card.parentElement !== host) host.appendChild(card);
+      const ids = (card.dataset.lessons || "").split(",").filter(Boolean);
       const lock = card.querySelector("[data-lock]");
       if (lock) {
         lock.textContent = open ? "فعال" : "قفل";
-        lock.className = open ? "rounded-full bg-gold px-2 py-1 text-[11px] font-semibold text-navy" : "rounded-full bg-white/10 px-2 py-1 text-[11px]";
+        lock.className = open ? "rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy" : "rounded-full bg-white/10 px-2.5 py-1 text-[11px]";
       }
+      const summary = card.querySelector("[data-course-summary]");
+      const price = card.querySelector("[data-course-price]");
+      const progressBlock = card.querySelector("[data-progress-block]");
+      if (summary) summary.hidden = open;
+      if (price) price.hidden = open;
+      if (progressBlock) progressBlock.hidden = !open;
       const enter = card.querySelector("[data-enter]");
       const buy = card.querySelector("[data-buy-link]");
+      const nextId = ids.find((lessonId) => !progress.passed.includes(lessonId)) || ids[ids.length - 1];
       if (enter) {
-        enter.classList.toggle("hidden", !open);
-        enter.classList.toggle("inline-flex", open);
+        enter.hidden = !open;
+        if (nextId) enter.setAttribute("href", base + "/learn/" + id + "/" + nextId + "/");
+        const started = ids.some((lessonId) => progress.watched.includes(lessonId) || progress.passed.includes(lessonId));
+        enter.textContent = started ? "ورود سریع به آخرین درس" : "شروع از درس اول";
       }
-      if (buy) buy.classList.toggle("hidden", open);
+      if (buy) buy.hidden = open;
     });
 
     document.querySelectorAll("[data-course-gate]").forEach((gate) => {
@@ -286,8 +317,8 @@
       const quizLine = card.querySelector("[data-quiz-line]");
       const videoBar = card.querySelector("[data-video-bar]");
       const quizBar = card.querySelector("[data-quiz-bar]");
-      if (videoLine) videoLine.textContent = "ویدیوهای دیده‌شده: " + fa.format(videos) + " از " + fa.format(unique.length);
-      if (quizLine) quizLine.textContent = "چالش‌های قبول‌شده: " + fa.format(quizzes) + " از " + fa.format(unique.length);
+      if (videoLine) videoLine.textContent = "درصد تکمیل ویدیوها: " + fa.format(Math.round((videos / total) * 100)) + "٪";
+      if (quizLine) quizLine.textContent = "چالش‌ها و کوییزهای پاس‌شده: " + fa.format(quizzes) + " از " + fa.format(unique.length);
       if (videoBar) videoBar.style.width = Math.round((videos / total) * 100) + "%";
       if (quizBar) quizBar.style.width = Math.round((quizzes / total) * 100) + "%";
     });
@@ -339,23 +370,52 @@
     const empty = document.querySelector("[data-tx-empty]");
     if (!body) return;
     const rows = user && Array.isArray(user.transactions) ? user.transactions : [];
-    const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" });
+    const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium", timeStyle: "short" });
     body.innerHTML = rows.map((row) => {
       const signed = Number(row.amount) || 0;
       const tone = signed < 0 ? "text-rose-300" : "text-emerald-300";
-      const when = row.at ? stamp.format(new Date(row.at)) : "";
-      return "<tr class=\"border-t border-gold/20\"><td class=\"px-3 py-3\">" + escText(row.title || "تراکنش") + "</td><td class=\"px-3 py-3 font-medium " + tone + "\">" + (signed > 0 ? "+" : "") + fa.format(signed) + " تومان</td><td class=\"px-3 py-3 text-cream/60\">" + escText(when) + "</td></tr>";
+      let when = "—";
+      if (row.at) {
+        const date = new Date(row.at);
+        when = Number.isNaN(date.getTime()) ? String(row.at) : stamp.format(date);
+      }
+      const ref = row.id ? String(row.id) : "—";
+      return "<tr class=\"border-t border-white/10\"><td class=\"px-3 py-3\"><p class=\"text-xs text-cream/50\" dir=\"ltr\">" + escText(ref) + "</p><p class=\"mt-1\">" + escText(row.title || "تراکنش") + "</p></td><td class=\"px-3 py-3 text-cream/70\">" + escText(when) + "</td><td class=\"px-3 py-3 font-medium " + tone + "\">" + (signed > 0 ? "+" : "") + fa.format(signed) + " تومان</td><td class=\"px-3 py-3\">ثبت شد</td><td class=\"px-3 py-3 text-cream/60\" dir=\"ltr\">" + escText(ref) + "</td></tr>";
     }).join("");
-    if (empty) empty.classList.toggle("hidden", rows.length > 0);
+    if (empty) empty.hidden = rows.length > 0;
+  }
+
+  function ticketStatus(ticket) {
+    const status = ticket && ticket.status;
+    if (status === "answered" || status === "closed" || status === "open") return status;
+    return "open";
   }
 
   function paintLiveTickets(user) {
     const list = document.querySelector("[data-live-tickets]");
+    const all = user && Array.isArray(user.tickets) ? user.tickets : [];
+    const openCount = all.filter((ticket) => ticketStatus(ticket) === "open").length;
+    document.querySelectorAll("[data-ticket-count]").forEach((node) => {
+      node.textContent = fa.format(openCount);
+    });
+    document.querySelectorAll("[data-ticket-filter]").forEach((node) => {
+      const on = node.dataset.ticketFilter === ticketFilter;
+      node.classList.toggle("bg-gold", on);
+      node.classList.toggle("text-navy", on);
+      node.classList.toggle("font-medium", on);
+      node.setAttribute("aria-pressed", on ? "true" : "false");
+    });
     if (!list) return;
-    const rows = user && Array.isArray(user.tickets) ? user.tickets : [];
-    list.innerHTML = rows.map((ticket) => "<article class=\"glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2></div><span class=\"rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy\">ثبت شد</span></article>").join("");
+    const labels = { open: "در حال بررسی", answered: "پاسخ داده شده", closed: "بسته شده" };
+    const rows = all.filter((ticket) => ticketFilter === "all" || ticketStatus(ticket) === ticketFilter);
+    list.innerHTML = rows.map((ticket) => {
+      const status = ticketStatus(ticket);
+      return "<article class=\"dash-card flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\" dir=\"ltr\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2><p class=\"mt-1 text-xs text-cream/50\">" + escText(ticket.at || "") + "</p></div><span class=\"rounded-full bg-white/10 px-3 py-1 text-xs\">" + labels[status] + "</span></article>";
+    }).join("");
     const empty = document.querySelector("[data-ticket-empty]");
-    if (empty) empty.classList.toggle("hidden", rows.length > 0);
+    const filteredEmpty = document.querySelector("[data-ticket-filter-empty]");
+    if (empty) empty.hidden = all.length > 0;
+    if (filteredEmpty) filteredEmpty.hidden = all.length === 0 || rows.length > 0;
   }
 
   function paintProfile(user) {
@@ -1213,7 +1273,39 @@
       if (note) note.textContent = "اعتبار به کیف پول اضافه شد.";
       return;
     }
+    const ticketFilterButton = event.target.closest("[data-ticket-filter]");
+    if (ticketFilterButton) {
+      ticketFilter = ticketFilterButton.dataset.ticketFilter || "all";
+      const current = readSession();
+      paintLiveTickets(current && current.currentUser);
+      return;
+    }
+    if (event.target.closest("[data-ticket-open]")) {
+      const dialog = document.querySelector("#ticket-dialog");
+      if (dialog && !dialog.open) dialog.showModal();
+      return;
+    }
+    if (event.target.closest("[data-ticket-close]")) {
+      const dialog = document.querySelector("#ticket-dialog");
+      if (dialog) dialog.close();
+      return;
+    }
+    if (event.target.closest("[data-logout-confirm]")) {
+      localStorage.removeItem(SESSION);
+      location.href = base + "/login/";
+      return;
+    }
+    if (event.target.closest("[data-logout-cancel]")) {
+      const dialog = document.querySelector("#logout-dialog");
+      if (dialog) dialog.close();
+      return;
+    }
     if (event.target.closest("[data-sign-out]")) {
+      const dialog = document.querySelector("#logout-dialog");
+      if (dialog && typeof dialog.showModal === "function") {
+        if (!dialog.open) dialog.showModal();
+        return;
+      }
       localStorage.removeItem(SESSION);
       location.href = base + "/login/";
       return;
@@ -1846,13 +1938,25 @@
         if (note) note.textContent = "موضوع تیکت را بنویسید.";
         return;
       }
-      const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
-      session.currentUser.tickets = [{ id: "TK-" + String(Date.now()).slice(-4), subject: title, at: stamp }].concat(session.currentUser.tickets || []);
+      const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
+      session.currentUser.tickets = [{ id: "TK-" + String(Date.now()).slice(-4), subject: title, at: stamp, status: "open" }].concat(session.currentUser.tickets || []);
       panelTicket.reset();
-      if (note) note.textContent = "تیکت ثبت شد.";
+      if (note) note.textContent = "";
+      const toast = document.querySelector("[data-ticket-toast]");
+      if (toast) toast.textContent = "تیکت ثبت شد.";
+      const dialog = document.querySelector("#ticket-dialog");
+      if (dialog && dialog.open) dialog.close();
       writeSession(session);
     });
   }
+
+  document.querySelectorAll("#logout-dialog, #ticket-dialog").forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+      const rect = dialog.getBoundingClientRect();
+      const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+      if (!inside) dialog.close();
+    });
+  });
 
   window.addEventListener("popstate", () => {
     if (document.querySelector("[data-user-panel]")) paintTabs();
