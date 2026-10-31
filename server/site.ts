@@ -15,6 +15,9 @@ import {
   learnLessonPage,
   loginPage,
   registerPage,
+  adminDashboardPage,
+  adminCustomersPage,
+  adminSettingsPage,
   notFoundPage,
   profilePage,
   progressPage,
@@ -68,6 +71,10 @@ export function createApp() {
   app.get(["/dashboard", "/dashboard/"], (_req, res) => send(dashboardPage(base), res));
   app.get(["/wallet", "/wallet/"], (_req, res) => res.redirect(302, `${base}/dashboard/?tab=wallet`));
   app.get(["/login", "/login/"], (_req, res) => send(loginPage(base), res));
+  app.get(["/admin", "/admin/"], (_req, res) => res.redirect(302, `${base}/admin/dashboard/`));
+  app.get(["/admin/dashboard", "/admin/dashboard/"], (_req, res) => send(adminDashboardPage(base), res));
+  app.get(["/admin/customers", "/admin/customers/"], (_req, res) => send(adminCustomersPage(base), res));
+  app.get(["/admin/settings", "/admin/settings/"], (_req, res) => send(adminSettingsPage(base), res));
   app.get(["/register", "/register/"], (_req, res) => send(registerPage(base), res));
   app.get(["/progress", "/progress/"], (_req, res) => send(progressPage(base), res));
   app.get(["/profile", "/profile/", "/me", "/me/"], (_req, res) => send(profilePage(base), res));

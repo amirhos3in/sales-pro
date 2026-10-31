@@ -169,21 +169,30 @@ export function layout(base: string, active: string, title: string, body: string
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="${href("/login/")}" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
-        <a data-auth-user="chip" href="${href("/dashboard/")}" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
-          <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
-          <span data-header-name class="max-w-28 truncate">کاربر</span>
-        </a>
+        <a data-auth-guest href="${href("/login/")}" class="whitespace-nowrap rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / ثبت‌نام</a>
+        <div data-auth-customer class="flex items-center gap-2" hidden>
+          <a href="${href("/dashboard/")}" dir="ltr" data-header-phone class="max-w-36 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">—</a>
+          <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
+        </div>
+        <div data-auth-admin class="flex items-center gap-2" hidden>
+          <a href="${href("/admin/dashboard/")}" class="whitespace-nowrap rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-navy">ورود به پنل مدیریت</a>
+          <span class="grid size-8 place-items-center rounded-full bg-[#1C2541] text-xs font-bold text-gold" aria-label="مدیر">م</span>
+          <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
+        </div>
         <button type="button" data-menu class="rounded-xl px-3 py-2 text-sm ring-1 ring-gold/30 md:hidden">منو</button>
       </div>
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="${href("/login/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
-      <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
-        <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
+      <a data-auth-guest href="${href("/login/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / ثبت‌نام</a>
+      <div data-auth-customer class="mb-2 border-b border-white/10 pb-2" hidden>
+        <p class="px-3 py-2 text-sm font-semibold" dir="ltr" data-header-phone>—</p>
         <a href="${href("/dashboard/")}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
-        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج از حساب</button>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
+      </div>
+      <div data-auth-admin class="mb-2 border-b border-white/10 pb-2" hidden>
+        <a href="${href("/admin/dashboard/")}" class="block rounded-xl px-3 py-2 text-sm text-gold">ورود به پنل مدیریت</a>
+        <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
       </div>
       ${NAV.map(([path, label]) => `<a href="${href(path)}" class="block rounded-xl px-3 py-2 text-sm text-cream/80">${label}</a>`).join("")}
     </div>
@@ -742,6 +751,7 @@ export function homePage(base: string) {
           <svg viewBox="0 0 24 24" class="size-4" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
           دسترسی سریع به دستیار هوش مصنوعی
         </a>
+        <a data-auth-admin href="${base}/admin/dashboard/" hidden class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#F3E5AB] to-gold px-8 text-sm font-semibold text-navy">ورود به پنل مدیریت</a>
         <ul class="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-cream/55 sm:text-sm">
           ${["فروش تلفنی", "فروش حضوری", "فروش آنلاین", "اصول مذاکره"].map((label) => `<li class="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1"><svg viewBox="0 0 24 24" class="size-3.5 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>${label}</li>`).join("")}
         </ul>
@@ -1776,17 +1786,17 @@ function authTabs(base: string, mode: "login" | "register") {
   return `<div class="grid grid-cols-2 gap-2">${item("login", "/login/", "ورود")}${item("register", "/register/", "ثبت‌نام")}</div>`;
 }
 
-function otpFields() {
+function otpFields(initial = "01:59") {
   return `<div data-auth-otp class="hidden space-y-4">
-    <p class="text-sm leading-7 text-cream/80">کد تایید را برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> وارد کنید.</p>
+    <p class="text-sm leading-7 text-cream/80">کد تأیید را برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> وارد کنید.</p>
     <div>
-      <p class="mb-3 text-sm font-medium">کد تایید</p>
+      <p class="mb-3 text-sm font-medium">کد تأیید</p>
       <div dir="ltr" class="flex justify-between gap-2">
-        ${[0, 1, 2, 3, 4].map((index) => `<input data-otp-digit inputmode="numeric" autocomplete="${index === 0 ? "one-time-code" : "off"}" aria-label="رقم ${fa.format(index + 1)} کد تایید" maxlength="${index === 0 ? 5 : 1}" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" />`).join("")}
+        ${[0, 1, 2, 3, 4].map((index) => `<input data-otp-digit inputmode="numeric" autocomplete="${index === 0 ? "one-time-code" : "off"}" aria-label="رقم ${fa.format(index + 1)} کد تأیید" maxlength="${index === 0 ? 5 : 1}" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" />`).join("")}
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 text-sm">
-      <span data-otp-timer dir="ltr" class="font-mono text-base tabular-nums text-gold">01:59</span>
+      <span data-otp-timer dir="ltr" class="font-mono text-base tabular-nums text-gold">${initial}</span>
       <button type="button" data-otp-resend disabled class="text-gold disabled:opacity-40">ارسال دوباره</button>
     </div>
   </div>`;
@@ -1795,22 +1805,45 @@ function otpFields() {
 const authField = "mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold";
 
 export function loginPage(base: string) {
+  const tab = (id: "user" | "admin", label: string, selected: boolean) =>
+    `<button type="button" data-auth-tab="${id}" role="tab" aria-selected="${selected ? "true" : "false"}" class="flex h-11 items-center justify-center rounded-2xl text-sm ${selected ? "bg-gold font-semibold text-navy" : "text-cream/80 ring-1 ring-gold/30"}">${label}</button>`;
   return layout(base, "home", "ورود | نکس‌سل", `
-    <form data-auth="login" class="glass mx-auto w-full max-w-[420px] space-y-4 rounded-[28px] p-6 sm:p-8">
-      ${authTabs(base, "login")}
-      <div>
-        <p class="text-xs tracking-[0.18em] text-gold">ورود</p>
-        <h1 class="mt-2 text-2xl font-semibold">ورود</h1>
-        <p class="mt-2 text-sm leading-7 text-cream/70">شماره موبایل را وارد کنید و کد تایید را بنویسید.</p>
-      </div>
-      <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${authField} text-left" /></label>
-      <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تایید شماره و دریافت کد</button>
-      ${otpFields()}
-      <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ورود</button>
-      <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
-      <p data-auth-note class="text-sm text-cream/80" role="status"></p>
-      <a href="${base}/register/" class="block text-sm text-gold">حساب کاربری ندارید؟ ثبت‌نام کنید</a>
-    </form>
+    <section class="mx-auto w-full max-w-[440px]">
+      <div role="tablist" aria-label="نوع ورود" class="grid grid-cols-2 gap-2">${tab("user", "ورود کاربران", true)}${tab("admin", "ورود ادمین", false)}</div>
+      <form data-auth="login" data-auth-panel="user" class="glass mt-4 space-y-4 rounded-[28px] p-6 sm:p-8">
+        <div>
+          <p class="text-xs tracking-[0.18em] text-gold">ورود کاربران</p>
+          <h1 class="mt-2 text-2xl font-semibold">ورود با کد تأیید</h1>
+          <p class="mt-2 text-sm leading-7 text-cream/70">شماره موبایل را وارد کنید. کد تأیید را در مرحله بعد بنویسید.</p>
+        </div>
+        <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${authField} text-left" /></label>
+        <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ارسال کد تأیید</button>
+        ${otpFields("01:00")}
+        <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تأیید و ورود</button>
+        <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
+        <p data-auth-note class="text-sm text-cream/80" role="status"></p>
+        <a href="${base}/register/" class="block text-sm text-gold">حساب کاربری ندارید؟ ثبت‌نام کنید</a>
+      </form>
+      <form data-auth="admin" data-auth-panel="admin" class="glass mt-4 space-y-4 rounded-[28px] p-6 sm:p-8" hidden>
+        <div>
+          <p class="text-xs tracking-[0.18em] text-gold">ورود ادمین</p>
+          <h1 class="mt-2 text-2xl font-semibold">پنل مدیریت</h1>
+          <p class="mt-2 text-sm leading-7 text-cream/70">نام کاربری و رمز عبور مدیریت را وارد کنید.</p>
+        </div>
+        <label class="block text-sm">نام کاربری<input name="username" dir="ltr" autocomplete="username" class="${authField} text-left" /></label>
+        <label class="block text-sm">رمز عبور<input name="password" type="password" dir="ltr" autocomplete="current-password" class="${authField} text-left" /></label>
+        <p data-admin-note class="text-sm text-rose-300" role="alert"></p>
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">ورود به پنل مدیریت</button>
+      </form>
+    </section>
+    <script>
+      if (new URLSearchParams(location.search).get("role") === "admin") {
+        var userPanel = document.querySelector("[data-auth-panel='user']");
+        var adminPanel = document.querySelector("[data-auth-panel='admin']");
+        if (userPanel) userPanel.hidden = true;
+        if (adminPanel) adminPanel.hidden = false;
+      }
+    </script>
   `);
 }
 
@@ -1847,6 +1880,197 @@ export function profilePage(base: string) {
 
 export function notFoundPage(base: string) {
   return layout(base, "home", "پیدا نشد | نکس‌سل", `<section ${revealAttrs(0)}><h1 class="text-3xl font-semibold">این صفحه پیدا نشد.</h1><a class="mt-4 inline-flex text-gold" href="${base}/">بازگشت به خانه</a></section>`);
+}
+
+function adminIcon(body: string) {
+  return `<svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+
+const ADMIN_ICONS = {
+  dashboard: adminIcon(`<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>`),
+  users: adminIcon(`<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`),
+  settings: adminIcon(`<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8.6 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1-.33H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 .33 1 1.65 1.65 0 0 0 1 .6 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.3.45.64.6 1a1.65 1.65 0 0 0 1 .33H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1 .33 1.65 1.65 0 0 0-.51 1z"/>`),
+  logout: adminIcon(`<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>`),
+};
+
+function adminLayout(base: string, view: "dashboard" | "customers" | "settings", title: string, body: string) {
+  const item = (id: "dashboard" | "customers" | "settings", href: string, label: string, icon: string) =>
+    `<a data-admin-link="${id}" href="${base}${href}" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300">${icon}${label}</a>`;
+  return `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${esc(title)}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D4AF37'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ["Vazirmatn", "Tahoma", "sans-serif"] }
+    } } }
+  </script>
+  <script>
+    (function () {
+      var next = ${JSON.stringify(base)} + "/login/?role=admin";
+      try {
+        var raw = JSON.parse(localStorage.getItem("academy_user_session") || "null");
+        if (raw && raw.isAuthenticated === true && raw.role === "admin" && raw.currentUser) return;
+      } catch (error) {}
+      location.replace(next);
+    })();
+  </script>
+  <style>
+    [hidden] { display: none !important; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #D4AF37; outline-offset: 3px; }
+    #admin-customer-dialog, #admin-delete-dialog {
+      width: min(32rem, calc(100vw - 1.5rem));
+      margin: auto;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1.5rem;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 1.25rem;
+    }
+    #admin-customer-dialog::backdrop, #admin-delete-dialog::backdrop { background: rgba(0,0,0,0.66); }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0f172a] font-sans text-slate-100 antialiased" data-base="${esc(base)}" data-admin-app data-admin-view="${view}">
+  <div class="lg:grid lg:min-h-screen lg:grid-cols-[16.5rem_1fr]">
+    <aside class="border-b border-white/10 bg-[#020617] lg:border-b-0 lg:border-e lg:border-white/10">
+      <a href="${base}/" class="flex items-center gap-2 px-4 py-4">
+        <span class="grid size-9 place-items-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-[#0B132B]">ن</span>
+        <span><span class="block text-sm font-bold">نکس‌سل</span><span class="block text-[11px] text-slate-400">پنل مدیریت</span></span>
+      </a>
+      <nav class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible" aria-label="بخش‌های مدیریت">
+        ${item("dashboard", "/admin/dashboard/", "داشبورد", ADMIN_ICONS.dashboard)}
+        ${item("customers", "/admin/customers/", "مدیریت مشتریان", ADMIN_ICONS.users)}
+        ${item("settings", "/admin/settings/", "تنظیمات سیستم", ADMIN_ICONS.settings)}
+        <button type="button" data-sign-out class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-start text-sm text-rose-300">${ADMIN_ICONS.logout}خروج</button>
+      </nav>
+    </aside>
+    <div class="min-w-0 px-4 py-5 sm:px-6">${body}</div>
+  </div>
+  <script src="${base}/client.js"></script>
+</body>
+</html>`;
+}
+
+const adminField = "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-3 text-sm outline-none focus:border-[#D4AF37]";
+
+export function adminDashboardPage(base: string) {
+  const card = (key: string, label: string, hint: string) => `<article class="rounded-3xl border border-white/10 bg-white/5 p-5">
+    <p class="text-sm text-slate-400">${label}</p>
+    <p data-kpi="${key}" class="mt-3 text-2xl font-bold text-white">—</p>
+    <p class="mt-2 text-xs leading-6 text-slate-500">${hint}</p>
+  </article>`;
+  return adminLayout(base, "dashboard", "داشبورد مدیریت | نکس‌سل", `
+    <header>
+      <h1 class="text-2xl font-bold sm:text-3xl">داشبورد</h1>
+      <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-400">این اعداد از فهرست مشتریان و سفارش‌های ذخیره‌شده در همین مرورگر است.</p>
+    </header>
+    <section class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      ${card("users", "تعداد کل کاربران", "همهٔ ردیف‌های فهرست مشتریان")}
+      ${card("active", "کاربران فعال", "ردیف‌هایی که مسدود نیستند")}
+      ${card("orders", "تراکنش‌ها / سفارشات", "سفارش‌های خرید همین مرورگر")}
+      ${card("revenue", "درآمد", "جمع مبلغ همان سفارش‌ها، بدون اتصال به بانک")}
+    </section>
+    <section class="mt-6">
+      <h2 class="text-lg font-semibold">فعالیت‌های اخیر</h2>
+      <ul data-admin-activity class="mt-3 space-y-2"></ul>
+      <p data-admin-activity-empty class="mt-3 text-sm text-slate-400">فعلاً فعالیتی ثبت نشده است.</p>
+    </section>
+  `);
+}
+
+export function adminCustomersPage(base: string) {
+  return adminLayout(base, "customers", "مدیریت مشتریان | نکس‌سل", `
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold sm:text-3xl">مدیریت مشتریان</h1>
+        <p class="mt-2 text-sm leading-7 text-slate-400">جستجو، فیلتر و ویرایش فهرست مشتریان همین مرورگر.</p>
+      </div>
+      <button type="button" data-customer-add class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">افزودن مشتری جدید</button>
+    </header>
+    <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+      <label class="block min-w-0 flex-1 text-sm">جستجو<input data-customer-search type="search" placeholder="نام یا شماره موبایل" class="${adminField}" /></label>
+      <label class="block text-sm sm:w-52">وضعیت
+        <select data-customer-filter class="${adminField}">
+          <option value="all">همه</option>
+          <option value="active">فعال</option>
+          <option value="blocked">مسدود</option>
+        </select>
+      </label>
+    </div>
+    <div class="mt-4 overflow-x-auto rounded-3xl border border-white/10">
+      <table class="w-full min-w-[46rem] text-right">
+        <thead class="bg-white/5 text-xs text-slate-400">
+          <tr>
+            <th class="px-3 py-3 font-medium">نام و نام خانوادگی</th>
+            <th class="px-3 py-3 font-medium">شماره موبایل</th>
+            <th class="px-3 py-3 font-medium">وضعیت</th>
+            <th class="px-3 py-3 font-medium">تاریخ ثبت‌نام</th>
+            <th class="px-3 py-3 font-medium">اقدامات</th>
+          </tr>
+        </thead>
+        <tbody data-customer-rows></tbody>
+      </table>
+    </div>
+    <p data-customer-empty class="mt-4 text-sm text-slate-400" hidden>مشتری‌ای با این مشخصات نیست.</p>
+    <dialog id="admin-customer-dialog" aria-labelledby="customer-dialog-title">
+      <form data-customer-form class="space-y-3">
+        <h2 id="customer-dialog-title" data-customer-title class="text-lg font-semibold">افزودن مشتری جدید</h2>
+        <input name="customerId" type="hidden" />
+        <label class="block text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" class="${adminField}" /></label>
+        <label class="block text-sm">شماره موبایل<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${adminField} text-left" /></label>
+        <label class="block text-sm">وضعیت
+          <select name="status" class="${adminField}">
+            <option value="active">فعال</option>
+            <option value="blocked">مسدود</option>
+          </select>
+        </label>
+        <p data-customer-note class="text-sm text-rose-300" role="status"></p>
+        <div class="flex gap-2">
+          <button type="submit" class="h-11 flex-1 rounded-2xl bg-[#D4AF37] text-sm font-semibold text-[#0B132B]">ذخیره</button>
+          <button type="button" data-customer-cancel class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/15">انصراف</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="admin-delete-dialog" aria-labelledby="delete-dialog-title">
+      <h2 id="delete-dialog-title" class="text-lg font-semibold">حذف مشتری</h2>
+      <p class="mt-2 text-sm leading-7 text-slate-300">«<span data-delete-name></span>» از فهرست همین مرورگر حذف شود؟</p>
+      <div class="mt-4 flex gap-2">
+        <button type="button" data-delete-confirm class="h-11 flex-1 rounded-2xl bg-rose-500 text-sm font-semibold text-white">حذف</button>
+        <button type="button" data-delete-cancel class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/15">انصراف</button>
+      </div>
+    </dialog>
+  `);
+}
+
+export function adminSettingsPage(base: string) {
+  const stat = (key: string, label: string) => `<div class="rounded-3xl border border-white/10 bg-white/5 p-4"><p class="text-xs text-slate-400">${label}</p><p data-admin-stat="${key}" class="mt-2 text-sm font-semibold">—</p></div>`;
+  return adminLayout(base, "settings", "تنظیمات سیستم | نکس‌سل", `
+    <header>
+      <h1 class="text-2xl font-bold sm:text-3xl">تنظیمات سیستم</h1>
+      <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-400">نام کاربری و رمز ورود مدیر فقط در همین مرورگر ذخیره می‌شود.</p>
+    </header>
+    <section class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      ${stat("users", "تعداد مشتریان")}
+      ${stat("active", "مشتریان فعال")}
+      ${stat("orders", "سفارش‌های ذخیره‌شده")}
+      ${stat("seen", "آخرین ورود مدیر")}
+      ${stat("username", "نام کاربری فعلی")}
+    </section>
+    <form data-admin-settings class="mt-6 max-w-lg space-y-3 rounded-3xl border border-white/10 bg-white/5 p-5">
+      <h2 class="text-lg font-semibold">تغییر مشخصات ورود</h2>
+      <label class="block text-sm">نام کاربری<input name="username" dir="ltr" autocomplete="username" class="${adminField} text-left" /></label>
+      <label class="block text-sm">رمز جدید<input name="password" type="password" dir="ltr" autocomplete="new-password" class="${adminField} text-left" /></label>
+      <label class="block text-sm">تکرار رمز جدید<input name="again" type="password" dir="ltr" autocomplete="new-password" class="${adminField} text-left" /></label>
+      <p data-admin-settings-note class="text-sm text-slate-300" role="status"></p>
+      <button type="submit" class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">ذخیرهٔ مشخصات</button>
+    </form>
+  `);
 }
 
 export function answerCounter(text: string, variant = 0) {
