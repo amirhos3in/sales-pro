@@ -1,7 +1,7 @@
 import { articles } from "@/lib/articles";
 import { OBJECTIONS, counterFor } from "@/lib/copilot/playbook";
 import { categories, lessonsOf, type Category } from "@/lib/courses-data";
-import { BUNDLE_PRICE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
+import { BUNDLE_LIST_PRICE, BUNDLE_PRICE, BUNDLE_SAVE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
 import { SERVICE_OFFERS, quoteService, serviceBreakdown } from "@/lib/service-pricing";
 
 export const fa = new Intl.NumberFormat("fa-IR");
@@ -12,6 +12,12 @@ export function toman(value: number) {
 
 function revealAttrs(delayMs = 0) {
   return `data-reveal data-delay="${delayMs}"`;
+}
+
+function bundleOfferCopy() {
+  return `<p class="mt-2 max-w-2xl text-sm leading-7 text-cream/80">برای کسی که می‌خواهد فروش را یاد بگیرد، فروشش را بالاتر ببرد و در مسیر فروش جلو برود.</p>
+    <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/75">هر چهار مسیر با هم است: فروش آنلاین، فروش حضوری، فروش تلفنی و اصول مذاکره. هر درس ویدیو دارد و با کوییز تمام می‌شود.</p>
+    <p class="mt-3 text-sm leading-7 text-cream/70">خرید جدا <span class="line-through decoration-cream/40">${toman(BUNDLE_LIST_PRICE)}</span>. با هم <span class="font-semibold text-gold">${toman(BUNDLE_PRICE)}</span>؛ ${toman(BUNDLE_SAVE)} کمتر.</p>`;
 }
 
 function esc(value: string) {
@@ -420,9 +426,14 @@ export function homePage(base: string) {
           </article>
         </div>
       </section>
-      <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></p>
-        <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+      <article class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div class="min-w-0">
+            <h2 class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></h2>
+            ${bundleOfferCopy()}
+          </div>
+          <button type="button" id="buy-bundle" class="h-11 w-full shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">افزودن به سبد</button>
+        </div>
       </article>
       <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دستیار پشت خط از دقیقهٔ خریده‌شده استفاده می‌کند و جزو ثبت‌نام دوره نیست.</a></p>
     </section>
@@ -604,9 +615,14 @@ export function subscriptionPage(base: string) {
       <p class="mt-3 max-w-2xl text-sm leading-8 text-cream">هر مسیر یک عدد کنار خودش دارد. پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند. درس اول هر مسیر بدون سبد دیده می‌شود.</p>
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${paths}</div>
-    <article class="mt-4 flex flex-col gap-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></p>
-      <button type="button" id="buy-bundle" class="h-11 shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
+    <article class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></h2>
+          ${bundleOfferCopy()}
+        </div>
+        <button type="button" id="buy-bundle" class="h-11 w-full shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">افزودن به سبد</button>
+      </div>
     </article>
   `);
 }
@@ -721,6 +737,7 @@ function dashboardPage(base: string, initialTab = "overview") {
               <h2 class="text-lg font-semibold">آکادمی جامع</h2>
               <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">آکادمی جامع، ${toman(BUNDLE_PRICE)}</span>
             </div>
+            ${bundleOfferCopy()}
             <button type="button" id="buy-bundle" data-bundle-buy class="mt-4 inline-flex h-11 items-center rounded-2xl bg-cream px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
           </article>
           <div class="grid gap-3 sm:grid-cols-2">${cards}</div>
