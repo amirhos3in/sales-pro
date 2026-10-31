@@ -31,7 +31,7 @@ function esc(value: string) {
 const NAV = [
   ["/", "خانه", "home"],
   ["/academy/", "آموزش", "academy"],
-  ["/demo/", "دستیار", "copilot"],
+  ["/assistant/", "دستیار", "copilot"],
   ["/articles/", "مقالات", "articles"],
   ["/services/", "خدمات", "services"],
   ["/support/", "پشتیبانی", "support"],
@@ -598,7 +598,7 @@ function offeringLanes(base: string) {
         "بازخورد آنی پس از اتمام هر مکالمه کاری",
       ],
       cta: "تست زنده و شارژ دستیار هوشمند",
-      href: `${base}/demo/`,
+      href: `${base}/assistant/`,
       mockup: copilotMockup(),
     })}
     ${offerBlock({
@@ -737,7 +737,7 @@ export function homePage(base: string) {
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 19c1.4-3 3.6-4.5 7-4.5s5.6 1.5 7 4.5" stroke-linecap="round"/></svg>
           ورود / ثبت‌نام
         </a>
-        <a data-auth-user href="${base}/demo/" hidden class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#F3E5AB] to-gold px-8 text-sm font-semibold text-navy shadow-[0_0_24px_rgba(212,175,55,0.35)] transition hover:brightness-110">
+        <a data-auth-user href="${base}/assistant/" hidden class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#F3E5AB] to-gold px-8 text-sm font-semibold text-navy shadow-[0_0_24px_rgba(212,175,55,0.35)] transition hover:brightness-110">
           <svg viewBox="0 0 24 24" class="size-4" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
           دسترسی سریع به دستیار هوش مصنوعی
         </a>
@@ -762,7 +762,7 @@ export function homePage(base: string) {
           <button type="button" id="buy-bundle" class="h-11 w-full shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">افزودن به سبد</button>
         </div>
       </article>
-      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/demo/">دستیار پشت خط جدا از آموزش است و از همان صفحه می‌شود باهاش کار کرد.</a></p>
+      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/assistant/">دستیار پشت خط جدا از آموزش است و از همان صفحه می‌شود باهاش کار کرد.</a></p>
     </section>
   `);
 }
@@ -792,26 +792,89 @@ export function minutesPage(base: string) {
 }
 
 export function demoPage(base: string) {
-  return layout(base, "copilot", "دستیار | نکس‌سل", `
-    <section ${revealAttrs(0)} class="rounded-[28px] bg-[#070B18] p-4 sm:p-6" data-live-demo>
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p class="text-xs tracking-[0.16em] text-gold">پشت خط</p>
-          <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">دستیار</h1>
-          <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">جملهٔ مشتری را بگویید یا بنویسید. دستیار اعتراض را نام می‌برد و یک جمله برای گفتن همان لحظه می‌دهد.</p>
-        </div>
-        <div class="rounded-3xl border border-gold/40 bg-navy px-4 py-3">
+  const preview = [
+    { id: "price", label: "قیمت بالاتر است", hear: "مشتری می‌گوید: «قیمت شما نسبت به بقیه همکاران بالاتر است!»" },
+    { id: "think", label: "«باید فکر کنم»", hear: "مشتری می‌گوید: «باید فکر کنم»" },
+    { id: "authority", label: "«با شریکم مشورت کنم»", hear: "مشتری می‌گوید: «با شریکم مشورت کنم»" },
+  ].map((item, index) => {
+    const hit = OBJECTIONS.find((row) => row.id === item.id);
+    const say = hit?.lines[0] || "";
+    const chip = hit?.tag || "";
+    const on = index === 0;
+    return `<button type="button" role="tab" data-preview-tab aria-selected="${on ? "true" : "false"}" data-hear="${esc(item.hear)}" data-say="${esc(say)}" data-chip="${esc(chip)}" class="h-10 rounded-full px-3 text-xs ${on ? "bg-gold font-semibold text-navy" : "text-cream/80 ring-1 ring-white/10"}">${esc(item.label)}</button>`;
+  });
+  const first = OBJECTIONS.find((row) => row.id === "price");
+  const steps = [
+    ["گوش دادن / تایپ لحظه‌ای", "در زمان مکالمه تلفنی یا چت، اعتراض یا بهانه مشتری نوشته یا گفته می‌شود؛ مثل «قیمت بالاست» یا «باید فکر کنم»."],
+    ["محاسبه و پردازش هوشمند", "دستیار از سناریوهای آمادهٔ اعتراض، زاویهٔ پاسخ را انتخاب می‌کند و تکنیک همان بهانه را نام می‌برد."],
+    ["اعلام جمله طلایی", "فروشنده همان جمله را پشت خط می‌گوید، بدون اینکه مکث طولانی وسط مکالمه بیفتد."],
+  ];
+  const stepIcons = [
+    `<svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3" stroke-linecap="round"/></svg>`,
+    `<svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M9 3h6M9 21h6M3 9v6M21 9v6" stroke-linecap="round"/></svg>`,
+    `<svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 7h9a4 4 0 0 1 0 8H8" stroke-linecap="round"/><path d="M8 12h8a3 3 0 0 1 0 6H6" stroke-linecap="round"/></svg>`,
+  ];
+  const description = "دستیار فروش پشت خط. اعتراض مشتری را بگویید تا جملهٔ همان لحظه را ببینید. دقیقه جدا از دوره‌هاست.";
+  return layout(base, "copilot", "دستیار فروش | نکس‌سل", `
+    <style>
+      [data-preview-say] { transition: opacity 220ms ease, transform 220ms ease; }
+      [data-assistant-preview].is-switching [data-preview-hear],
+      [data-assistant-preview].is-switching [data-preview-say] { opacity: 0; transform: translateY(6px); }
+    </style>
+    <section ${revealAttrs(0)} class="grid items-center gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] p-5 sm:p-8 lg:grid-cols-2" data-live-demo>
+      <div>
+        <p class="text-xs tracking-[0.18em] text-gold">پشت خط</p>
+        <h1 class="mt-3 text-3xl font-semibold leading-[1.45] sm:text-4xl">هوش مصنوعی دستیار فروش (پشت خط مکالمه)</h1>
+        <p class="mt-4 text-sm leading-8 text-cream/80 sm:text-base">اعتراض که آمد، مکث تمام؛ جمله‌ی درست، دقیقاً در همان ثانیه‌ای که مشتری بهانه‌تراشی می‌کند روی صفحه ظاهر می‌شود.</p>
+        <p class="mt-3 text-sm leading-7 text-cream/60">دقیقهٔ دستیار جدا از دوره‌هاست و روی همین مرورگر در لحظه فعال می‌شود.</p>
+        <div class="mt-5 inline-flex flex-col rounded-3xl border border-white/10 bg-white/[0.04] px-4 py-3">
           <p class="text-xs text-cream/60">موجودی دقیقه</p>
           <p class="mt-1 text-2xl font-semibold text-gold"><span data-assistant-balance>۰</span> <span class="text-sm font-medium text-cream">دقیقه</span></p>
           <a href="${base}/services/#ai-minutes" class="mt-2 inline-flex text-xs text-gold">افزودن دقیقه</a>
         </div>
       </div>
-      <p class="mt-4 text-sm leading-7 text-cream/70">هر پاسخ متنی ۱ دقیقه کم می‌کند. صحبت زنده، طول همان شنیدن را به دقیقهٔ بالا گرد می‌کند و کمتر از ۱ دقیقه حساب نمی‌شود.</p>
+      <figure class="relative">
+        <div class="pointer-events-none absolute -inset-8 -z-10 rounded-full" style="background: radial-gradient(circle, rgba(212,175,55,0.18) 0%, transparent 70%)"></div>
+        <img src="${base}/present/assistant-module.webp" width="1280" height="720" alt="ماژول شیشه‌ای تیره با موج صدای طلایی و کارت‌های شناور" class="w-full rounded-[1.75rem] border border-white/10 object-cover shadow-[0_0_48px_rgba(212,175,55,0.16)]" />
+        <p class="absolute top-3 end-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#070B18]/80 px-3 py-1 text-[11px] text-cream backdrop-blur"><span class="size-1.5 rounded-full bg-gold" aria-hidden="true"></span>در حال آنالیز مکالمه...</p>
+        <p class="absolute bottom-3 start-3 rounded-full border border-gold/40 bg-[#070B18]/80 px-3 py-1 text-[11px] text-[#F3E5AB] backdrop-blur">پاسخ بهینه آماده شد (۰.۳ ثانیه)</p>
+      </figure>
+    </section>
+    <ul class="mt-4 grid gap-2 sm:grid-cols-3">
+      <li class="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3 text-sm"><span class="size-2 shrink-0 rounded-full bg-emerald-400" aria-hidden="true"></span>میکروفن فعال</li>
+      <li class="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3 text-sm" data-preview-chip>${esc(first?.tag || "")}</li>
+      <li class="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3 text-sm">زمان جلسه <span dir="ltr" class="font-semibold text-gold">۰۳:۴۲</span></li>
+    </ul>
+    <section class="mt-8" aria-labelledby="assistant-steps">
+      <h2 id="assistant-steps" class="text-xl font-semibold">سه قدم پشت خط</h2>
+      <ol class="mt-4 grid gap-3 md:grid-cols-3">
+        ${steps.map(([title, text], index) => `<li class="rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+          <span class="grid size-10 place-items-center rounded-2xl bg-gold/15 text-gold">${stepIcons[index]}</span>
+          <p class="mt-4 text-xs text-gold">${fa.format(index + 1)}</p>
+          <h3 class="mt-1 text-base font-semibold">${title}</h3>
+          <p class="mt-2 text-sm leading-7 text-cream/70">${text}</p>
+        </li>`).join("")}
+      </ol>
+    </section>
+    <section class="mt-8 rounded-[2rem] border border-white/10 bg-[#070B18] p-5 sm:p-6" data-assistant-preview aria-labelledby="assistant-preview">
+      <h2 id="assistant-preview" class="text-xl font-semibold">پیش‌نمایش پاسخ</h2>
+      <p class="mt-2 text-sm leading-7 text-cream/60">این سه بهانه دقیقه کم نمی‌کند. پاسخ، همان جملهٔ آمادهٔ دستیار برای آن اعتراض است.</p>
+      <div class="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="بهانه‌های نمونه">${preview.join("")}</div>
+      <p data-preview-hear class="mt-5 text-sm leading-8 text-cream/80">مشتری می‌گوید: «قیمت شما نسبت به بقیه همکاران بالاتر است!»</p>
+      <blockquote data-preview-say class="mt-3 rounded-[1.5rem] border border-gold/40 bg-gold/10 p-4 text-sm leading-8 text-cream shadow-[0_0_32px_rgba(212,175,55,0.12)]">${esc(first?.lines[0] || "")}</blockquote>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <button type="button" data-preview-copy class="h-11 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">کپی سریع پاسخ</button>
+        <p data-preview-copy-note class="text-sm text-gold" role="status"></p>
+      </div>
+    </section>
+    <section class="mt-8 rounded-[2rem] border border-white/10 bg-[#070B18] p-5 sm:p-6">
+      <h2 class="text-xl font-semibold">استفاده با دقیقهٔ خودتان</h2>
+      <p class="mt-3 text-sm leading-7 text-cream/70">هر پاسخ متنی ۱ دقیقه کم می‌کند. صحبت زنده، طول همان شنیدن را به دقیقهٔ بالا گرد می‌کند و کمتر از ۱ دقیقه حساب نمی‌شود.</p>
       <p data-assistant-lock class="mt-3 hidden rounded-2xl border border-gold/30 bg-white/5 px-3 py-3 text-sm leading-7">موجودی دقیقه تمام شده. تا وقتی از بخش خدمات دقیقه اضافه نکنید، دستیار جواب نمی‌دهد.</p>
       ${voiceChat()}
-      <div data-counter class="mt-4 hidden rounded-3xl bg-navy p-5"></div>
+      <div data-counter class="mt-4 hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5"></div>
     </section>
-  `);
+  `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="دستیار فروش | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
 export function academyPage(base: string) {
@@ -1312,7 +1375,7 @@ function dashboardPage(base: string, initialTab = "overview") {
     <div data-user-panel data-initial-tab="${esc(initialTab)}" class="lg:flex lg:items-start lg:gap-4">
       <div class="glass -mx-4 flex gap-2 overflow-x-auto px-4 py-2 lg:hidden" data-lenis-prevent>
         ${PANEL_TABS.map(([id, label]) => tabLink(id, label, true)).join("")}
-          <a href="${base}/demo/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2 text-sm">دستیار</a>
+          <a href="${base}/assistant/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2 text-sm">دستیار</a>
       </div>
       <aside class="glass hidden w-64 shrink-0 rounded-[28px] p-4 lg:block">
         <div class="flex items-center gap-3">
@@ -1326,7 +1389,7 @@ function dashboardPage(base: string, initialTab = "overview") {
         <p class="mt-2 text-xs text-cream/60"><span data-minute-balance>۰</span> دقیقه کوپایلوت</p>
         <nav class="mt-5 flex flex-col gap-1">
           ${PANEL_TABS.map(([id, label]) => tabLink(id, label, false)).join("")}
-          <a href="${base}/demo/" class="mt-2 flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm">دستیار</a>
+          <a href="${base}/assistant/" class="mt-2 flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm">دستیار</a>
         </nav>
         <button type="button" data-sign-out class="mt-4 w-full rounded-2xl px-3 py-2 text-start text-sm text-cream/70 ring-1 ring-white/15">خروج از حساب</button>
       </aside>
@@ -1422,7 +1485,7 @@ function dashboardPage(base: string, initialTab = "overview") {
           </section>
         </section>
         <section data-tab="audits" class="view space-y-4">
-          <div><h1 class="text-2xl font-semibold">تحلیل‌های تماس من</h1><p class="mt-2 text-sm leading-7 text-cream/60">تماسی اینجا ثبت نشده است. تحلیل تماس از صفحهٔ دستیار انجام می‌شود.</p><a class="mt-4 inline-flex text-sm text-gold" href="${base}/demo/">رفتن به دستیار</a></div>
+          <div><h1 class="text-2xl font-semibold">تحلیل‌های تماس من</h1><p class="mt-2 text-sm leading-7 text-cream/60">تماسی اینجا ثبت نشده است. تحلیل تماس از صفحهٔ دستیار انجام می‌شود.</p><a class="mt-4 inline-flex text-sm text-gold" href="${base}/assistant/">رفتن به دستیار</a></div>
         </section>
         <section data-tab="tickets" class="view space-y-4">
           <div class="flex flex-wrap items-end justify-between gap-3">

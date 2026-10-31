@@ -31,6 +31,7 @@ const out = path.join(process.cwd(), "pages-out");
 const files: Array<[string, string]> = [
   ["index.html", homePage(base)],
   ["academy/index.html", academyPage(base)],
+  ["assistant/index.html", demoPage(base)],
   ["demo/index.html", demoPage(base)],
   ["minutes/index.html", minutesPage(base)],
   ["dashboard/copilot/index.html", copilotPage(base)],
