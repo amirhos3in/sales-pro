@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ارتباط با ما | نکس‌سل</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D4AF37'/%3E%3C/svg%3E" />
-  <meta name="description" content="فرم ارزیابی فروش نکس‌سل برای منتورینگ، کارگاه، دستیار و انتخاب دوره." /><meta property="og:title" content="ارتباط با ما | نکس‌سل" /><meta property="og:description" content="فرم ارزیابی فروش نکس‌سل برای منتورینگ، کارگاه، دستیار و انتخاب دوره." /><meta property="og:locale" content="fa_IR" />
+  <meta name="description" content="درخواست همکاری سازمانی نکس‌سل برای بازنویسی اسکریپت، کارگاه حضوری، منتورینگ و اشتراک دستیار." /><meta property="og:title" content="ارتباط با ما | نکس‌سل" /><meta property="og:description" content="درخواست همکاری سازمانی نکس‌سل برای بازنویسی اسکریپت، کارگاه حضوری، منتورینگ و اشتراک دستیار." /><meta property="og:locale" content="fa_IR" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/sales-pro/lenis.css" />
@@ -121,58 +121,50 @@
   </header>
   <main class="mx-auto w-full max-w-6xl px-4 py-8">
     <header>
-      <p class="text-xs tracking-[0.18em] text-gold">ارتباط و پشتیبانی</p>
-      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">بگویید فروش در کدام مرحله می‌ایستد.</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">فرم ارزیابی به بخش تحلیل فروش می‌رود. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم. قیمت خدمات جدا در <a class="text-gold" href="/sales-pro/services/">صفحهٔ خدمات</a> حساب می‌شود.</p>
+      <p class="text-xs tracking-[0.18em] text-gold">همکاری سازمانی</p>
+      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">ارزیابی سیستم فروش و درخواست همکاری سازمانی</h1>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/75 sm:text-base">اگر برای بازنویسی اسکریپت تیم، کارگاه حضوری، یا مهندسی قیف فروش نیاز به همراهی دارید، اطلاعات اولیه را ثبت کنید تا در کمتر از ۴ ساعت کاری با شما هماهنگ شویم.</p>
     </header>
-    <div class="mt-8 grid items-start gap-4 lg:grid-cols-2">
-      <form id="lead" data-lead novalidate data-lenis-prevent class="scroll-mt-24 rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_40px_rgba(212,175,55,0.08)] sm:p-6">
-        <h2 class="text-xl font-semibold">ارزیابی و ثبت درخواست</h2>
-        <div class="mt-4 grid gap-3">
-          <label class="text-sm">نوع درخواست<select name="kind" required class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold"><option value="" disabled selected>نوع درخواست را انتخاب کنید</option><option value="منتورینگ و بازنویسی سناریوی تیم فروش">منتورینگ و بازنویسی سناریوی تیم فروش</option><option value="اجرای کارگاه حضوری و مهندسی قیف">اجرای کارگاه حضوری و مهندسی قیف</option><option value="دسترسی و لایسنس دستیار هوش مصنوعی">دسترسی و لایسنس دستیار هوش مصنوعی</option><option value="راهنمایی خرید دوره‌های آموزشی">راهنمایی خرید دوره‌های آموزشی</option><option value="همکاری سازمانی و سایر موارد">همکاری سازمانی و سایر موارد</option></select></label>
-          <label class="text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" required class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold" /></label>
-          <label class="text-sm">شماره تماس<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" required placeholder="09xxxxxxxxx" class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold text-left" /></label>
-          <fieldset class="grid gap-2"><legend class="text-sm">تعداد پرسنل فروش</legend><div class="mt-2 grid gap-2"><label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 px-3 py-2 text-sm has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="radio" name="size" value="solo" class="size-4 accent-gold" />فروشنده مستقل (۱ نفر)</label><label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 px-3 py-2 text-sm has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="radio" name="size" value="small" class="size-4 accent-gold" />تیم کوچک (۲ تا ۵ نفر)</label><label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 px-3 py-2 text-sm has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="radio" name="size" value="large" class="size-4 accent-gold" />تیم متوسط و بزرگ (بیش از ۵ نفر)</label></div></fieldset>
-          <label class="text-sm">شرح چالش اصلی<textarea name="body" required rows="5" placeholder="مشتریان شما عمدتاً در کدام مرحله ریزش می‌کنند؟ (تلفنی، دایرکت، اعتراض به قیمت، یا عدم پیگیری...)" class="mt-1 min-h-32 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
+    <div class="mt-8 grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.8fr)]">
+      <form id="b2b" data-b2b novalidate data-lenis-prevent class="scroll-mt-24 rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_40px_rgba(212,175,55,0.08)] sm:p-6">
+        <div class="grid gap-3">
+          <label class="text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold" /></label>
+          <label class="text-sm">شماره تماس مستقیم / موبایل<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold text-left" /></label>
+          <label class="text-sm">نام مجموعه یا حوزه کسب‌وکار<input name="company" autocomplete="organization" class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold" /></label>
+          <label class="text-sm">نوع همکاری مورد نظر<select name="kind" class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold"><option value="" disabled selected>نوع همکاری را انتخاب کنید</option><option value="بازنویسی اسکریپت تیم">بازنویسی اسکریپت تیم</option><option value="کارگاه حضوری">کارگاه حضوری</option><option value="منتورینگ مدیر فروش">منتورینگ مدیر فروش</option><option value="اشتراک سازمانی دستیار">اشتراک سازمانی دستیار</option></select></label>
+          <label class="text-sm">تعداد کارشناسان فروش تیم<input name="teamSize" inputmode="numeric" min="1" placeholder="مثلاً ۸" class="mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold" /></label>
+          <label class="text-sm">توضیح کوتاه درباره وضعیت فعلی و گلوگاه فروش<textarea name="body" rows="5" class="mt-1 min-h-32 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
         </div>
-        <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy sm:w-auto sm:px-6">ثبت و ارسال به بخش تحلیل فروش</button>
-        <p data-lead-note class="mt-3 text-sm leading-7 text-cream/80" role="status"></p>
+        <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy sm:w-auto sm:px-6">ثبت درخواست و هماهنگی جلسه</button>
+        <p data-b2b-note class="mt-3 text-sm leading-7 text-cream/80" role="status"></p>
       </form>
-      <div class="grid gap-3"><article class="rounded-3xl border border-white/10 bg-[#070B18] p-4">
-    <h3 class="font-semibold">پشتیبانی مستقیم تلفنی</h3>
-    <p class="mt-2 text-sm leading-7 text-cream/70">شنبه تا چهارشنبه، ۹ تا ۱۸. درخواست تماس را در فرم بگذارید تا در همین بازه هماهنگ شود.</p>
-    <a href="#lead" class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-gold">درخواست تماس</a>
-  </article><article class="rounded-3xl border border-white/10 bg-[#070B18] p-4">
-    <h3 class="font-semibold">پشتیبانی در تلگرام</h3>
-    <p class="mt-2 text-sm leading-7 text-cream/70">هماهنگی تلگرام از همین درخواست انجام می‌شود. پیام همان شیفت، در روز کاری، کمتر از ۱۵ دقیقه برمی‌گردد.</p>
-    <a href="#lead" class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-gold">درخواست تلگرام</a>
-  </article><article class="rounded-3xl border border-white/10 bg-[#070B18] p-4">
-    <h3 class="font-semibold">پشتیبانی در واتساپ</h3>
-    <p class="mt-2 text-sm leading-7 text-cream/70">ویس یا توضیح سازمانی را در شرح چالش بنویسید تا مسیر واتساپ روی همان درخواست باز شود.</p>
-    <a href="#lead" class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-gold">درخواست واتساپ</a>
-  </article><article class="rounded-3xl border border-white/10 bg-[#070B18] p-4">
-    <h3 class="font-semibold">ایمیل رسمی</h3>
-    <p class="mt-2 text-sm leading-7 text-cream/70">نامه و قرارداد را در شرح بنویسید تا پیگیری از همان درخواست شروع شود.</p>
-    <a href="#lead" class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-gold">درخواست نامه</a>
-  </article></div>
+      <aside class="grid gap-3">
+        <section class="rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+          <h2 class="text-lg font-semibold">امور قراردادها</h2>
+          <p class="mt-3 text-sm leading-7 text-cream/75">ساعات پاسخگویی: شنبه تا چهارشنبه، ۹ تا ۱۸.</p>
+          
+          
+          
+        </section>
+        <a href="/sales-pro/support/" class="rounded-[1.75rem] border border-gold/30 bg-gold/10 p-5">
+          <p class="text-sm leading-7 text-cream/80">دانشجوی دوره‌ها هستید یا مشکل فنی دارید؟</p>
+          <p class="mt-2 text-sm font-semibold text-gold">ورود به مرکز پشتیبانی کاربران</p>
+        </a>
+      </aside>
     </div>
-    <div class="mt-4 grid gap-3 md:grid-cols-3"><article class="rounded-3xl border border-gold/25 bg-gold/10 p-4"><h3 class="text-sm font-semibold text-gold">زمان پاسخ تیکت</h3><p class="mt-2 text-sm leading-7 text-cream/80">در روزهای کاری، میانگین بازگشت به تیکت زیر ۳۰ دقیقه است.</p></article><article class="rounded-3xl border border-gold/25 bg-gold/10 p-4"><h3 class="text-sm font-semibold text-gold">لایسنس دستیار</h3><p class="mt-2 text-sm leading-7 text-cream/80">پشتیبانی فنی لایسنس دستیار، جدا از سؤال آموزشی، روی همین درخواست دنبال می‌شود.</p></article><article class="rounded-3xl border border-gold/25 bg-gold/10 p-4"><h3 class="text-sm font-semibold text-gold">انتخاب دوره</h3><p class="mt-2 text-sm leading-7 text-cream/80">اگر مسیر دوره برایتان روشن نیست، انتخاب دوره متناسب با سطح فعلی در ارزیابی همین فرم رایگان است.</p></article></div>
-    <section class="mt-8" aria-labelledby="support-faq">
-      <h2 id="support-faq" class="text-xl font-semibold">سؤال‌های پرتکرار پشتیبانی</h2>
-      <div class="mt-4 grid gap-3"><details class="rounded-2xl border border-white/10 bg-[#070B18] px-4 py-3">
-    <summary class="cursor-pointer text-sm font-semibold leading-7">دستیار صوتی با چه پلتفرم‌ها و تماس‌هایی سازگار است؟</summary>
-    <p class="mt-3 text-sm leading-8 text-cream/75">دستیار روی صفحهٔ خودش در نکس‌سل کار می‌کند. جمله را می‌نویسید یا با میکروفن فارسی می‌گویید و جواب همان لحظه می‌آید. به سانترال تلفن یا نرم‌افزار تماس جدا وصل نیست.</p>
-  </details><details class="rounded-2xl border border-white/10 bg-[#070B18] px-4 py-3">
-    <summary class="cursor-pointer text-sm font-semibold leading-7">آیا بازنویسی سناریو و خدمات منتورینگ شامل ضمانت نتیجه است؟</summary>
-    <p class="mt-3 text-sm leading-8 text-cream/75">ضمانت عددی فروش ندارد. خروجی، سناریو، کارگاه یا همراهی روی مکالمهٔ همان تیم است و دامنه را قبل از شروع در پیشنهاد همان خدمت می‌بینید.</p>
-  </details><details class="rounded-2xl border border-white/10 bg-[#070B18] px-4 py-3">
-    <summary class="cursor-pointer text-sm font-semibold leading-7">بعد از ثبت درخواست در این فرم، فرایند تماس و ارزیابی به چه صورت خواهد بود؟</summary>
-    <p class="mt-3 text-sm leading-8 text-cream/75">درخواست در پیگیری شما ثبت می‌شود. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم. اگر خدمت مشخصی خواسته باشید، قیمت همان خدمت جدا در صفحهٔ خدمات حساب می‌شود.</p>
-  </details></div>
-    </section>
   </main>
-  <footer class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-cream/50 sm:flex-row sm:justify-between">
-    <p>نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
+  <footer class="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
+    <p class="text-xs leading-6 text-cream/50">نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
+    <nav aria-label="همکاری سازمانی" class="grid gap-2 text-sm">
+      <p class="text-xs text-gold">همکاری و قرارداد</p>
+      <a class="text-cream/80" href="/sales-pro/contact/">ارتباط با ما</a>
+      <a class="text-cream/80" href="/sales-pro/services/">خدمات تیم فروش</a>
+    </nav>
+    <nav aria-label="پشتیبانی کاربران" class="grid gap-2 text-sm">
+      <p class="text-xs text-gold">پشتیبانی و سؤال‌های رایج</p>
+      <a class="text-cream/80" href="/sales-pro/support/">مرکز پشتیبانی</a>
+      <a class="text-cream/80" href="/sales-pro/support/#faq">سؤال‌های رایج</a>
+    </nav>
   </footer>
   <dialog id="cart-drawer" aria-labelledby="cart-title">
     <div class="flex h-full max-h-[100vh] flex-col">

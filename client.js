@@ -1456,43 +1456,93 @@
 
   mountAuth();
 
-  const ticket = document.querySelector("[data-ticket]");
-  if (ticket) {
-    ticket.addEventListener("submit", (event) => {
+  document.querySelectorAll("[data-fill-subject]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const form = document.querySelector("[data-support-ticket]");
+      const subject = link.getAttribute("data-fill-subject") || "";
+      if (form && subject && form.elements.subject) form.elements.subject.value = subject;
+    });
+  });
+
+  const supportTicket = document.querySelector("[data-support-ticket]");
+  if (supportTicket) {
+    supportTicket.addEventListener("submit", (event) => {
       event.preventDefault();
-      ticket.querySelector("[data-ticket-note]").textContent = "تیکت ثبت شد.";
-      ticket.reset();
+      const note = supportTicket.querySelector("[data-support-note]");
+      const phone = digits(supportTicket.elements.phone.value);
+      const subject = supportTicket.elements.subject.value.trim();
+      const body = supportTicket.elements.body.value.trim();
+      if (!/^09\d{9}$/.test(phone)) {
+        note.textContent = "شماره موبایل را با ۰۹ و ۱۱ رقم وارد کنید.";
+        return;
+      }
+      if (subject.length < 2) {
+        note.textContent = "موضوع را بنویسید.";
+        return;
+      }
+      if (body.length < 8) {
+        note.textContent = "پیام را کمی روشن‌تر بنویسید.";
+        return;
+      }
+      const id = "TK-" + Math.floor(10000 + Math.random() * 90000);
+      const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
+      orders.unshift({
+        id,
+        at: new Date().toISOString(),
+        phone,
+        notes: body,
+        items: [{ type: "support", title: subject, price: 0 }],
+        total: 0,
+        status: "support",
+        message: "تیکت ثبت شد.",
+      });
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      const session = readSession();
+      let message = "تیکت ثبت شد.";
+      if (session && session.isAuthenticated && session.currentUser) {
+        const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
+        session.currentUser.tickets = [{ id, subject, at: stamp }].concat(session.currentUser.tickets || []);
+        writeSession(session);
+        message = "تیکت ثبت شد و در تیکت‌های حساب قرار گرفت.";
+      }
+      supportTicket.reset();
+      note.textContent = message;
     });
   }
 
-  const lead = document.querySelector("[data-lead]");
-  if (lead) {
-    lead.addEventListener("submit", (event) => {
+  const b2b = document.querySelector("[data-b2b]");
+  if (b2b) {
+    b2b.addEventListener("submit", (event) => {
       event.preventDefault();
-      const note = lead.querySelector("[data-lead-note]");
-      const name = lead.elements.name.value.trim();
-      const phone = digits(lead.elements.phone.value);
-      const kind = lead.elements.kind.value;
-      const size = lead.querySelector("[name=size]:checked");
-      const body = lead.elements.body.value.trim();
-      if (!kind) {
-        note.textContent = "نوع درخواست را انتخاب کنید.";
-        return;
-      }
+      const note = b2b.querySelector("[data-b2b-note]");
+      const name = b2b.elements.name.value.trim();
+      const phone = digits(b2b.elements.phone.value);
+      const company = b2b.elements.company.value.trim();
+      const kind = b2b.elements.kind.value;
+      const teamSize = digits(b2b.elements.teamSize.value);
+      const body = b2b.elements.body.value.trim();
       if (name.length < 2) {
-        note.textContent = "نام را کامل بنویسید.";
+        note.textContent = "نام و نام خانوادگی را کامل بنویسید.";
         return;
       }
       if (!/^09\d{9}$/.test(phone)) {
         note.textContent = "شماره موبایل را با ۰۹ و ۱۱ رقم وارد کنید.";
         return;
       }
-      if (!size) {
-        note.textContent = "تعداد پرسنل فروش را انتخاب کنید.";
+      if (company.length < 2) {
+        note.textContent = "نام مجموعه یا حوزه کسب‌وکار را بنویسید.";
+        return;
+      }
+      if (!kind) {
+        note.textContent = "نوع همکاری را انتخاب کنید.";
+        return;
+      }
+      if (!teamSize || Number(teamSize) < 1) {
+        note.textContent = "تعداد کارشناسان فروش را وارد کنید.";
         return;
       }
       if (body.length < 8) {
-        note.textContent = "چالش اصلی را کمی روشن‌تر بنویسید.";
+        note.textContent = "گلوگاه فروش را کمی روشن‌تر بنویسید.";
         return;
       }
       const id = "LD-" + Math.floor(10000 + Math.random() * 90000);
@@ -1502,22 +1552,22 @@
         at: new Date().toISOString(),
         name,
         phone,
-        notes: body,
-        items: [{ type: "lead", title: kind, size: size.value, price: 0 }],
+        notes: company + "\n" + body,
+        items: [{ type: "lead", title: kind, size: teamSize, company, price: 0 }],
         total: 0,
         status: "lead",
         message: "درخواست ارزیابی ثبت شد.",
       });
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
       const session = readSession();
-      let message = "درخواست ثبت شد. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم.";
+      let message = "درخواست ثبت شد. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی جلسه برمی‌گردیم.";
       if (session && session.isAuthenticated && session.currentUser) {
         const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
         session.currentUser.tickets = [{ id, subject: kind, at: stamp }].concat(session.currentUser.tickets || []);
         writeSession(session);
-        message = "درخواست ثبت شد و در تیکت‌های حساب قرار گرفت. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم.";
+        message = "درخواست ثبت شد و در تیکت‌های حساب قرار گرفت. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی جلسه برمی‌گردیم.";
       }
-      lead.reset();
+      b2b.reset();
       note.textContent = message;
     });
   }
