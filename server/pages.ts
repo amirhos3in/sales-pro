@@ -163,8 +163,18 @@ export function layout(base: string, active: string, title: string, body: string
     </div>
   </header>
   <main class="mx-auto w-full max-w-6xl px-4 py-8">${body}</main>
-  <footer class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-cream/50 sm:flex-row sm:justify-between">
-    <p>نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
+  <footer class="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
+    <p class="text-xs leading-6 text-cream/50">نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
+    <nav aria-label="همکاری سازمانی" class="grid gap-2 text-sm">
+      <p class="text-xs text-gold">همکاری و قرارداد</p>
+      <a class="text-cream/80" href="${href("/contact/")}">ارتباط با ما</a>
+      <a class="text-cream/80" href="${href("/services/")}">خدمات تیم فروش</a>
+    </nav>
+    <nav aria-label="پشتیبانی کاربران" class="grid gap-2 text-sm">
+      <p class="text-xs text-gold">پشتیبانی و سؤال‌های رایج</p>
+      <a class="text-cream/80" href="${href("/support/")}">مرکز پشتیبانی</a>
+      <a class="text-cream/80" href="${href("/support/#faq")}">سؤال‌های رایج</a>
+    </nav>
   </footer>
   ${commerceShell(base)}
   <script id="objections" type="application/json">${JSON.stringify(OBJECTIONS)}</script>
@@ -907,91 +917,143 @@ export function aboutPage(base: string) {
     <div class="mt-6 grid gap-4 md:grid-cols-3">${cards}</div>
     <section class="mt-6 rounded-[2rem] border border-gold/30 bg-[#070B18] px-5 py-8 text-center sm:px-10">
       <h2 class="text-2xl font-semibold leading-[1.5]">سیستم فروش شما در کدام مرحله گیر کرده است؟</h2>
-      <a href="${base}/contact/#lead" class="mt-5 inline-flex h-12 items-center justify-center rounded-2xl bg-gold px-6 text-sm font-semibold text-navy">ارزیابی و مشاهده خدمات</a>
+      <a href="${base}/contact/#b2b" class="mt-5 inline-flex h-12 items-center justify-center rounded-2xl bg-gold px-6 text-sm font-semibold text-navy">ارزیابی و مشاهده خدمات</a>
     </section>
   `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="درباره ما | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
-function contactBody(base: string) {
-  const kinds = [
-    "منتورینگ و بازنویسی سناریوی تیم فروش",
-    "اجرای کارگاه حضوری و مهندسی قیف",
-    "دسترسی و لایسنس دستیار هوش مصنوعی",
-    "راهنمایی خرید دوره‌های آموزشی",
-    "همکاری سازمانی و سایر موارد",
+const CHANNELS = {
+  phone: "",
+  whatsapp: "",
+  telegram: "",
+  email: "",
+  address: "",
+};
+
+function directHref(kind: "phone" | "whatsapp" | "telegram" | "email") {
+  if (kind === "phone" && CHANNELS.phone) return `tel:${CHANNELS.phone}`;
+  if (kind === "whatsapp" && CHANNELS.whatsapp) return `https://wa.me/${CHANNELS.whatsapp.replace(/\D/g, "")}`;
+  if (kind === "telegram" && CHANNELS.telegram) return `https://t.me/${CHANNELS.telegram.replace(/^@/, "")}`;
+  if (kind === "email" && CHANNELS.email) return `mailto:${CHANNELS.email}`;
+  return "";
+}
+
+export function contactPage(base: string) {
+  const kinds = ["بازنویسی اسکریپت تیم", "کارگاه حضوری", "منتورینگ مدیر فروش", "اشتراک سازمانی دستیار"];
+  const options = [`<option value="" disabled selected>نوع همکاری را انتخاب کنید</option>`]
+    .concat(kinds.map((label) => `<option value="${esc(label)}">${esc(label)}</option>`))
+    .join("");
+  const emailLine = CHANNELS.email ? `<p class="text-sm leading-7">ایمیل سازمانی: <a class="text-gold" dir="ltr" href="${esc(directHref("email"))}">${esc(CHANNELS.email)}</a></p>` : "";
+  const addressLine = CHANNELS.address ? `<p class="text-sm leading-7">آدرس دفتر: ${esc(CHANNELS.address)}</p>` : "";
+  const phoneLine = CHANNELS.phone ? `<p class="text-sm leading-7">تلفن قراردادها: <a class="text-gold" dir="ltr" href="${esc(directHref("phone"))}">${esc(CHANNELS.phone)}</a></p>` : "";
+  const description = "درخواست همکاری سازمانی نکس‌سل برای بازنویسی اسکریپت، کارگاه حضوری، منتورینگ و اشتراک دستیار.";
+  return layout(base, "contact", "ارتباط با ما | نکس‌سل", `
+    <header>
+      <p class="text-xs tracking-[0.18em] text-gold">همکاری سازمانی</p>
+      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">ارزیابی سیستم فروش و درخواست همکاری سازمانی</h1>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/75 sm:text-base">اگر برای بازنویسی اسکریپت تیم، کارگاه حضوری، یا مهندسی قیف فروش نیاز به همراهی دارید، اطلاعات اولیه را ثبت کنید تا در کمتر از ۴ ساعت کاری با شما هماهنگ شویم.</p>
+    </header>
+    <div class="mt-8 grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.8fr)]">
+      <form id="b2b" data-b2b novalidate data-lenis-prevent class="scroll-mt-24 rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_40px_rgba(212,175,55,0.08)] sm:p-6">
+        <div class="grid gap-3">
+          <label class="text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" class="${fieldClass}" /></label>
+          <label class="text-sm">شماره تماس مستقیم / موبایل<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${fieldClass} text-left" /></label>
+          <label class="text-sm">نام مجموعه یا حوزه کسب‌وکار<input name="company" autocomplete="organization" class="${fieldClass}" /></label>
+          <label class="text-sm">نوع همکاری مورد نظر<select name="kind" class="${fieldClass}">${options}</select></label>
+          <label class="text-sm">تعداد کارشناسان فروش تیم<input name="teamSize" inputmode="numeric" min="1" placeholder="مثلاً ۸" class="${fieldClass}" /></label>
+          <label class="text-sm">توضیح کوتاه درباره وضعیت فعلی و گلوگاه فروش<textarea name="body" rows="5" class="mt-1 min-h-32 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
+        </div>
+        <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy sm:w-auto sm:px-6">ثبت درخواست و هماهنگی جلسه</button>
+        <p data-b2b-note class="mt-3 text-sm leading-7 text-cream/80" role="status"></p>
+      </form>
+      <aside class="grid gap-3">
+        <section class="rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+          <h2 class="text-lg font-semibold">امور قراردادها</h2>
+          <p class="mt-3 text-sm leading-7 text-cream/75">ساعات پاسخگویی: شنبه تا چهارشنبه، ۹ تا ۱۸.</p>
+          ${phoneLine}
+          ${emailLine}
+          ${addressLine}
+        </section>
+        <a href="${base}/support/" class="rounded-[1.75rem] border border-gold/30 bg-gold/10 p-5">
+          <p class="text-sm leading-7 text-cream/80">دانشجوی دوره‌ها هستید یا مشکل فنی دارید؟</p>
+          <p class="mt-2 text-sm font-semibold text-gold">ورود به مرکز پشتیبانی کاربران</p>
+        </a>
+      </aside>
+    </div>
+  `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="ارتباط با ما | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
+}
+
+export function supportPage(base: string) {
+  const telegram = directHref("telegram");
+  const phone = directHref("phone");
+  const whatsapp = directHref("whatsapp");
+  const talk = [phone, whatsapp].filter(Boolean);
+  const cards = [
+    {
+      title: "پشتیبانی تلگرام",
+      text: "پاسخگویی سریع زیر ۱۵ دقیقه.",
+      href: telegram || "#ticket",
+      label: telegram ? "گفتگوی تلگرام" : "ثبت موضوع تلگرام",
+      external: Boolean(telegram),
+      subject: "هماهنگی تلگرام",
+    },
+    {
+      title: "پشتیبانی تلفنی و واتساپ",
+      text: "ویژه مشکلات پرداخت و دسترسی.",
+      href: talk[0] || "#ticket",
+      label: phone ? "تماس تلفنی" : whatsapp ? "واتساپ" : "ثبت مشکل دسترسی",
+      external: Boolean(talk[0]),
+      subject: "مشکل پرداخت یا دسترسی",
+    },
+    {
+      title: "ارسال تیکت سریع",
+      text: "موبایل، موضوع و پیام. همین صفحه کافی است.",
+      href: "#ticket",
+      label: "رفتن به فرم تیکت",
+      external: false,
+      subject: "",
+    },
   ];
-  const options = [`<option value="" disabled selected>نوع درخواست را انتخاب کنید</option>`].concat(
-    kinds.map((label) => `<option value="${esc(label)}">${esc(label)}</option>`),
-  ).join("");
-  const sizes = [
-    ["solo", "فروشنده مستقل (۱ نفر)"],
-    ["small", "تیم کوچک (۲ تا ۵ نفر)"],
-    ["large", "تیم متوسط و بزرگ (بیش از ۵ نفر)"],
-  ];
-  const radios = sizes.map(([id, label]) => `<label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 px-3 py-2 text-sm has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="radio" name="size" value="${id}" class="size-4 accent-gold" />${label}</label>`).join("");
-  const channels = [
-    ["پشتیبانی مستقیم تلفنی", "شنبه تا چهارشنبه، ۹ تا ۱۸. درخواست تماس را در فرم بگذارید تا در همین بازه هماهنگ شود.", "درخواست تماس"],
-    ["پشتیبانی در تلگرام", "هماهنگی تلگرام از همین درخواست انجام می‌شود. پیام همان شیفت، در روز کاری، کمتر از ۱۵ دقیقه برمی‌گردد.", "درخواست تلگرام"],
-    ["پشتیبانی در واتساپ", "ویس یا توضیح سازمانی را در شرح چالش بنویسید تا مسیر واتساپ روی همان درخواست باز شود.", "درخواست واتساپ"],
-    ["ایمیل رسمی", "نامه و قرارداد را در شرح بنویسید تا پیگیری از همان درخواست شروع شود.", "درخواست نامه"],
-  ];
-  const channelCards = channels.map(([title, text, action]) => `<article class="rounded-3xl border border-white/10 bg-[#070B18] p-4">
-    <h3 class="font-semibold">${title}</h3>
-    <p class="mt-2 text-sm leading-7 text-cream/70">${text}</p>
-    <a href="#lead" class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-gold">${action}</a>
+  const cardHtml = cards.map((card) => `<article class="flex flex-col rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+    <h2 class="text-lg font-semibold">${card.title}</h2>
+    <p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${card.text}</p>
+    <a href="${card.href}" ${card.external ? `target="_blank" rel="noopener"` : `data-fill-subject="${esc(card.subject)}"`} class="mt-4 inline-flex h-12 items-center justify-center rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">${card.label}</a>
   </article>`).join("");
-  const trusts = [
-    ["زمان پاسخ تیکت", "در روزهای کاری، میانگین بازگشت به تیکت زیر ۳۰ دقیقه است."],
-    ["لایسنس دستیار", "پشتیبانی فنی لایسنس دستیار، جدا از سؤال آموزشی، روی همین درخواست دنبال می‌شود."],
-    ["انتخاب دوره", "اگر مسیر دوره برایتان روشن نیست، انتخاب دوره متناسب با سطح فعلی در ارزیابی همین فرم رایگان است."],
-  ];
-  const trustCards = trusts.map(([title, text]) => `<article class="rounded-3xl border border-gold/25 bg-gold/10 p-4"><h3 class="text-sm font-semibold text-gold">${title}</h3><p class="mt-2 text-sm leading-7 text-cream/80">${text}</p></article>`).join("");
   const faqs = [
     ["دستیار صوتی با چه پلتفرم‌ها و تماس‌هایی سازگار است؟", "دستیار روی صفحهٔ خودش در نکس‌سل کار می‌کند. جمله را می‌نویسید یا با میکروفن فارسی می‌گویید و جواب همان لحظه می‌آید. به سانترال تلفن یا نرم‌افزار تماس جدا وصل نیست."],
     ["آیا بازنویسی سناریو و خدمات منتورینگ شامل ضمانت نتیجه است؟", "ضمانت عددی فروش ندارد. خروجی، سناریو، کارگاه یا همراهی روی مکالمهٔ همان تیم است و دامنه را قبل از شروع در پیشنهاد همان خدمت می‌بینید."],
-    ["بعد از ثبت درخواست در این فرم، فرایند تماس و ارزیابی به چه صورت خواهد بود؟", "درخواست در پیگیری شما ثبت می‌شود. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم. اگر خدمت مشخصی خواسته باشید، قیمت همان خدمت جدا در صفحهٔ خدمات حساب می‌شود."],
+    ["نحوه تماشای ویدیوها و دسترسی به کوییزها", "از صفحهٔ آموزش وارد هر مسیر شوید. درس اول هر مسیر بدون سبد باز است. بقیهٔ درس‌ها بعد از افزودن همان مسیر به سبد دیده می‌شوند. زیر ویدیو تماشا را علامت می‌زنید و از سه سؤال، دست‌کم به دو تا درست جواب می‌دهید تا چالش آن درس قبول شود."],
   ];
   const faq = faqs.map(([q, a]) => `<details class="rounded-2xl border border-white/10 bg-[#070B18] px-4 py-3">
     <summary class="cursor-pointer text-sm font-semibold leading-7">${q}</summary>
     <p class="mt-3 text-sm leading-8 text-cream/75">${a}</p>
   </details>`).join("");
-  return `
-    <header>
-      <p class="text-xs tracking-[0.18em] text-gold">ارتباط و پشتیبانی</p>
-      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">بگویید فروش در کدام مرحله می‌ایستد.</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">فرم ارزیابی به بخش تحلیل فروش می‌رود. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم. قیمت خدمات جدا در <a class="text-gold" href="${base}/services/">صفحهٔ خدمات</a> حساب می‌شود.</p>
+  const description = "پشتیبانی حساب، لایسنس دستیار و دوره‌های نکس‌سل.";
+  return layout(base, "support", "پشتیبانی | نکس‌سل", `
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-xs tracking-[0.18em] text-gold">کاربران آکادمی</p>
+        <h1 class="mt-3 text-3xl font-semibold leading-[1.45] sm:text-4xl">مرکز پشتیبانی و پاسخگویی نکس‌سل</h1>
+        <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/75 sm:text-base">دسترسی به حساب کاربری، سوالات فنی لایسنس دستیار، و راهنمایی دوره‌های آموزشی.</p>
+      </div>
+      <p class="inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 text-sm text-emerald-200"><span class="size-2 rounded-full bg-emerald-400" aria-hidden="true"></span>کلیه سرورها و سرویس‌های دستیار آنلاین است</p>
     </header>
-    <div class="mt-8 grid items-start gap-4 lg:grid-cols-2">
-      <form id="lead" data-lead novalidate data-lenis-prevent class="scroll-mt-24 rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_40px_rgba(212,175,55,0.08)] sm:p-6">
-        <h2 class="text-xl font-semibold">ارزیابی و ثبت درخواست</h2>
-        <div class="mt-4 grid gap-3">
-          <label class="text-sm">نوع درخواست<select name="kind" required class="${fieldClass}">${options}</select></label>
-          <label class="text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" required class="${fieldClass}" /></label>
-          <label class="text-sm">شماره تماس<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" required placeholder="09xxxxxxxxx" class="${fieldClass} text-left" /></label>
-          <fieldset class="grid gap-2"><legend class="text-sm">تعداد پرسنل فروش</legend><div class="mt-2 grid gap-2">${radios}</div></fieldset>
-          <label class="text-sm">شرح چالش اصلی<textarea name="body" required rows="5" placeholder="مشتریان شما عمدتاً در کدام مرحله ریزش می‌کنند؟ (تلفنی، دایرکت، اعتراض به قیمت، یا عدم پیگیری...)" class="mt-1 min-h-32 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
-        </div>
-        <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy sm:w-auto sm:px-6">ثبت و ارسال به بخش تحلیل فروش</button>
-        <p data-lead-note class="mt-3 text-sm leading-7 text-cream/80" role="status"></p>
-      </form>
-      <div class="grid gap-3">${channelCards}</div>
-    </div>
-    <div class="mt-4 grid gap-3 md:grid-cols-3">${trustCards}</div>
-    <section class="mt-8" aria-labelledby="support-faq">
-      <h2 id="support-faq" class="text-xl font-semibold">سؤال‌های پرتکرار پشتیبانی</h2>
+    <div class="mt-8 grid gap-3 md:grid-cols-3">${cardHtml}</div>
+    <form id="ticket" data-support-ticket novalidate data-lenis-prevent class="scroll-mt-24 mt-6 max-w-xl rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
+      <h2 class="text-lg font-semibold">تیکت سریع</h2>
+      <div class="mt-4 grid gap-3">
+        <label class="text-sm">موبایل<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="${fieldClass} text-left" /></label>
+        <label class="text-sm">موضوع<input name="subject" class="${fieldClass}" /></label>
+        <label class="text-sm">پیام<textarea name="body" rows="4" class="mt-1 min-h-28 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
+      </div>
+      <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy sm:w-auto sm:px-6">ارسال</button>
+      <p data-support-note class="mt-3 text-sm leading-7 text-cream/80" role="status"></p>
+    </form>
+    <section id="faq" class="mt-8 scroll-mt-24" aria-labelledby="support-faq">
+      <h2 id="support-faq" class="text-xl font-semibold">سؤال‌های رایج</h2>
       <div class="mt-4 grid gap-3">${faq}</div>
     </section>
-  `;
-}
-
-export function supportPage(base: string) {
-  const description = "ارزیابی فروش، درخواست خدمت و پشتیبانی نکس‌سل. در روزهای کاری کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم.";
-  return layout(base, "support", "پشتیبانی | نکس‌سل", contactBody(base), `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="پشتیبانی | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
-}
-
-export function contactPage(base: string) {
-  const description = "فرم ارزیابی فروش نکس‌سل برای منتورینگ، کارگاه، دستیار و انتخاب دوره.";
-  return layout(base, "contact", "ارتباط با ما | نکس‌سل", contactBody(base), `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="ارتباط با ما | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
+  `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="پشتیبانی | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
 export function subscriptionPage(base: string) {
