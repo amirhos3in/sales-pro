@@ -1,6 +1,6 @@
-import { articles } from "@/lib/articles";
+import { articleFilters, articles, type Article, type ArticleBlock } from "@/lib/articles";
 import { OBJECTIONS, counterFor } from "@/lib/copilot/playbook";
-import { categories, lessonsOf, type Category } from "@/lib/courses-data";
+import { categories, findCategory, lessonsOf, type Category } from "@/lib/courses-data";
 import { BUNDLE_LIST_PRICE, BUNDLE_PRICE, BUNDLE_SAVE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
 import { SERVICE_OFFERS, quoteService, serviceBreakdown } from "@/lib/service-pricing";
 
@@ -39,7 +39,7 @@ const NAV = [
   ["/contact/", "ارتباط با ما", "contact"],
 ] as const;
 
-export function layout(base: string, active: string, title: string, body: string) {
+export function layout(base: string, active: string, title: string, body: string, head = "") {
   const href = (path: string) => `${base}${path}`;
   return `<!DOCTYPE html>
 <html lang="fa" dir="rtl" class="dark">
@@ -47,6 +47,8 @@ export function layout(base: string, active: string, title: string, body: string
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${esc(title)}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D4AF37'/%3E%3C/svg%3E" />
+  ${head}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="${href("/lenis.css")}" />
@@ -60,6 +62,10 @@ export function layout(base: string, active: string, title: string, body: string
   <style>
     html { scroll-behavior: auto; }
     [hidden] { display: none !important; }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid #D4AF37;
+      outline-offset: 3px;
+    }
     body {
       background: #0B132B;
       color: #F6F1E4;
@@ -696,24 +702,137 @@ export function copilotPage(base: string) {
   return demoPage(base);
 }
 
+function articleArt(kind: Article["visual"]) {
+  const glow = `<defs><radialGradient id="g-${kind}" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#D4AF37" stop-opacity="0.28"/><stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/></radialGradient></defs><rect width="320" height="320" fill="#070B18"/><circle cx="160" cy="150" r="120" fill="url(#g-${kind})"/>`;
+  const scenes: Record<Article["visual"], string> = {
+    hook: `${glow}<rect x="138" y="92" width="44" height="78" rx="16" fill="none" stroke="#D4AF37" stroke-width="3"/><path d="M146 110h28M150 162c8 18 22 18 28 0" fill="none" stroke="#F6F1E4" stroke-width="2"/><path d="M118 132c-16 8-22 28-14 44M202 132c16 8 22 28 14 44" fill="none" stroke="#D4AF37" stroke-width="2"/>`,
+    closes: `${glow}<path d="M70 210 V120 q40-50 50 0 V210" fill="none" stroke="#D4AF37" stroke-width="3"/><path d="M135 210 V100 q40-60 50 0 V210" fill="none" stroke="#F6F1E4" stroke-width="3"/><path d="M200 210 V120 q40-50 50 0 V210" fill="none" stroke="#D4AF37" stroke-width="3"/><path d="M58 214h204" stroke="#D4AF37" stroke-opacity="0.45"/>`,
+    price: `${glow}<path d="M70 150h70l20-28 20 28h70" fill="none" stroke="#D4AF37" stroke-width="3"/><circle cx="118" cy="188" r="26" fill="none" stroke="#F6F1E4" stroke-width="3"/><circle cx="202" cy="176" r="18" fill="none" stroke="#D4AF37" stroke-width="3"/><path d="M160 122 V86" stroke="#F3E5AB" stroke-width="3"/><circle cx="160" cy="76" r="6" fill="#D4AF37"/>`,
+    proof: `${glow}<rect x="58" y="96" width="110" height="128" rx="16" fill="none" stroke="#D4AF37" stroke-width="3"/><path d="M78 132h70M78 154h52" stroke="#F6F1E4" stroke-opacity="0.8"/><rect x="168" y="124" width="96" height="64" rx="14" fill="#D4AF37" fill-opacity="0.16" stroke="#F3E5AB"/><text x="216" y="162" text-anchor="middle" fill="#F6F1E4" font-size="18" font-family="Vazirmatn, Tahoma, sans-serif">قیمت</text>`,
+    room: `${glow}<rect x="78" y="150" width="164" height="18" rx="4" fill="#D4AF37" fill-opacity="0.85"/><rect x="96" y="168" width="10" height="42" fill="#F6F1E4" fill-opacity="0.7"/><rect x="214" y="168" width="10" height="42" fill="#F6F1E4" fill-opacity="0.7"/><rect x="108" y="118" width="36" height="28" rx="8" fill="none" stroke="#F3E5AB"/><rect x="176" y="118" width="36" height="28" rx="8" fill="none" stroke="#D4AF37"/><rect x="124" y="70" width="72" height="40" rx="6" fill="none" stroke="#D4AF37" stroke-opacity="0.45"/>`,
+    status: `${glow}<rect x="78" y="92" width="168" height="36" rx="10" fill="none" stroke="#D4AF37"/><rect x="78" y="142" width="168" height="36" rx="10" fill="none" stroke="#F6F1E4" stroke-opacity="0.8"/><rect x="78" y="192" width="168" height="36" rx="10" fill="none" stroke="#D4AF37" stroke-opacity="0.7"/><circle cx="104" cy="110" r="6" fill="#D4AF37"/><path d="M98 160h12M110 160l-6 8" stroke="#F3E5AB" stroke-width="2"/><path d="M98 210 l8 8 M106 210 l-8 8" stroke="#D4AF37" stroke-width="2"/>`,
+    trade: `${glow}<path d="M78 132h120" stroke="#D4AF37" stroke-width="3"/><path d="M184 120 l16 12 l-16 12" fill="none" stroke="#D4AF37" stroke-width="3"/><path d="M242 188 H122" stroke="#F6F1E4" stroke-width="3"/><path d="M136 176 l-16 12 l16 12" fill="none" stroke="#F6F1E4" stroke-width="3"/><circle cx="96" cy="132" r="16" fill="none" stroke="#F3E5AB"/><rect x="214" y="170" width="28" height="28" rx="6" fill="none" stroke="#D4AF37"/>`,
+    funnel: `${glow}<path d="M78 78h164l-28 48H106z" fill="#D4AF37" fill-opacity="0.18" stroke="#D4AF37"/><path d="M106 138h108l-22 42H128z" fill="none" stroke="#F6F1E4"/><path d="M128 192h64l-14 36h-36z" fill="#D4AF37" fill-opacity="0.45" stroke="#F3E5AB"/>`,
+  };
+  return `<svg viewBox="0 0 320 320" overflow="hidden" class="h-full w-full" role="img" aria-hidden="true">${scenes[kind]}</svg>`;
+}
+
+function articleBlocks(blocks: ArticleBlock[]) {
+  return blocks.map((block) => {
+    if (block.type === "h2") return `<h2 class="mt-10 text-xl font-semibold text-cream">${esc(block.text.fa)}</h2>`;
+    if (block.type === "h3") return `<h3 class="mt-6 text-lg font-semibold text-[#F3E5AB]">${esc(block.text.fa)}</h3>`;
+    if (block.type === "ul") {
+      return `<ul class="mt-4 space-y-2 pe-5 text-base leading-8 text-cream/80">${block.items.map((item) => `<li class="list-disc">${esc(item.fa)}</li>`).join("")}</ul>`;
+    }
+    if (block.type === "checklist") {
+      return `<section class="mt-6 rounded-3xl border border-gold/30 bg-white/5 p-5"><h2 class="text-base font-semibold text-gold">${esc(block.title.fa)}</h2><ul class="mt-3 space-y-2">${block.items.map((item) => `<li class="flex items-start gap-2 text-sm leading-7 text-cream/85"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${esc(item.fa)}</span></li>`).join("")}</ul></section>`;
+    }
+    if (block.type === "note") {
+      return `<aside class="mt-6 rounded-3xl border border-gold/40 bg-gold/10 p-5"><p class="text-sm font-semibold text-gold">${esc(block.title.fa)}</p><p class="mt-2 text-sm leading-8 text-cream/85">${esc(block.text.fa)}</p></aside>`;
+    }
+    return `<p class="mt-4 text-base leading-9 text-cream/85">${esc(block.text.fa)}</p>`;
+  }).join("");
+}
+
+function articlePreview(article: Article) {
+  if (!article.related.lessonId) return false;
+  const category = findCategory(article.related.courseId);
+  if (!category) return false;
+  return lessonsOf(category)[0]?.lesson.id === article.related.lessonId;
+}
+
+function articleCta(base: string, article: Article) {
+  const courseHref = `${base}/learn/${article.related.courseId}/`;
+  const lessonHref = article.related.lessonId ? `${base}/learn/${article.related.courseId}/${article.related.lessonId}/` : courseHref;
+  const preview = articlePreview(article);
+  const href = preview ? lessonHref : courseHref;
+  const label = preview ? article.related.lessonCta.fa : article.related.courseCta.fa;
+  const lessonAttr = article.related.lessonId ? ` data-lesson="${esc(article.related.lessonId)}" data-preview="${preview ? "yes" : "no"}"` : "";
+  return `<a data-article-cta data-course="${esc(article.related.courseId)}"${lessonAttr} data-lesson-label="${esc(article.related.lessonCta.fa)}" data-course-label="${esc(article.related.courseCta.fa)}" href="${href}" class="inline-flex h-12 items-center justify-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">${esc(label)}</a>`;
+}
+
+function articleMeta(title: string, description: string) {
+  return `<meta name="description" content="${esc(description)}" />
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:locale" content="fa_IR" />
+  <meta property="og:type" content="article" />`;
+}
+
 export function articlesPage(base: string) {
-  const cards = articles.map((article, index) => `<a ${revealAttrs(Math.min(index, 6) * 70)} href="${base}/articles/${article.slug}/" class="glass block rounded-3xl p-5">
-    <p class="text-xs text-gold">${esc(article.category.fa)} · ${esc(article.readTime.fa)}</p>
-    <h2 class="mt-2 text-lg font-semibold">${esc(article.title.fa)}</h2>
-    <p class="mt-2 text-sm leading-7 text-cream/70">${esc(article.excerpt.fa)}</p>
-  </a>`).join("");
-  return layout(base, "articles", "مقالات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">مقالات</h1></header><div class="mt-6 grid gap-4">${cards}</div>`);
+  const filters = articleFilters.map((filter, index) => `<button type="button" data-article-filter="${esc(filter.id)}" aria-pressed="${index === 0 ? "true" : "false"}" class="h-10 rounded-full px-4 text-sm ${index === 0 ? "bg-gold font-semibold text-navy" : "text-cream/80 ring-1 ring-gold/30"}">${esc(filter.label)}</button>`).join("");
+  const cards = articles.map((article) => `<article data-article-card data-category="${esc(article.category.fa)}" data-visual="${esc(article.visual)}" class="overflow-hidden rounded-[1.75rem] border border-gold/25 bg-[#070B18] shadow-[0_0_40px_rgba(212,175,55,0.07)] sm:aspect-square">
+    <a href="${base}/articles/${article.slug}/" class="flex h-full flex-col rounded-[1.75rem] sm:relative">
+      <div class="aspect-square w-full shrink-0 sm:absolute sm:inset-0">${articleArt(article.visual)}</div>
+      <div class="flex flex-1 flex-col gap-2 p-4 sm:relative sm:z-10 sm:mt-auto sm:bg-gradient-to-t sm:from-[#070B18] sm:via-[#070B18]/95 sm:to-transparent sm:pt-24">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-cream/70">
+          <span class="rounded-full border border-gold/40 px-2 py-1 text-[#F3E5AB]">${esc(article.category.fa)}</span>
+          <span>${esc(article.readTime.fa)}</span>
+        </div>
+        <h2 class="text-base font-semibold leading-7 text-cream sm:line-clamp-3">${esc(article.title.fa)}</h2>
+        <p class="text-sm leading-7 text-cream/70 sm:line-clamp-2">${esc(article.excerpt.fa)}</p>
+        <span class="mt-auto inline-flex pt-2 text-sm font-semibold text-gold">خواندن مقاله</span>
+      </div>
+    </a>
+  </article>`).join("");
+  const description = "یادداشت‌های فروش تلفنی، حضوری، آنلاین و مذاکره. هر مقاله یک روش را باز می‌کند و به درس مرتبط وصل است.";
+  return layout(base, "articles", "مقالات | نکس‌سل", `
+    <header>
+      <p class="text-xs tracking-[0.18em] text-gold">نکس‌سل</p>
+      <h1 class="mt-3 text-3xl font-semibold text-cream sm:text-4xl">مقالات</h1>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70 sm:text-base">${description}</p>
+      <div class="mt-6 flex flex-wrap gap-2" role="group" aria-label="دسته‌بندی مقاله‌ها">${filters}</div>
+    </header>
+    <div data-article-grid class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">${cards}</div>
+    <p data-article-empty class="mt-8 text-sm text-cream/70" hidden>در این دسته مقاله‌ای نیست.</p>
+  `, articleMeta("مقالات | نکس‌سل", description));
 }
 
 export function articlePage(base: string, slug: string) {
   const article = articles.find((item) => item.slug === slug);
   if (!article) return null;
-  const blocks = article.content.map((block) => {
-    if (block.type === "h2") return `<h2 class="mt-6 text-xl font-semibold">${esc(block.text.fa)}</h2>`;
-    if (block.type === "ul") return `<ul class="mt-3 list-disc space-y-2 pe-5 text-sm leading-7 text-cream/80">${block.items.map((item) => `<li>${esc(item.fa)}</li>`).join("")}</ul>`;
-    return `<p class="mt-3 text-sm leading-8 text-cream/80">${esc(block.text.fa)}</p>`;
-  }).join("");
-  return layout(base, "articles", `${article.title.fa} | نکس‌سل`, `<article ${revealAttrs(0)}><a href="${base}/articles/" class="text-sm text-gold">بازگشت به مقالات</a><h1 class="mt-3 text-3xl font-semibold">${esc(article.title.fa)}</h1><p class="mt-2 text-sm text-cream/50">${esc(article.author.name.fa)} · ${esc(article.publishedAt.fa)}</p>${blocks}</article>`);
+  const related = articles.filter((item) => item.slug !== article.slug && item.category.fa === article.category.fa).concat(
+    articles.filter((item) => item.slug !== article.slug && item.category.fa !== article.category.fa),
+  ).slice(0, 3);
+  const relatedCards = related.map((item) => `<a href="${base}/articles/${item.slug}/" class="rounded-2xl border border-gold/25 bg-[#070B18] p-4">
+    <p class="text-xs text-gold">${esc(item.category.fa)} · ${esc(item.readTime.fa)}</p>
+    <p class="mt-2 text-sm font-semibold leading-7">${esc(item.title.fa)}</p>
+  </a>`).join("");
+  const title = `${article.title.fa} | نکس‌سل`;
+  return layout(base, "articles", title, `
+    <article class="mx-auto max-w-3xl">
+      <nav aria-label="مسیر" class="text-sm text-cream/60">
+        <ol class="flex flex-wrap items-center gap-2">
+          <li><a class="text-gold" href="${base}/">خانه</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a class="text-gold" href="${base}/articles/">مقالات</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-cream/80">${esc(article.title.fa)}</li>
+        </ol>
+      </nav>
+      <header class="mt-6">
+        <div class="flex flex-wrap items-center gap-2 text-sm text-cream/70">
+          <span class="rounded-full border border-gold/40 px-2 py-1 text-[#F3E5AB]">${esc(article.category.fa)}</span>
+          <span>${esc(article.readTime.fa)}</span>
+        </div>
+        <h1 class="mt-4 text-3xl font-semibold leading-[1.45] text-cream sm:text-4xl">${esc(article.title.fa)}</h1>
+        <p class="mt-3 text-sm text-cream/55">${esc(article.author.name.fa)} · ${esc(article.publishedAt.fa)}</p>
+      </header>
+      <div class="mt-6 aspect-square overflow-hidden rounded-[1.75rem] border border-gold/25 bg-[#070B18] sm:aspect-[16/9]">${articleArt(article.visual)}</div>
+      <div class="mt-2">${articleBlocks(article.content)}</div>
+      <div class="mt-10 rounded-[1.75rem] border border-gold/35 bg-[#070B18] p-5 sm:flex sm:items-center sm:justify-between sm:gap-4">
+        <p class="text-sm leading-7 text-cream/75">همین مهارت را در دوره مرتبط ادامه دهید.</p>
+        <div class="mt-4 sm:mt-0 sm:shrink-0">${articleCta(base, article)}</div>
+      </div>
+      <div class="mt-8 flex flex-wrap gap-3 text-sm">
+        <a class="text-gold" href="${base}/articles/">بازگشت به مقالات</a>
+      </div>
+      <section class="mt-8" aria-labelledby="related-articles">
+        <h2 id="related-articles" class="text-lg font-semibold">مقاله‌های مرتبط</h2>
+        <div class="mt-3 grid gap-3 sm:grid-cols-3">${relatedCards}</div>
+      </section>
+    </article>
+  `, articleMeta(title, article.excerpt.fa));
 }
 
 function serviceSelect(param: { id: string; label: string; options: Array<{ id: string; label: string }> }) {

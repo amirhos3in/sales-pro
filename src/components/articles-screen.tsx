@@ -19,11 +19,13 @@ export function ArticlesScreen() {
       <div className="grid gap-4 md:grid-cols-2">
         {articles.map((article) => (
           <article key={article.id} className="glass flex flex-col overflow-hidden rounded-3xl shadow-[0_10px_30px_-10px_rgba(15,28,63,0.08)]">
-            <img
-              src={article.coverImage}
-              alt=""
-              className="h-44 w-full object-cover"
-            />
+            {article.coverImage ? (
+              <img
+                src={article.coverImage}
+                alt=""
+                className="h-44 w-full object-cover"
+              />
+            ) : null}
             <div className="flex flex-1 flex-col p-5">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="rounded-full border border-[#D4AF37]/40 px-2 py-1 text-[#B89020]">
@@ -71,11 +73,13 @@ export function ArticleScreen({ slug }: { slug: string }) {
       <Link href="/articles" className="text-sm text-[#B89020]">
         {copy.articlesPage.back}
       </Link>
-      <img
-        src={article.coverImage}
-        alt=""
-        className="h-56 w-full rounded-3xl object-cover shadow-[0_10px_30px_-10px_rgba(15,28,63,0.12)] sm:h-72"
-      />
+      {article.coverImage ? (
+        <img
+          src={article.coverImage}
+          alt=""
+          className="h-56 w-full rounded-3xl object-cover shadow-[0_10px_30px_-10px_rgba(15,28,63,0.12)] sm:h-72"
+        />
+      ) : null}
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <span className="rounded-full border border-[#D4AF37]/40 px-2 py-1 text-[#B89020]">
           {tx(article.category, lang)}
@@ -104,21 +108,36 @@ function Block({ block, lang }: { block: ArticleBlock; lang: "fa" | "en" }) {
   if (block.type === "h2") {
     return <h2 className="pt-2 text-lg font-semibold text-[#0F1C3F] dark:text-[#E5C07B]">{tx(block.text, lang)}</h2>;
   }
-  if (block.type === "ul") {
+  if (block.type === "h3") {
+    return <h3 className="pt-1 text-base font-semibold text-[#0F1C3F] dark:text-[#F3E5AB]">{tx(block.text, lang)}</h3>;
+  }
+  if (block.type === "ul" || block.type === "checklist") {
     return (
-      <ul className="space-y-2 ps-5 text-sm leading-7">
-        {block.items.map((item) => (
-          <li key={tx(item, lang)} className="list-disc">
-            {tx(item, lang)}
-          </li>
-        ))}
-      </ul>
+      <div>
+        {block.type === "checklist" ? <p className="text-sm font-semibold text-[#B89020]">{tx(block.title, lang)}</p> : null}
+        <ul className="mt-2 space-y-2 ps-5 text-sm leading-7">
+          {block.items.map((item) => (
+            <li key={tx(item, lang)} className="list-disc">
+              {tx(item, lang)}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  if (block.type === "note") {
+    return (
+      <aside className="rounded-2xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 p-4">
+        <p className="text-sm font-semibold text-[#B89020]">{tx(block.title, lang)}</p>
+        <p className="mt-2 text-sm leading-7">{tx(block.text, lang)}</p>
+      </aside>
     );
   }
   return <p className="text-sm leading-8 text-[#0F1C3F] dark:text-[#F6F1E4]">{tx(block.text, lang)}</p>;
 }
 
 function blockKey(block: ArticleBlock, lang: "fa" | "en") {
-  if (block.type === "ul") return block.items.map((item) => tx(item, lang)).join("|");
+  if (block.type === "ul" || block.type === "checklist") return block.items.map((item) => tx(item, lang)).join("|");
+  if (block.type === "note") return tx(block.title, lang) + tx(block.text, lang);
   return tx(block.text, lang);
 }
