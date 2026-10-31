@@ -1735,16 +1735,22 @@
     localStorage.setItem(ACTIVITY_KEY, JSON.stringify(next));
   }
 
+  function defaultAdminCreds() {
+    return { username: "Amirho3in", password: "a1b@23456" };
+  }
+
   function readAdminCreds() {
+    const fallback = defaultAdminCreds();
     try {
       const parsed = JSON.parse(localStorage.getItem(ADMIN_CREDS_KEY) || "null");
       if (parsed && typeof parsed.username === "string" && typeof parsed.password === "string" && parsed.username && parsed.password) {
+        if (parsed.username === "admin" && parsed.password === "adminPassword123") return fallback;
         return parsed;
       }
     } catch {
       /* keep the built-in pair */
     }
-    return { username: "admin", password: "adminPassword123" };
+    return fallback;
   }
 
   function upsertCustomerFromUser(user) {
