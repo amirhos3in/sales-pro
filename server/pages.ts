@@ -48,7 +48,7 @@ export function layout(base: string, active: string, title: string, body: string
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${esc(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="${href("/lenis.css")}" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -59,6 +59,7 @@ export function layout(base: string, active: string, title: string, body: string
   </script>
   <style>
     html { scroll-behavior: auto; }
+    [hidden] { display: none !important; }
     body {
       background: #0B132B;
       color: #F6F1E4;
@@ -552,10 +553,27 @@ function offeringLanes(base: string) {
 
 export function homePage(base: string) {
   return layout(base, "home", "نکس‌سل | آکادمی فروش", `
-    <section ${revealAttrs(0)} class="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-10">
-      <p class="text-xs tracking-[0.18em] text-gold">نکس‌سل</p>
-      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] text-cream sm:text-4xl">آکادمی فروش نکس‌سل</h1>
-      <p class="mt-4 max-w-2xl text-sm leading-8 text-cream">چهار مسیر فروش: آنلاین، حضوری، تلفنی و مذاکره.</p>
+    <section ${revealAttrs(0)} class="relative overflow-hidden rounded-[2rem] border border-gold/25 bg-[#070B18] px-6 py-16 text-center sm:px-10 sm:py-24">
+      <div class="pointer-events-none absolute inset-0" style="background: radial-gradient(ellipse at center, rgba(212,175,55,0.16) 0%, transparent 70%)"></div>
+      <div class="relative mx-auto flex max-w-4xl flex-col items-center">
+        <p class="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs text-[#F3E5AB] shadow-[0_0_18px_rgba(212,175,55,0.18)] sm:text-sm">
+          <span class="size-1.5 rounded-full bg-gold shadow-[0_0_8px_#D4AF37]"></span>
+          ✦ پلتفرم جامع مهارت، دستیار هوشمند و خدمات فروش
+        </p>
+        <h1 class="mt-6 text-3xl font-black leading-[1.25] text-cream sm:text-5xl lg:text-6xl">مکالمه را شما شروع کنید؛ <span class="bg-gradient-to-l from-[#F6F1E4] to-[#D4AF37] bg-clip-text text-transparent">بستن قطعی قرارداد</span> با سیستم نکس‌سل.</h1>
+        <p class="mt-4 max-w-2xl text-base leading-8 text-cream/60 sm:text-lg">تلفنی، حضوری، آنلاین یا جلسات سنگین مذاکره. با آموزش‌های سناریومحور، دستیار هوش مصنوعی لحظه تماس و سیستم‌سازی تیم، نرخ تبدیل مکالمات کاری خود را افزایش دهید.</p>
+        <a data-auth-guest href="${base}/login/" class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#F3E5AB] to-gold px-8 text-sm font-semibold text-navy shadow-[0_0_24px_rgba(212,175,55,0.35)] transition hover:brightness-110">
+          <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 19c1.4-3 3.6-4.5 7-4.5s5.6 1.5 7 4.5" stroke-linecap="round"/></svg>
+          ورود / ثبت‌نام
+        </a>
+        <a data-auth-user href="${base}/demo/" hidden class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#F3E5AB] to-gold px-8 text-sm font-semibold text-navy shadow-[0_0_24px_rgba(212,175,55,0.35)] transition hover:brightness-110">
+          <svg viewBox="0 0 24 24" class="size-4" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z"/></svg>
+          دسترسی سریع به دستیار هوش مصنوعی
+        </a>
+        <ul class="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-cream/55 sm:text-sm">
+          ${["فروش تلفنی", "فروش حضوری", "فروش آنلاین", "اصول مذاکره"].map((label) => `<li class="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1"><svg viewBox="0 0 24 24" class="size-3.5 text-gold" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>${label}</li>`).join("")}
+        </ul>
+      </div>
     </section>
     ${productPresent(base)}
     ${offeringLanes(base)}
