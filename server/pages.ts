@@ -412,19 +412,141 @@ function productPresent(base: string) {
       </div>
       <div class="grid grid-cols-2 border-t border-gold/20 lg:border-t-0 lg:border-s">${tiles}</div>
     </div>
-    <div class="flex flex-col gap-5 border-t border-gold/25 p-6 sm:p-8">
-      <div class="max-w-3xl space-y-3 text-sm leading-8 text-cream/80">
-        <p>از همین‌جا سه راه باز است، و هیچ‌کدام جای آن یکی را نمی‌گیرد.</p>
-        <p>آموزش‌ها چهار مسیرند: آنلاین، حضوری، تلفنی و مذاکره. هر درس ویدیو است و با یک کوییز کوچک تمام می‌شود. درس اول هر مسیر باز است تا خودت ببینی این راه به کارت می‌آید یا نه.</p>
-        <p>خدمات برای وقتی است که کار از یک نفر بزرگ‌تر شده. بازنویسی اسکریپت تیم، کارگاه حضوری، چیدن قیف، یا منتورینگ مدیر فروش. هر کدام را همان‌جا، با شرایط خودِ تیم، می‌شود دقیق دید.</p>
-        <p>دستیار برای لحظهٔ پشت خط است. اعتراض که آمد، جمله را همان‌جا می‌گیری و مکث کوتاه می‌شود. دقیقهٔ دستیار جدا از دوره‌هاست و جزو ثبت‌نام آموزش حساب نمی‌شود.</p>
+  </section>`;
+}
+
+function offerChecks(points: readonly string[]) {
+  return `<ul class="mt-4 space-y-2">${points.map((point) => `<li class="flex items-start gap-2 text-sm leading-7 text-cream/80"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${point}</span></li>`).join("")}</ul>`;
+}
+
+function offerBlock(options: { id: string; flip: boolean; badge: string; title: string; body: string; points: readonly string[]; cta: string; href: string; mockup: string }) {
+  const copyOrder = options.flip ? "order-2" : "order-2 lg:order-1";
+  const mockOrder = options.flip ? "order-1" : "order-1 lg:order-2";
+  return `<article id="${options.id}" ${revealAttrs(options.flip ? 80 : 40)} class="scroll-mt-24 overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] p-5 sm:p-8">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
+      <div class="${copyOrder} min-w-0 flex-1">
+        <p class="inline-flex rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs text-gold">${options.badge}</p>
+        <h2 class="mt-4 text-2xl font-semibold leading-[1.5] text-cream">${options.title}</h2>
+        <p class="mt-3 text-sm leading-8 text-cream/75">${options.body}</p>
+        ${offerChecks(options.points)}
+        <a href="${options.href}" class="mt-5 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy sm:w-auto">${options.cta}</a>
       </div>
-      <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <a href="#courses" class="inline-flex h-11 items-center justify-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">شروع آموزش‌ها</a>
-        <a href="${base}/services/" class="inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold text-cream ring-1 ring-gold/40">دیدن خدمات</a>
-        <a href="${base}/demo/" class="inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold text-cream ring-1 ring-gold/40">رفتن سراغ دستیار</a>
+      <div class="${mockOrder} min-w-0 flex-1" aria-hidden="true">${options.mockup}</div>
+    </div>
+  </article>`;
+}
+
+function trainingMockup() {
+  const lessons = [
+    ["فروش تلفنی", "انجام شد"],
+    ["اعتراض قیمت", "در حال تمرین"],
+    ["بستن جلسه", "قفل"],
+  ];
+  return `<div class="rounded-[1.5rem] border border-gold/25 bg-navy p-4 shadow-[0_0_40px_rgba(212,175,55,0.08)]">
+    <div class="flex items-center justify-between gap-3">
+      <p class="text-sm font-semibold">داشبورد درس</p>
+      <div class="text-center">
+        <div class="relative grid size-16 place-items-center">
+          <svg viewBox="0 0 36 36" class="size-16">
+            <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(246,241,228,0.12)" stroke-width="3"></circle>
+            <circle cx="18" cy="18" r="15" fill="none" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="30" transform="rotate(-90 18 18)"></circle>
+          </svg>
+          <span class="absolute text-[10px] font-semibold text-gold">۶۸٪</span>
+        </div>
+        <p class="mt-1 text-[10px] text-cream/50">تکمیل شده</p>
       </div>
     </div>
+    <ul class="mt-3 space-y-2">${lessons.map(([name, state]) => `<li class="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 text-sm"><span>${name}</span><span class="text-xs text-gold">${state}</span></li>`).join("")}</ul>
+    <div class="mt-3 rounded-2xl border border-gold/30 bg-[#070B18] p-3">
+      <p class="text-xs text-gold">سناریو</p>
+      <p class="mt-1 text-sm">قیمت بالاست</p>
+      <span class="mt-3 inline-flex h-8 items-center rounded-full bg-gold px-3 text-xs font-semibold text-navy">پخش تمرین</span>
+    </div>
+  </div>`;
+}
+
+function copilotMockup() {
+  const bars = [35, 62, 48, 80, 44, 28, 70, 52, 38, 66];
+  return `<div class="rounded-[1.5rem] border border-gold/25 bg-navy p-4 shadow-[0_0_40px_rgba(212,175,55,0.08)]">
+    <div class="flex items-center justify-between text-sm">
+      <p class="font-semibold">تماس زنده</p>
+      <p class="font-semibold text-gold" dir="ltr">03:42</p>
+    </div>
+    <div class="mt-4 flex h-12 items-end justify-center gap-1">${bars.map((height) => `<span class="inline-block w-1.5 shrink-0 rounded-full bg-gold" style="height:${Math.round(height * 0.46)}px"></span>`).join("")}</div>
+    <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
+      <p class="text-xs text-cream/50">اعتراض شنیده‌شده</p>
+      <p class="mt-1 text-sm">«قیمت شما بالاست»</p>
+    </div>
+    <div class="mt-3 rounded-2xl border border-gold/40 bg-gold/10 p-3">
+      <p class="text-xs font-semibold text-gold">پاسخ پیشنهادی</p>
+      <p class="mt-1 text-sm leading-7">اگر مقایسه با هزینهٔ نخریدن باشد، کدام بخش برایتان سنگین است؟</p>
+    </div>
+  </div>`;
+}
+
+function servicesMockup() {
+  const rows = [
+    ["پیگیری قیمت", "باز"],
+    ["معرفی محصول", "قرار"],
+    ["تمدید قرارداد", "در مذاکره"],
+  ];
+  const checks = ["اسکریپت تماس سرد", "جواب اعتراض قیمت", "قرار جلسهٔ بعد"];
+  return `<div class="rounded-[1.5rem] border border-gold/25 bg-navy p-4 shadow-[0_0_40px_rgba(212,175,55,0.08)]">
+    <p class="text-[11px] text-cream/45">نمونهٔ رابط</p>
+    <p class="mt-2 text-2xl font-semibold text-gold" dir="ltr">+۳۴٪</p>
+    <p class="text-xs text-cream/60">افزایش نرخ بستن</p>
+    <ul class="mt-4 space-y-2">${rows.map(([name, state]) => `<li class="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 text-sm"><span>${name}</span><span class="text-xs text-gold">${state}</span></li>`).join("")}</ul>
+    <ul class="mt-3 space-y-1.5">${checks.map((item) => `<li class="flex items-center gap-2 text-xs text-cream/70"><span class="size-3 rounded-sm border border-gold/50"></span>${item}</li>`).join("")}</ul>
+  </div>`;
+}
+
+function offeringLanes(base: string) {
+  return `<section aria-label="آموزش، دستیار و خدمات" class="mt-8 space-y-6">
+    ${offerBlock({
+      id: "training-section",
+      flip: false,
+      badge: "مسیر رشد مهارت",
+      title: "تبدیل سرنخ‌های سرد به مشتریان وفادار با متد عملی",
+      body: "دوره‌های پروژه‌محور و مبتنی بر سناریوهای واقعی بازار ایران؛ از مذاکره تلفنی و شکستن مقاومت قیمت تا مدیریت پیشرفته اعتراض‌ها. هر سرفصل همراه با ارزیابی عملی و تمرین گام‌به‌گام طراحی شده است.",
+      points: [
+        "دسترسی به درس‌ها بر اساس آزمون‌های عملی",
+        "سناریوهای واقعی مکالمات شکست‌خورده و اصلاح‌شده",
+        "تمرین متنی و صوتی قبل از ورود به جلسه واقعی",
+      ],
+      cta: "مشاهده سرفصل‌ها و شروع یادگیری",
+      href: "#courses",
+      mockup: trainingMockup(),
+    })}
+    ${offerBlock({
+      id: "copilot-section",
+      flip: true,
+      badge: "دستیار هوشمند لحظه‌ای",
+      title: "راهنمای ثانیه‌به‌ثانیه در حین تماس؛ بدون جا انداختن هیچ اعتراضی",
+      body: "در میانه مکالمه با مشتری سردرگم نمی‌شوید. دستیار هوشمند، صحبت‌های مشتری را تحلیل می‌کند، الگوی اعتراض را تشخیص می‌دهد و بهترین پاسخ متقاعدکننده را بلافاصله روی نمایشگر شما ظاهر می‌کند.",
+      points: [
+        "تحلیل لحن و مقاومت مشتری در لحظه تماس",
+        "پیشنهاد عبارات طلایی برای قطعی کردن فروش",
+        "بازخورد آنی پس از اتمام هر مکالمه کاری",
+      ],
+      cta: "تست زنده و شارژ دستیار هوشمند",
+      href: `${base}/demo/`,
+      mockup: copilotMockup(),
+    })}
+    ${offerBlock({
+      id: "services-section",
+      flip: false,
+      badge: "سیستم‌سازی سازمانی",
+      title: "بازنویسی اسکریپت و کوچینگ فروش؛ وقتی کار از یک نفر بزرگ‌تر شده است",
+      body: "اگر تیم فروش شما به تارگت‌های مشخص نمی‌رسد یا هر بازاریاب به شیوه متفاوتی پاسخ می‌دهد، وقت سیستم‌سازی است. ما اسکریپت‌ها را بازنویسی کرده و با کارگاه‌های عملی و منتورینگ هفتگی، نرخ بستن معاملات تیم شما را بالا می‌بریم.",
+      points: [
+        "بازنویسی دقیق فرآیند تماس و دایرکت‌های ورودی",
+        "کارگاه حضوری و تمرین روی پرونده‌های فعال شرکت",
+        "نظارت و آنالیز هفتگی کیفیت مکالمات فروشندگان",
+      ],
+      cta: "ثبت درخواست خدمات و مشاوره تیم",
+      href: `${base}/services/`,
+      mockup: servicesMockup(),
+    })}
   </section>`;
 }
 
@@ -436,6 +558,7 @@ export function homePage(base: string) {
       <p class="mt-4 max-w-2xl text-sm leading-8 text-cream">چهار مسیر فروش: آنلاین، حضوری، تلفنی و مذاکره.</p>
     </section>
     ${productPresent(base)}
+    ${offeringLanes(base)}
     <section id="courses" class="mt-8 scroll-mt-24">
       <h2 class="text-xl font-semibold">چهار مسیر فروش</h2>
       <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/70">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند. درس اول هر مسیر بدون سبد دیده می‌شود.</p>
