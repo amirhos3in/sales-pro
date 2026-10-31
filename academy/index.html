@@ -172,6 +172,14 @@
         height: auto;
         opacity: 1;
       }
+      @keyframes free-pulse {
+        0%, 100% { box-shadow: 0 0 18px rgba(212, 175, 55, 0.14); }
+        50% { box-shadow: 0 0 28px rgba(212, 175, 55, 0.32); }
+      }
+      .free-banner { animation: free-pulse 2.8s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .free-banner { animation: none; box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); }
+      }
     </style>
     <header data-reveal data-delay="0" class="overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] px-5 py-8 sm:px-8">
       <p class="text-xs tracking-[0.18em] text-gold">آکادمی</p>
@@ -203,6 +211,12 @@
     </a>
   </li></ol>
     </header>
+    <a href="/sales-pro/free-courses/" class="free-banner mt-6 block rounded-[2rem] border border-gold/50 bg-white/[0.06] p-5 backdrop-blur-md sm:p-7">
+      <p class="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-[#F3E5AB]">⚡ ۱۰۰٪ رایگان — شروع مسیر بدون هزینه</p>
+      <h2 class="mt-4 text-2xl font-semibold leading-[1.5]">می‌خواهید قبل از سرمایه‌گذاری، سطح آموزش‌ها را بسنجید؟</h2>
+      <p class="mt-3 max-w-3xl text-sm leading-8 text-cream/75">با مینی‌دوره‌های رایگان، تکنیک‌های عملی مهار بهانه‌های مشتری و بستن فروش را در کمتر از ۳۰ دقیقه یاد بگیرید.</p>
+      <span class="mt-5 inline-flex h-12 items-center gap-2 rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">مشاهده و ورود به دوره‌های رایگان <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 6 8 12l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
     <div class="mt-6 grid gap-4 md:grid-cols-2"><article id="course-telefoni" data-reveal data-delay="0" class="flex scroll-mt-24 flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#070B18]" data-course-card="telefoni" data-paid="yes" data-card-mode="locked">
       <div class="relative aspect-video overflow-hidden border-b border-white/10 bg-[#070B18] shadow-[inset_0_0_48px_rgba(212,175,55,0.16)]">
         <img src="/sales-pro/present/academy-phone.webp" width="1280" height="720" alt="هدست تیره کنار کارت هولوگرام طلایی و موج صدا" class="h-full w-full object-cover" />
@@ -397,7 +411,7 @@
       </div>
     </div>
   </dialog>
-    <script id="course-catalog" type="application/json">[{"id":"online","title":"آموزش فروش آنلاین","description":"قیف، اعتماد در اینستاگرام و تبدیل توجه به گفتگوی خرید.","paid":true,"lessons":[{"id":"online-lead","title":"لید، پراسپکت و مشتری"},{"id":"online-funnel-shape","title":"قیف فروش چیست؟"},{"id":"online-trust","title":"اعتماد فالوور"},{"id":"online-offer","title":"از توجه تا پیشنهاد"}]},{"id":"hozuri","title":"آموزش فروش حضوری","description":"زبان بدن، ورود به جلسه و بستن رو در رو بدون فشار مصنوعی.","paid":true,"lessons":[{"id":"live-open","title":"زبان بدن فروش حضوری"},{"id":"live-importance","title":"چرا زبان بدن فروش را عوض می‌کند"},{"id":"live-tracy","title":"نکاتی برای فروش بیشتر"},{"id":"live-manager","title":"زبان بدن مدیر فروش"}]},{"id":"telefoni","title":"آموزش فروش تلفنی","description":"برخورد اول، مکالمه بیمه و نقشه راه تماس سرد تا قرار بعدی.","paid":true,"lessons":[{"id":"phone-first","title":"اولین برخورد در کال‌سنتر"},{"id":"phone-sample","title":"نمونه مکالمه فروش تلفنی"},{"id":"phone-roadmap","title":"نقشه راه فروش تلفنی"},{"id":"phone-intro","title":"معارفه هنر فروش تلفنی"}]},{"id":"mozakerah","title":"آموزش مذاکره","description":"اصول امتیاز، مخالفت مشتری و استراتژی قبل از اینکه تخفیف تنها ابزار شود.","paid":true,"lessons":[{"id":"neg-principles","title":"اصول مذاکره فروش"},{"id":"neg-objection","title":"مخالفت مشتری"},{"id":"neg-strategy","title":"استراتژی مذاکره فروش"},{"id":"neg-social","title":"مذاکره در اینستاگرام و تلگرام"}]},{"id":"free","title":"آموزش‌های رایگان","description":"برای همه کاربران واردشده باز است و فقط با رد کردن چالش درس قبل جلو می‌رود.","paid":false,"lessons":[{"id":"free-expression","title":"فن بیان برای فروش"},{"id":"free-collar","title":"یک نکته زبان بدن"},{"id":"free-funnel","title":"قیف را خالی نگذارید"}]}]</script>
+    <script id="course-catalog" type="application/json">[{"id":"online","title":"آموزش فروش آنلاین","description":"قیف، اعتماد در اینستاگرام و تبدیل توجه به گفتگوی خرید.","paid":true,"lessons":[{"id":"online-lead","title":"لید، پراسپکت و مشتری"},{"id":"online-funnel-shape","title":"قیف فروش چیست؟"},{"id":"online-trust","title":"اعتماد فالوور"},{"id":"online-offer","title":"از توجه تا پیشنهاد"}]},{"id":"hozuri","title":"آموزش فروش حضوری","description":"زبان بدن، ورود به جلسه و بستن رو در رو بدون فشار مصنوعی.","paid":true,"lessons":[{"id":"live-open","title":"زبان بدن فروش حضوری"},{"id":"live-importance","title":"چرا زبان بدن فروش را عوض می‌کند"},{"id":"live-tracy","title":"نکاتی برای فروش بیشتر"},{"id":"live-manager","title":"زبان بدن مدیر فروش"}]},{"id":"telefoni","title":"آموزش فروش تلفنی","description":"برخورد اول، مکالمه بیمه و نقشه راه تماس سرد تا قرار بعدی.","paid":true,"lessons":[{"id":"phone-first","title":"اولین برخورد در کال‌سنتر"},{"id":"phone-sample","title":"نمونه مکالمه فروش تلفنی"},{"id":"phone-roadmap","title":"نقشه راه فروش تلفنی"},{"id":"phone-intro","title":"معارفه هنر فروش تلفنی"}]},{"id":"mozakerah","title":"آموزش مذاکره","description":"اصول امتیاز، مخالفت مشتری و استراتژی قبل از اینکه تخفیف تنها ابزار شود.","paid":true,"lessons":[{"id":"neg-principles","title":"اصول مذاکره فروش"},{"id":"neg-objection","title":"مخالفت مشتری"},{"id":"neg-strategy","title":"استراتژی مذاکره فروش"},{"id":"neg-social","title":"مذاکره در اینستاگرام و تلگرام"}]},{"id":"free","title":"آموزش‌های رایگان","description":"برای همه کاربران واردشده باز است و فقط با رد کردن چالش درس قبل جلو می‌رود.","paid":false,"lessons":[{"id":"free-expression","title":"فن بیان برای فروش"},{"id":"free-collar","title":"یک نکته زبان بدن"},{"id":"free-funnel","title":"قیف را خالی نگذارید"}]},{"id":"mini-price","title":"مهار سریع اعتراض «قیمت شما بالاست!»","description":"۳ تکنیک فوری برای تغییر بازی زمانی که مشتری در ثانیه‌های اول مکالمه بهانه قیمت می‌آورد.","paid":false,"lessons":[{"id":"mini-price-compare","title":"نسبت به چه چیزی؟"},{"id":"mini-price-trade","title":"ارزش، در برابر امتیاز رایگان"},{"id":"mini-price-timing","title":"عدد را قبل از مسئله نگویید"}]},{"id":"mini-open","title":"قلاب طلایی در ۱۰ ثانیه اول تماس سرد","description":"چگونه مکالمه را شروع کنیم تا تلفن قطع نشود و کنجکاوی مشتری از همان جمله اول تحریک شود.","paid":false,"lessons":[{"id":"mini-open-hook","title":"ده ثانیه اول"},{"id":"mini-open-clear","title":"یک جمله که فهمیده شود"},{"id":"mini-open-sample","title":"سوال، بازتاب، قدم بعد"},{"id":"mini-open-who","title":"قبل از شماره‌گیری، طرف کیست؟"}]},{"id":"mini-think","title":"پایان بلاتکلیفی: مهار بهانه «باید فکر کنم»","description":"سه پاسخ برای وقتی که مشتری مکث می‌کند: مانع واقعی را پیدا کنید و یک زمان برگشت ببندید، بدون تعقیب و بدون تخفیف فوری.","paid":false,"lessons":[{"id":"mini-think-room","title":"فکر کردن را با فشار جواب ندهید"},{"id":"mini-think-next","title":"یک زمان برگشت، نه یک تخفیف"},{"id":"mini-think-funnel","title":"یک مکث، کل قیف را نگه نمی‌دارد"}]}]</script>
   </main>
   <footer class="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
     <p class="text-xs leading-6 text-cream/50">نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
