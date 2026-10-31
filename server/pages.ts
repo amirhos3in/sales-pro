@@ -1,6 +1,7 @@
 import { articleFilters, articles, type Article, type ArticleBlock } from "@/lib/articles";
 import { OBJECTIONS, counterFor } from "@/lib/copilot/playbook";
 import { categories, findCategory, lessonsOf, type Category } from "@/lib/courses-data";
+import { FREE_MINI_IDS, FREE_MINI_PRACTICE, FREE_MINI_VISUAL } from "@/lib/free-minis";
 import { BUNDLE_LIST_PRICE, BUNDLE_PRICE, BUNDLE_SAVE, COURSE_PRICE, PRICE_PER_THOUSAND } from "@/lib/pricing";
 import { SERVICE_OFFERS, quoteService, serviceBreakdown } from "@/lib/service-pricing";
 
@@ -455,7 +456,7 @@ function courseOverview() {
 
 function paidHomeCards(base: string) {
   return homeCourseCards(base).replace(
-    /<article[^>]*data-paid="no"[\s\S]*?<\/article>/,
+    /<article[^>]*data-paid="no"[\s\S]*?<\/article>/g,
     "",
   );
 }
@@ -916,6 +917,14 @@ export function academyPage(base: string) {
         height: auto;
         opacity: 1;
       }
+      @keyframes free-pulse {
+        0%, 100% { box-shadow: 0 0 18px rgba(212, 175, 55, 0.14); }
+        50% { box-shadow: 0 0 28px rgba(212, 175, 55, 0.32); }
+      }
+      .free-banner { animation: free-pulse 2.8s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .free-banner { animation: none; box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); }
+      }
     </style>
     <header ${revealAttrs(0)} class="overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] px-5 py-8 sm:px-8">
       <p class="text-xs tracking-[0.18em] text-gold">آکادمی</p>
@@ -923,6 +932,12 @@ export function academyPage(base: string) {
       <p class="mt-3 max-w-3xl text-sm leading-8 text-cream/75 sm:text-base">چهار مسیر تخصصی بدون اتلاف وقت و اضافه‌گویی؛ هر درس همراه با ویدیوی کاربردی و کوییز سناریومحور برای تثبیت مهارت.</p>
       <ol class="mt-6 flex gap-3 overflow-x-auto pb-1" data-lenis-prevent aria-label="مسیر پیشرفت">${steps}</ol>
     </header>
+    <a href="${base}/free-courses/" class="free-banner mt-6 block rounded-[2rem] border border-gold/50 bg-white/[0.06] p-5 backdrop-blur-md sm:p-7">
+      <p class="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-[#F3E5AB]">⚡ ۱۰۰٪ رایگان — شروع مسیر بدون هزینه</p>
+      <h2 class="mt-4 text-2xl font-semibold leading-[1.5]">می‌خواهید قبل از سرمایه‌گذاری، سطح آموزش‌ها را بسنجید؟</h2>
+      <p class="mt-3 max-w-3xl text-sm leading-8 text-cream/75">با مینی‌دوره‌های رایگان، تکنیک‌های عملی مهار بهانه‌های مشتری و بستن فروش را در کمتر از ۳۰ دقیقه یاد بگیرید.</p>
+      <span class="mt-5 inline-flex h-12 items-center gap-2 rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">مشاهده و ورود به دوره‌های رایگان <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 6 8 12l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${academyCourseCards(base)}</div>
     <section class="mt-6 rounded-[2rem] border border-gold bg-[#070B18] p-5 shadow-[0_0_42px_rgba(212,175,55,0.16)] sm:p-7">
       <p class="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-[#F3E5AB]">پیشنهاد اقتصادی و کامل (۴ دوره در ۱ پکیج)</p>
@@ -960,6 +975,43 @@ export function academyPage(base: string) {
     ${courseOverview()}
     <script id="course-catalog" type="application/json">${catalog}</script>
   `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="آکادمی عملیاتی فروش نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
+}
+
+export function freeCoursesPage(base: string) {
+  const cards = FREE_MINI_IDS.map((id) => {
+    const category = findCategory(id);
+    if (!category) return "";
+    const rows = lessonsOf(category);
+    const minutes = rows.reduce((sum, row) => sum + row.lesson.minutes, 0);
+    const visual = FREE_MINI_VISUAL[id];
+    return `<article class="flex flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.06] backdrop-blur-md">
+      <img src="${base}/present/${visual.file}" alt="${esc(visual.alt)}" width="1024" height="1024" class="aspect-square w-full object-cover" />
+      <div class="flex flex-1 flex-col p-4">
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px]">مینی‌دوره</span>
+          <span class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-navy">رایگان</span>
+        </div>
+        <h2 class="mt-3 text-lg font-semibold leading-8">${esc(category.title.fa)}</h2>
+        <p class="mt-2 flex-1 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
+        <ul class="mt-3 flex flex-wrap gap-2 text-[11px] text-cream/75">
+          <li class="rounded-full px-2.5 py-1 ring-1 ring-white/10">${durationLabel(minutes)}</li>
+          <li class="rounded-full px-2.5 py-1 ring-1 ring-white/10">${fa.format(rows.length)} درس ویدیویی</li>
+          <li class="rounded-full px-2.5 py-1 ring-1 ring-white/10">${esc(visual.chip)}</li>
+        </ul>
+        <button type="button" data-free-start data-free-course="${id}" class="mt-4 h-11 rounded-2xl bg-gold text-sm font-semibold text-navy">شروع رایگان دوره</button>
+        <a data-free-continue data-free-course="${id}" href="${base}/learn/${id}/" class="mt-4 inline-flex h-11 items-center justify-center rounded-2xl border border-gold text-sm font-semibold text-gold" hidden>ادامه یادگیری</a>
+      </div>
+    </article>`;
+  }).join("");
+  const description = "سه مینی‌دوره رایگان برای اعتراض قیمت، شروع تماس سرد و بهانهٔ فکر کردن. هر درس ویدیو و کوییز دارد و بعد از ورود در پنل ثبت می‌شود.";
+  return layout(base, "academy", "دوره‌های آموزشی رایگان | نکس‌سل", `
+    <header ${revealAttrs(0)}>
+      <p class="text-xs tracking-[0.18em] text-gold">آکادمی</p>
+      <h1 class="mt-3 text-3xl font-semibold leading-[1.45]">دوره‌های آموزشی رایگان</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-8 text-cream/75">سه مسیر کوتاه برای سنجیدن سطح آموزش، قبل از خرید. ویدیوها فیلم‌های کوتاه موجود آکادمی‌اند و کوییز هر درس جداست. با زدن شروع، اگر وارد نشده باشید به صفحهٔ ورود می‌روید و بعد از آن دوره در پنل ثبت می‌شود.</p>
+    </header>
+    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${cards}</div>
+  `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="دوره‌های آموزشی رایگان | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
 export function copilotPage(base: string) {
@@ -1486,7 +1538,7 @@ function dashboardPage(base: string, initialTab = "overview") {
           <div>
             <p class="text-xs tracking-[0.16em] text-gold">آموزش</p>
             <h1 class="mt-2 text-2xl font-semibold">دوره‌های من</h1>
-            <p class="mt-2 text-sm leading-7 text-cream/60">مسیرهای فعال همین حساب، و مسیرهایی که هنوز باز نشده‌اند. هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}.</p>
+            <p class="mt-2 text-sm leading-7 text-cream/60">مسیرهای فعال همین حساب، و مسیرهایی که هنوز باز نشده‌اند. هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}. <a class="text-gold" href="${base}/free-courses/">مینی‌دوره‌های رایگان</a> جدا از این چهار مسیر ثبت می‌شوند.</p>
           </div>
           <article data-courses-empty class="dash-card rounded-[28px] p-6">
             <h2 class="text-lg font-semibold">هنوز دوره‌ای فعال نکرده‌اید</h2>
@@ -1500,6 +1552,17 @@ function dashboardPage(base: string, initialTab = "overview") {
           <div data-course-locked-wrap>
             <h2 class="text-lg font-semibold">سایر دوره‌ها</h2>
             <div data-course-locked class="mt-3 grid gap-3 sm:grid-cols-2">${cards}</div>
+          </div>
+          <div data-free-dash-wrap hidden>
+            <h2 class="text-lg font-semibold">مینی‌دوره‌های رایگان من</h2>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">${categories.filter((category) => (FREE_MINI_IDS as readonly string[]).includes(category.id)).map((category) => `<article class="dash-card flex flex-col rounded-[28px] p-5" data-free-dash="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}" hidden>
+              <div class="flex items-start justify-between gap-3"><h3 class="text-lg font-semibold">${esc(category.title.fa)}</h3><span class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">رایگان</span></div>
+              <p class="mt-4 text-sm text-cream/70" data-video-line>درصد تکمیل ویدیوها: ۰٪</p>
+              <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-video-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+              <p class="mt-3 text-sm text-cream/70" data-quiz-line>چالش‌ها و کوییزهای پاس‌شده: ۰</p>
+              <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-quiz-bar class="h-full rounded-full bg-cream" style="width:0%"></div></div>
+              <a data-free-enter href="${base}/learn/${category.id}/" class="mt-5 flex h-10 items-center justify-center rounded-2xl border-2 border-gold bg-navy px-4 text-sm font-medium text-gold">ورود به درس</a>
+            </article>`).join("")}</div>
           </div>
           <article class="rounded-[28px] bg-[#070B18] p-5 ring-1 ring-gold/30" data-bundle-card>
             <div class="flex flex-wrap items-center gap-2">
@@ -1630,15 +1693,22 @@ export function learnCategoryPage(base: string, id: string) {
   const category = findCategory(id);
   if (!category) return null;
   const rows = lessonsOf(category);
+  const mini = (FREE_MINI_IDS as readonly string[]).includes(category.id);
+  const practice = mini ? FREE_MINI_PRACTICE[category.id as keyof typeof FREE_MINI_PRACTICE] : "";
   return layout(base, "academy", `${category.title.fa} | نکس‌سل`, `
     <header ${revealAttrs(0)}>
     <p class="text-xs text-gold">${category.tierRequired === "free" ? "آموزش رایگان" : toman(COURSE_PRICE)}</p>
     <h1 class="mt-2 text-3xl font-semibold">${esc(category.title.fa)}</h1>
     <p class="mt-3 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
+    ${mini ? `<p class="mt-3 text-sm leading-7 text-cream/60">ویدیوها فیلم‌های کوتاه موجود آکادمی‌اند. ترتیب و کوییز این صفحه برای همین بهانه چیده شده است.</p>` : ""}
     </header>
-    <div class="mt-4" data-course="${category.id}">
+    ${mini ? `<aside class="mt-4 rounded-[28px] border border-gold/30 bg-gold/10 p-4"><p class="text-xs text-gold">سناریوی تمرین</p><p class="mt-2 text-sm leading-7 text-cream/80">${esc(practice)}</p></aside>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button type="button" data-free-start data-free-course="${category.id}" class="h-11 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">شروع رایگان دوره</button>
+      <a data-free-continue data-free-course="${category.id}" href="${base}/learn/${category.id}/${rows[0]?.lesson.id || ""}/" class="inline-flex h-11 items-center rounded-2xl border border-gold px-4 text-sm font-medium text-gold" hidden>ادامه یادگیری</a>
+    </div>` : `<div class="mt-4" data-course="${category.id}">
       ${category.tierRequired === "pro" ? `<button type="button" data-buy="${category.id}" class="h-11 rounded-2xl bg-cream px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>` : ""}
-    </div>
+    </div>`}
     <ol class="mt-6 space-y-3">${rows.map((row, index) => `<li ${revealAttrs(Math.min(index, 6) * 50)} class="glass rounded-2xl px-4 py-3"><a href="${base}/learn/${category.id}/${row.lesson.id}/" class="font-semibold">${fa.format(index + 1)}. ${esc(row.lesson.title.fa)}</a><p class="mt-1 text-xs text-cream/60">${esc(row.lesson.summary.fa)}</p>${category.tierRequired === "pro" && index === 0 ? `<p class="mt-1 text-xs text-gold">این درس بدون سبد دیده می‌شود.</p>` : ""}</li>`).join("")}</ol>
   `);
 }
@@ -1649,6 +1719,7 @@ export function learnLessonPage(base: string, categoryId: string, lessonId: stri
   const row = lessonsOf(category).find((item) => item.lesson.id === lessonId);
   if (!row) return null;
   const preview = category.tierRequired === "pro" && lessonsOf(category)[0]?.lesson.id === row.lesson.id;
+  const mini = (FREE_MINI_IDS as readonly string[]).includes(category.id);
   const quiz = row.lesson.quiz.slice(0, 3).map((question, qIndex) => `<fieldset class="rounded-2xl border border-white/10 p-3" data-answer="${question.answer}">
     <legend class="px-1 text-sm font-semibold">${esc(question.prompt.fa)}</legend>
     ${question.options.map((option, oIndex) => `<label class="mt-2 flex items-center gap-2 text-sm"><input type="radio" name="q${qIndex}" value="${oIndex}" class="accent-gold" /><span>${esc(option.fa)}</span></label>`).join("")}
@@ -1657,9 +1728,9 @@ export function learnLessonPage(base: string, categoryId: string, lessonId: stri
     <header ${revealAttrs(0)}><a href="${base}/learn/${category.id}/" class="text-sm text-gold">بازگشت به ${esc(category.title.fa)}</a>
     <h1 class="mt-3 text-2xl font-semibold sm:text-3xl">${esc(row.lesson.title.fa)}</h1></header>
     <p class="mt-2 text-sm leading-7 text-cream/70">${esc(row.lesson.summary.fa)}</p>
-    <div ${revealAttrs(80)} class="mt-4 aspect-video overflow-hidden rounded-2xl bg-black" data-course-gate="${category.id}" data-free="${category.tierRequired === "free" ? "yes" : "no"}" data-preview="${preview ? "yes" : "no"}">
+    <div ${revealAttrs(80)} class="mt-4 aspect-video overflow-hidden rounded-2xl bg-black" data-course-gate="${category.id}" data-free="${category.id === "free" ? "yes" : "no"}" data-enroll="${mini ? "yes" : "no"}" data-preview="${preview ? "yes" : "no"}">
       <iframe class="h-full w-full" title="ویدیوی آپارات" allowfullscreen data-aparat="${esc(row.lesson.aparat)}"></iframe>
-      <p data-locked class="grid h-full place-items-center p-6 text-center text-sm">برای دیدن این درس، همین مسیر را به سبد اضافه کنید.</p>
+      <div data-locked class="grid h-full place-items-center p-6 text-center text-sm">${mini ? `برای دیدن این ویدیو، وارد حساب شوید تا این مینی‌دوره رایگان در پنل شما ثبت شود.<button type="button" data-free-start data-free-course="${category.id}" class="mx-auto mt-4 block h-11 rounded-2xl bg-gold px-4 text-sm font-semibold text-navy">شروع رایگان دوره</button>` : "برای دیدن این درس، همین مسیر را به سبد اضافه کنید."}</div>
     </div>
     <form ${revealAttrs(140)} data-quiz data-lesson="${esc(row.lesson.id)}" class="mt-5 space-y-3">
       <label class="flex items-center gap-2 text-sm"><input name="watched" type="checkbox" class="size-4 accent-gold" /> ویدیو را دیدم</label>

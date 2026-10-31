@@ -7,6 +7,7 @@
   const STEP = 1000;
   const RATE = 3000000;
   const PAID = ["online", "hozuri", "telefoni", "mozakerah"];
+  const MINI = ["mini-price", "mini-open", "mini-think"];
   const base = document.body.dataset.base || "";
   const AVATARS = {
     navy: ["#0B132B", "#D4AF37"],
@@ -32,7 +33,7 @@
   }
 
   function emptyPricing() {
-    return { courses: [], bundle: false, minutes: 0, cashbackToman: 0, referrals: 0, referralCode: "" };
+    return { courses: [], freeCourses: [], bundle: false, minutes: 0, cashbackToman: 0, referrals: 0, referralCode: "" };
   }
 
   function readPricing() {
@@ -50,6 +51,7 @@
       }
       return {
         courses: Array.isArray(parsed.courses) ? parsed.courses.filter((id) => PAID.includes(id)) : [],
+        freeCourses: Array.isArray(parsed.freeCourses) ? parsed.freeCourses.filter((id) => MINI.includes(id)) : [],
         bundle: Boolean(parsed.bundle),
         minutes,
         cashbackToman: Number.isFinite(parsed.cashbackToman) ? Math.max(0, Math.round(parsed.cashbackToman)) : 0,
@@ -250,7 +252,7 @@
     const activeWrap = document.querySelector("[data-course-active-wrap]");
     const lockedWrap = document.querySelector("[data-course-locked-wrap]");
     const coursesEmpty = document.querySelector("[data-courses-empty]");
-    if (coursesEmpty) coursesEmpty.hidden = ownedCount > 0;
+    if (coursesEmpty) coursesEmpty.hidden = ownedCount > 0 || (state.freeCourses || []).length > 0;
     if (activeWrap) activeWrap.hidden = ownedCount === 0;
     if (lockedWrap) lockedWrap.hidden = ownedCount >= PAID.length;
     document.querySelectorAll("[data-dash-course]").forEach((card) => {
@@ -283,7 +285,8 @@
     });
 
     document.querySelectorAll("[data-course-gate]").forEach((gate) => {
-      const open = gate.dataset.free === "yes" || gate.dataset.preview === "yes" || owns(state, gate.dataset.courseGate);
+      const enrolledMini = (state.freeCourses || []).includes(gate.dataset.courseGate);
+      const open = gate.dataset.free === "yes" || gate.dataset.preview === "yes" || (gate.dataset.enroll === "yes" ? signedIn && enrolledMini : owns(state, gate.dataset.courseGate));
       const frame = gate.querySelector("iframe");
       const locked = gate.querySelector("[data-locked]");
       if (!frame) return;
@@ -301,6 +304,7 @@
 
     paintSlider();
     paintDashboardProgress(progress);
+    paintFreeCourses(state, signedIn, progress);
     paintTotals(progress);
     paintTabs();
     paintCart();
@@ -322,6 +326,56 @@
       if (videoBar) videoBar.style.width = Math.round((videos / total) * 100) + "%";
       if (quizBar) quizBar.style.width = Math.round((quizzes / total) * 100) + "%";
     });
+  }
+
+  function signedAccount() {
+    const session = readSession();
+    const user = session && session.currentUser;
+    return Boolean(session && session.isAuthenticated && user && user.name);
+  }
+
+  function rememberFreeEnroll(id) {
+    if (!MINI.includes(id)) return;
+    const state = readPricing();
+    if (state.freeCourses.includes(id)) return;
+    state.freeCourses = state.freeCourses.concat(id);
+    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem("aiMinutes", String(state.minutes));
+  }
+
+  function paintFreeCourses(state, signedIn, progress) {
+    const enrolled = new Set(state.freeCourses || []);
+    document.querySelectorAll("[data-free-start]").forEach((node) => {
+      node.hidden = signedIn && enrolled.has(node.dataset.freeCourse);
+    });
+    document.querySelectorAll("[data-free-continue]").forEach((node) => {
+      node.hidden = !(signedIn && enrolled.has(node.dataset.freeCourse));
+    });
+    let any = false;
+    document.querySelectorAll("[data-free-dash]").forEach((card) => {
+      const id = card.dataset.freeDash;
+      const on = enrolled.has(id);
+      card.hidden = !on;
+      if (!on) return;
+      any = true;
+      const ids = (card.dataset.lessons || "").split(",").filter(Boolean);
+      const total = ids.length || 1;
+      const videos = ids.filter((lessonId) => progress.watched.includes(lessonId)).length;
+      const quizzes = ids.filter((lessonId) => progress.passed.includes(lessonId)).length;
+      const videoLine = card.querySelector("[data-video-line]");
+      const quizLine = card.querySelector("[data-quiz-line]");
+      const videoBar = card.querySelector("[data-video-bar]");
+      const quizBar = card.querySelector("[data-quiz-bar]");
+      if (videoLine) videoLine.textContent = "درصد تکمیل ویدیوها: " + fa.format(Math.round((videos / total) * 100)) + "٪";
+      if (quizLine) quizLine.textContent = "چالش‌ها و کوییزهای پاس‌شده: " + fa.format(quizzes) + " از " + fa.format(ids.length);
+      if (videoBar) videoBar.style.width = Math.round((videos / total) * 100) + "%";
+      if (quizBar) quizBar.style.width = Math.round((quizzes / total) * 100) + "%";
+      const nextId = ids.find((lessonId) => !progress.passed.includes(lessonId)) || ids[0];
+      const enter = card.querySelector("[data-free-enter]");
+      if (enter && nextId) enter.setAttribute("href", base + "/learn/" + id + "/" + nextId + "/");
+    });
+    const wrap = document.querySelector("[data-free-dash-wrap]");
+    if (wrap) wrap.hidden = !any;
   }
 
   function paintTotals(progress) {
@@ -1187,6 +1241,19 @@
       addMinutes(slider ? Number(slider.value) : 1000);
       return;
     }
+    const freeStart = event.target.closest("[data-free-start]");
+    if (freeStart) {
+      const id = freeStart.dataset.freeCourse;
+      if (!MINI.includes(id)) return;
+      if (!signedAccount()) {
+        sessionStorage.setItem("nexsell-free-enroll", id);
+        location.href = base + "/login/";
+        return;
+      }
+      rememberFreeEnroll(id);
+      location.href = base + "/learn/" + id + "/";
+      return;
+    }
     const tabLink = event.target.closest("[data-tab-link]");
     if (tabLink) {
       event.preventDefault();
@@ -1328,6 +1395,14 @@
     quiz.addEventListener("submit", (event) => {
       event.preventDefault();
       const result = quiz.querySelector("[data-quiz-result]");
+      const gate = document.querySelector("[data-course-gate]");
+      if (gate && gate.dataset.enroll === "yes") {
+        const pricing = readPricing();
+        if (!signedAccount() || !(pricing.freeCourses || []).includes(gate.dataset.courseGate)) {
+          result.textContent = "اول وارد شوید تا این مینی‌دوره در حسابتان ثبت شود.";
+          return;
+        }
+      }
       if (!quiz.querySelector("[name=watched]").checked) {
         result.textContent = "اول تماشای ویدیو را علامت بزنید.";
         return;
@@ -1513,6 +1588,13 @@
         user = { ...accounts[confirmed], phone: confirmed };
       }
       localStorage.setItem(SESSION, JSON.stringify({ isAuthenticated: true, currentUser: user }));
+      const pending = sessionStorage.getItem("nexsell-free-enroll");
+      if (pending && MINI.includes(pending)) {
+        rememberFreeEnroll(pending);
+        sessionStorage.removeItem("nexsell-free-enroll");
+        location.href = base + "/learn/" + pending + "/";
+        return;
+      }
       location.href = base + "/dashboard/";
     }
 

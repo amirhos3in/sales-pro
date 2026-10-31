@@ -3,6 +3,7 @@ import path from "node:path";
 import {
   aboutPage,
   academyPage,
+  freeCoursesPage,
   articlePage,
   articleSlugs,
   articlesPage,
@@ -31,6 +32,7 @@ const out = path.join(process.cwd(), "pages-out");
 const files: Array<[string, string]> = [
   ["index.html", homePage(base)],
   ["academy/index.html", academyPage(base)],
+  ["free-courses/index.html", freeCoursesPage(base)],
   ["assistant/index.html", demoPage(base)],
   ["demo/index.html", demoPage(base)],
   ["minutes/index.html", minutesPage(base)],

@@ -1,3 +1,5 @@
+import { FREE_MINIS } from "./free-minis";
+
 export type Localized = { fa: string; en: string };
 
 export type QuizQuestion = {
@@ -740,6 +742,7 @@ export const categories: Category[] = [
       },
     ],
   },
+  ...FREE_MINIS,
 ];
 
 export function pickText(value: Localized, lang: "fa" | "en") {
