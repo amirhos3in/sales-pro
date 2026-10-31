@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>عضویت | نکس‌سل</title>
+  <title>ثبت‌نام | نکس‌سل</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/sales-pro/lenis.css" />
@@ -93,7 +93,7 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود آزمایشی</a>
+        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
         <a data-auth-user="chip" href="/sales-pro/dashboard/" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
           <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
           <span data-header-name class="max-w-28 truncate">کاربر</span>
@@ -103,7 +103,7 @@
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود آزمایشی</a>
+      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
       <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
         <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
@@ -114,25 +114,24 @@
   </header>
   <main class="mx-auto w-full max-w-6xl px-4 py-8">
     <form data-auth="register" class="glass mx-auto w-full max-w-[420px] space-y-4 rounded-[28px] p-6 sm:p-8">
-      <div class="grid grid-cols-2 gap-2"><a href="/sales-pro/login/" class="flex h-11 items-center justify-center rounded-2xl text-sm text-cream/80 ring-1 ring-gold/30">ورود آزمایشی</a><a href="/sales-pro/register/" class="flex h-11 items-center justify-center rounded-2xl text-sm bg-gold font-semibold text-navy">عضویت آزمایشی</a></div>
+      <div class="grid grid-cols-2 gap-2"><a href="/sales-pro/login/" class="flex h-11 items-center justify-center rounded-2xl text-sm text-cream/80 ring-1 ring-gold/30">ورود</a><a href="/sales-pro/register/" class="flex h-11 items-center justify-center rounded-2xl text-sm bg-gold font-semibold text-navy">ثبت‌نام</a></div>
       <div>
-        <p class="text-xs tracking-[0.18em] text-gold">عضویت آزمایشی</p>
-        <h1 class="mt-2 text-2xl font-semibold">عضویت آزمایشی</h1>
-        <p class="mt-2 text-sm leading-7 text-cream/70">حساب آکادمی روی همین مرورگر می‌ماند. کد تایید بعد از تایید شماره، نمادین است و پلن فعال نمی‌کند.</p>
+        <p class="text-xs tracking-[0.18em] text-gold">ثبت‌نام</p>
+        <h1 class="mt-2 text-2xl font-semibold">ثبت‌نام</h1>
+        <p class="mt-2 text-sm leading-7 text-cream/70">نام، شغل و شماره را وارد کنید.</p>
       </div>
       <label class="block text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold" /></label>
       <label class="block text-sm">شماره موبایل<input data-auth-phone name="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold text-left" /></label>
       <label class="block text-sm">حوزه فعالیت / شغل<input name="jobTitle" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold" /></label>
       <button type="button" data-auth-request class="h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تایید شماره و دریافت کد</button>
       <div data-auth-otp class="hidden space-y-4">
-    <p class="text-sm leading-7 text-cream/80">کد تایید برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> ارسال شد. این ارسال نمادین است و پیامک واقعی نمی‌رود.</p>
+    <p class="text-sm leading-7 text-cream/80">کد تایید را برای <span data-auth-sent-phone dir="ltr" class="font-semibold text-gold"></span> وارد کنید.</p>
     <div>
-      <p class="mb-3 text-sm font-medium">کد تایید پیامکی</p>
+      <p class="mb-3 text-sm font-medium">کد تایید</p>
       <div dir="ltr" class="flex justify-between gap-2">
         <input data-otp-digit inputmode="numeric" autocomplete="one-time-code" aria-label="رقم ۱ کد تایید" maxlength="5" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۲ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۳ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۴ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" /><input data-otp-digit inputmode="numeric" autocomplete="off" aria-label="رقم ۵ کد تایید" maxlength="1" class="h-14 min-w-0 flex-1 rounded-2xl border border-gold/40 bg-white/5 text-center text-xl outline-none focus:border-gold" />
       </div>
     </div>
-    <p class="text-xs leading-6 text-cream/60">ورود آزمایشی: هر کد ۵ رقمی قبول است، مثلاً ۱۲۳۴۵. این کد پلن یا پرداختی فعال نمی‌کند.</p>
     <div class="flex items-center justify-between gap-3 text-sm">
       <span data-otp-timer dir="ltr" class="font-mono text-base tabular-nums text-gold">01:59</span>
       <button type="button" data-otp-resend disabled class="text-gold disabled:opacity-40">ارسال دوباره</button>
@@ -182,7 +181,7 @@
   <dialog id="checkout-order" aria-labelledby="checkout-title">
     <form data-checkout-form class="flex max-h-[min(90vh,52rem)] flex-col">
       <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
-        <h2 id="checkout-title" class="text-xl font-semibold">ثبت دسترسی آزمایشی</h2>
+        <h2 id="checkout-title" class="text-xl font-semibold">ثبت سفارش</h2>
         <button type="button" data-checkout-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن">×</button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
@@ -196,7 +195,7 @@
       </div>
       <div data-checkout-actions class="border-t border-white/10 p-5">
         <div data-checkout-summary class="mb-3 rounded-2xl border border-white/10 p-3 text-sm"></div>
-        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button>
       </div>
     </form>
   </dialog>

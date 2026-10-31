@@ -93,7 +93,7 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود آزمایشی</a>
+        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
         <a data-auth-user="chip" href="/sales-pro/dashboard/" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
           <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
           <span data-header-name class="max-w-28 truncate">کاربر</span>
@@ -103,7 +103,7 @@
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود آزمایشی</a>
+      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
       <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
         <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
@@ -112,7 +112,7 @@
       <a href="/sales-pro/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">خانه</a><a href="/sales-pro/academy/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">آموزش</a><a href="/sales-pro/demo/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">دستیار</a><a href="/sales-pro/articles/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">مقالات</a><a href="/sales-pro/services/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">خدمات</a><a href="/sales-pro/support/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پشتیبانی</a><a href="/sales-pro/about/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">درباره ما</a><a href="/sales-pro/contact/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ارتباط با ما</a>
     </div>
   </header>
-  <main class="mx-auto w-full max-w-6xl px-4 py-8"><header data-reveal data-delay="0"><h1 class="text-3xl font-semibold">پشتیبانی</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">همین فرم تنها کانال پیام است. درخواست روی همین مرورگر می‌ماند. پاسخ واقعی از سرور نمی‌آید و تماسی برقرار نمی‌شود.</p><form data-ticket data-lenis-prevent class="glass mt-6 grid max-w-xl gap-3 rounded-3xl p-5"><label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label><label class="text-sm">شرح<textarea name="body" required class="mt-1 min-h-28 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button><p data-ticket-note class="text-sm text-cream/70"></p></form></header></main>
+  <main class="mx-auto w-full max-w-6xl px-4 py-8"><header data-reveal data-delay="0"><h1 class="text-3xl font-semibold">پشتیبانی</h1><form data-ticket data-lenis-prevent class="glass mt-6 grid max-w-xl gap-3 rounded-3xl p-5"><label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label><label class="text-sm">شرح<textarea name="body" required class="mt-1 min-h-28 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button><p data-ticket-note class="text-sm text-cream/70"></p></form></header></main>
   <footer class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-cream/50 sm:flex-row sm:justify-between">
     <p>نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
   </footer>
@@ -150,7 +150,7 @@
   <dialog id="checkout-order" aria-labelledby="checkout-title">
     <form data-checkout-form class="flex max-h-[min(90vh,52rem)] flex-col">
       <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
-        <h2 id="checkout-title" class="text-xl font-semibold">ثبت دسترسی آزمایشی</h2>
+        <h2 id="checkout-title" class="text-xl font-semibold">ثبت سفارش</h2>
         <button type="button" data-checkout-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن">×</button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
@@ -164,7 +164,7 @@
       </div>
       <div data-checkout-actions class="border-t border-white/10 p-5">
         <div data-checkout-summary class="mb-3 rounded-2xl border border-white/10 p-3 text-sm"></div>
-        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button>
       </div>
     </form>
   </dialog>

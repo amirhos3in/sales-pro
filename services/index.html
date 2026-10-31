@@ -93,7 +93,7 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود آزمایشی</a>
+        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
         <a data-auth-user="chip" href="/sales-pro/dashboard/" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
           <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
           <span data-header-name class="max-w-28 truncate">کاربر</span>
@@ -103,7 +103,7 @@
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود آزمایشی</a>
+      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
       <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
         <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
@@ -171,7 +171,6 @@
         </div>
       </div>
       <button type="button" id="buy-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-cream px-5 text-sm font-semibold text-navy">افزودن به سبد</button>
-      <p class="mt-3 text-xs leading-6 text-cream/60">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p>
     </section></div><script id="service-pricing" type="application/json">[{"id":"script","title":"بازنویسی اسکریپت تیم فروش","text":"چارچوب گفتن برای تماس ورودی، تماس سرد و اعتراض‌های پرتکرار. اندازه تیم، نوع تماس و تعداد چارچوب مبلغ را عوض می‌کند.","params":[{"id":"team","label":"اندازه تیم","options":[{"id":"5","label":"۱ تا ۵ نفر","amount":4000000},{"id":"15","label":"۶ تا ۱۵ نفر","amount":6000000},{"id":"40","label":"۱۶ تا ۴۰ نفر","amount":8000000}]},{"id":"calls","label":"نوع تماس","options":[{"id":"in","label":"فقط تماس ورودی","amount":0},{"id":"out","label":"فقط تماس سرد","amount":0},{"id":"both","label":"ورودی و سرد","amount":2000000}]},{"id":"frames","label":"تعداد چارچوب","options":[{"id":"1","label":"یک چارچوب","amount":0},{"id":"3","label":"سه چارچوب","amount":2000000},{"id":"6","label":"شش چارچوب","amount":5000000}]}]},{"id":"workshop","title":"کارگاه حضوری تیم فروش","text":"کارگاه زبان بدن، نیازسنجی و دمو برای سناریوهای همان تیم. زمان دوره، تعداد نفر و محل برگزاری مبلغ را عوض می‌کند.","params":[{"id":"duration","label":"زمان دوره","options":[{"id":"half","label":"نیم‌روز","amount":8000000},{"id":"day","label":"یک روز","amount":12000000},{"id":"two","label":"دو روز","amount":20000000}]},{"id":"people","label":"تعداد شرکت‌کننده","options":[{"id":"8","label":"تا ۸ نفر","amount":0},{"id":"16","label":"۹ تا ۱۶ نفر","amount":2000000},{"id":"30","label":"۱۷ تا ۳۰ نفر","amount":4000000}]},{"id":"place","label":"محل برگزاری","options":[{"id":"tehran","label":"تهران","amount":0},{"id":"other","label":"شهر دیگر","amount":3000000}]}]},{"id":"funnel","title":"بهینه‌سازی قیف فروش","text":"اصلاح صفحهٔ فرود، پیشنهاد و مسیر دایرکت. تعداد کانال و عمق مسیر مبلغ را عوض می‌کند.","params":[{"id":"channels","label":"تعداد کانال","options":[{"id":"1","label":"یک کانال","amount":6000000},{"id":"2","label":"دو کانال","amount":8000000},{"id":"3","label":"سه کانال یا بیشتر","amount":11000000}]},{"id":"depth","label":"عمق اصلاح","options":[{"id":"land","label":"فقط صفحهٔ فرود","amount":0},{"id":"offer","label":"فرود و پیشنهاد","amount":2000000},{"id":"full","label":"فرود، پیشنهاد و مسیر دایرکت","amount":4000000}]}]},{"id":"mentor","title":"منتورینگ مدیر فروش","text":"جلسهٔ یک‌به‌یک برای عارضه‌یابی تیم و شاخص‌ها. جلسه در ماه و اندازه تیم جمع یک ماه را می‌سازند و زمان دوره آن جمع را در تعداد ماه ضرب می‌کند.","params":[{"id":"term","label":"زمان دوره","scale":true,"options":[{"id":"1","label":"۱ ماه","amount":0,"factor":1},{"id":"3","label":"۳ ماه","amount":0,"factor":3},{"id":"6","label":"۶ ماه","amount":0,"factor":6}]},{"id":"sessions","label":"جلسه در ماه","options":[{"id":"1","label":"۱ جلسه","amount":5000000},{"id":"2","label":"۲ جلسه","amount":9000000},{"id":"4","label":"۴ جلسه","amount":16000000}]},{"id":"team","label":"اندازه تیم","options":[{"id":"5","label":"تا ۵ نفر","amount":0},{"id":"15","label":"۶ تا ۱۵ نفر","amount":2000000},{"id":"40","label":"۱۶ تا ۴۰ نفر","amount":4000000}]}]}]</script></main>
   <footer class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-cream/50 sm:flex-row sm:justify-between">
     <p>نکس‌سل، آموزش ویدیویی فروش با چالش پایان هر درس.</p>
@@ -210,7 +209,7 @@
   <dialog id="checkout-order" aria-labelledby="checkout-title">
     <form data-checkout-form class="flex max-h-[min(90vh,52rem)] flex-col">
       <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
-        <h2 id="checkout-title" class="text-xl font-semibold">ثبت دسترسی آزمایشی</h2>
+        <h2 id="checkout-title" class="text-xl font-semibold">ثبت سفارش</h2>
         <button type="button" data-checkout-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن">×</button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
@@ -224,7 +223,7 @@
       </div>
       <div data-checkout-actions class="border-t border-white/10 p-5">
         <div data-checkout-summary class="mb-3 rounded-2xl border border-white/10 p-3 text-sm"></div>
-        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button>
       </div>
     </form>
   </dialog>

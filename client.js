@@ -170,7 +170,7 @@
     });
     const ownedCount = PAID.filter((id) => owns(state, id)).length;
     const status = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر" : "بدون دوره";
-    const statusLong = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر با دسترسی آزمایشی" : "هنوز دسترسی آزمایشی ثبت نشده";
+    const statusLong = state.bundle ? "هر چهار مسیر" : ownedCount ? fa.format(ownedCount) + " مسیر" : "هنوز دوره‌ای ثبت نشده";
     document.querySelectorAll("[data-status-badge]").forEach((node) => {
       node.textContent = node.dataset.statusBadge === "short" ? status : statusLong;
     });
@@ -191,11 +191,11 @@
       const active = owns(state, row.dataset.courseStatus);
       const label = row.querySelector("[data-owned-label]");
       if (!label) return;
-      label.textContent = active ? "دسترسی آزمایشی" : "ثبت نشده";
+      label.textContent = active ? "فعال" : "ثبت نشده";
       label.className = active ? "text-gold" : "text-cream/50";
     });
     document.querySelectorAll("[data-bundle-label]").forEach((node) => {
-      node.textContent = state.bundle ? "دسترسی آزمایشی آکادمی جامع روی همین مرورگر است" : "آکادمی جامع، " + toman(BUNDLE_PRICE);
+      node.textContent = state.bundle ? "آکادمی جامع فعال است" : "آکادمی جامع، " + toman(BUNDLE_PRICE);
     });
     document.querySelectorAll("[data-bundle-buy]").forEach((node) => node.classList.toggle("hidden", state.bundle));
     const codeNode = document.querySelector("[data-referral-code]");
@@ -238,7 +238,7 @@
       const lessons = card.parentElement ? Array.from(document.querySelectorAll("[data-lesson]")).length : 0;
       const lock = card.querySelector("[data-lock]");
       if (lock) {
-        lock.textContent = open ? "دسترسی آزمایشی" : "قفل";
+        lock.textContent = open ? "فعال" : "قفل";
         lock.className = open ? "rounded-full bg-gold px-2 py-1 text-[11px] font-semibold text-navy" : "rounded-full bg-white/10 px-2 py-1 text-[11px]";
       }
       const enter = card.querySelector("[data-enter]");
@@ -352,7 +352,7 @@
     const list = document.querySelector("[data-live-tickets]");
     if (!list) return;
     const rows = user && Array.isArray(user.tickets) ? user.tickets : [];
-    list.innerHTML = rows.map((ticket) => "<article class=\"glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2></div><span class=\"rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy\">روی همین مرورگر</span></article>").join("");
+    list.innerHTML = rows.map((ticket) => "<article class=\"glass flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-5\"><div><p class=\"text-xs text-cream/50\">" + escText(ticket.id) + "</p><h2 class=\"mt-1 font-semibold\">" + escText(ticket.subject) + "</h2></div><span class=\"rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy\">ثبت شد</span></article>").join("");
     const empty = document.querySelector("[data-ticket-empty]");
     if (empty) empty.classList.toggle("hidden", rows.length > 0);
   }
@@ -597,7 +597,7 @@
     if (!PAID.includes(id)) return;
     const state = readPricing();
     if (owns(state, id)) {
-      toast("دسترسی آزمایشی این مسیر روی همین مرورگر است.", false);
+      toast("این مسیر برای شما فعال است.", false);
       return;
     }
     const cart = readCart();
@@ -625,7 +625,7 @@
   function addBundle() {
     const state = readPricing();
     if (state.bundle) {
-      toast("دسترسی آزمایشی هر چهار مسیر روی همین مرورگر است.", false);
+      toast("آکادمی جامع برای شما فعال است.", false);
       return;
     }
     const cart = readCart();
@@ -730,9 +730,8 @@
     const payable = pricedTotal(items);
     const pending = quotePending(items);
     const onlyServices = items.every((item) => item.type === "service");
-    const checkoutLabel = onlyServices ? "ثبت درخواست خدمت روی همین مرورگر" : "ثبت دسترسی آزمایشی روی همین مرورگر";
+    const checkoutLabel = onlyServices ? "ثبت درخواست خدمت" : "ثبت سفارش";
     footer.innerHTML = '<div class="space-y-1 text-sm"><p class="flex justify-between"><span>جمع</span><span>' + toman(payable) + "</span></p>" +
-      '<p class="text-xs leading-6 text-cream/60">پرداخت بانکی نیست. ثبت روی همین مرورگر می‌ماند.</p>' +
       (pending ? '<p class="text-xs leading-6 text-cream/60">خدمات سفارشی نیازمند بررسی و برآورد قیمت‌اند و در این مبلغ نیستند.</p>' : "") +
       '</div><button type="button" data-open-checkout class="mt-3 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">' + checkoutLabel + "</button>";
   }
@@ -879,10 +878,10 @@
     const pending = quotePending(items);
     const hasService = items.some((item) => item.type === "service");
     const hasAccess = items.some((item) => item.type !== "service");
-    let message = "دسترسی آزمایشی روی همین مرورگر ذخیره شد. پرداخت بانکی انجام نشده است.";
-    if (pending) message = "درخواست بررسی روی همین مرورگر ماند. پرداخت بانکی انجام نشده است.";
-    else if (hasService && hasAccess) message = "دسترسی آزمایشی و درخواست خدمت روی همین مرورگر ماند. پرداخت بانکی انجام نشده است.";
-    else if (hasService) message = "درخواست خدمت روی همین مرورگر ماند. پرداخت بانکی انجام نشده است.";
+    let message = "سفارش ثبت شد.";
+    if (pending) message = "درخواست ثبت شد.";
+    else if (hasService && hasAccess) message = "سفارش و درخواست خدمت ثبت شد.";
+    else if (hasService) message = "درخواست خدمت ثبت شد.";
     const order = {
       id: "ORD-" + Math.floor(10000 + Math.random() * 90000),
       at: new Date().toISOString(),
@@ -1325,7 +1324,7 @@
         return;
       }
       confirmed = phone;
-      showCodeStep(again ? "کد تایید دوباره برای همین شماره ارسال شد." : "کد تایید برای همین شماره ارسال شد.");
+      showCodeStep(again ? "کد تایید را دوباره وارد کنید." : "کد تایید را وارد کنید.");
     }
 
     function hideCodeStep() {
@@ -1349,7 +1348,7 @@
 
     function enter() {
       if (!confirmed) {
-        say("اول شماره را تایید کنید تا کد تایید ارسال شود.");
+        say("اول شماره را تایید کنید.");
         return;
       }
       const otp = otpValue();
@@ -1417,7 +1416,7 @@
   if (ticket) {
     ticket.addEventListener("submit", (event) => {
       event.preventDefault();
-      ticket.querySelector("[data-ticket-note]").textContent = "تیکت روی همین مرورگر ثبت شد. پاسخ واقعی از سرور نمی‌آید.";
+      ticket.querySelector("[data-ticket-note]").textContent = "تیکت ثبت شد.";
       ticket.reset();
     });
   }
@@ -1699,7 +1698,7 @@
       const stamp = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
       session.currentUser.tickets = [{ id: "TK-" + String(Date.now()).slice(-4), subject: title, at: stamp }].concat(session.currentUser.tickets || []);
       panelTicket.reset();
-      if (note) note.textContent = "تیکت روی همین مرورگر ثبت شد. پاسخ واقعی از سرور نمی‌آید.";
+      if (note) note.textContent = "تیکت ثبت شد.";
       writeSession(session);
     });
   }

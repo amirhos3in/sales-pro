@@ -93,7 +93,7 @@
           <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.2 11h11.3l1.8-8H7"/></svg>
           <span data-cart-count class="absolute -top-1 start-0 hidden min-w-5 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-5 text-navy">۰</span>
         </button>
-        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود آزمایشی</a>
+        <a data-auth-guest href="/sales-pro/login/" class="rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود</a>
         <a data-auth-user="chip" href="/sales-pro/dashboard/" class="items-center gap-2 rounded-full py-1 ps-1 pe-3 text-xs ring-1 ring-gold/30 sm:text-sm" hidden>
           <span data-header-letter class="grid size-7 place-items-center rounded-full bg-gold text-xs font-bold text-navy">ن</span>
           <span data-header-name class="max-w-28 truncate">کاربر</span>
@@ -103,7 +103,7 @@
     </div>
     <div data-mobile-nav data-lenis-prevent class="hidden max-h-[70vh] overflow-y-auto border-t border-white/10 px-4 py-3 md:hidden">
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
-      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود آزمایشی</a>
+      <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود</a>
       <div data-auth-user="menu" class="mb-2 border-b border-white/10 pb-2" hidden>
         <p class="px-3 py-2 text-sm font-semibold"><span data-header-name>کاربر</span></p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
@@ -132,7 +132,7 @@
     <header data-reveal data-delay="0">
       <p class="text-xs tracking-[0.16em] text-gold">مسیر مرحله‌به‌مرحله</p>
       <h1 class="mt-2 text-3xl font-semibold">آموزش</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">درس اول هر مسیر بدون سبد دیده می‌شود. بقیهٔ درس‌ها بعد از افزودن به سبد باز می‌شوند. پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p>
+      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">درس اول هر مسیر بدون سبد دیده می‌شود. بقیهٔ درس‌ها بعد از افزودن به سبد باز می‌شوند.</p>
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2"><article data-reveal data-delay="0" class="glass flex cursor-pointer flex-col overflow-hidden rounded-3xl" data-course-card="online" data-paid="yes" data-card-mode="locked">
       <div class="flex items-start justify-between gap-3 bg-[#10182E] px-5 py-5">
@@ -283,7 +283,7 @@
           <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div data-card-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
         </div>
         <div class="mt-3 grid gap-2">
-          <a data-card-guest href="/sales-pro/login/" class="inline-flex h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">ورود آزمایشی برای شروع</a>
+          <a data-card-guest href="/sales-pro/login/" class="inline-flex h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">ورود برای شروع</a>
           <a data-card-resume href="/sales-pro/learn/free/free-expression/" class="hidden h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">شروع یادگیری</a>
         </div></div>
       </div>
@@ -304,7 +304,6 @@
       </div>
       <div class="border-t border-white/10 p-5">
         <button type="button" data-buy data-ov-buy class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">افزودن به سبد</button>
-        <p class="mt-2 text-center text-xs leading-6 text-cream/60">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند.</p>
         <p data-ov-price class="mt-2 text-center text-xs text-cream/50"></p>
       </div>
     </div>
@@ -348,7 +347,7 @@
   <dialog id="checkout-order" aria-labelledby="checkout-title">
     <form data-checkout-form class="flex max-h-[min(90vh,52rem)] flex-col">
       <div class="flex items-start justify-between gap-3 border-b border-white/10 p-5">
-        <h2 id="checkout-title" class="text-xl font-semibold">ثبت دسترسی آزمایشی</h2>
+        <h2 id="checkout-title" class="text-xl font-semibold">ثبت سفارش</h2>
         <button type="button" data-checkout-close class="grid size-10 place-items-center rounded-full ring-1 ring-white/20" aria-label="بستن">×</button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
@@ -362,7 +361,7 @@
       </div>
       <div data-checkout-actions class="border-t border-white/10 p-5">
         <div data-checkout-summary class="mb-3 rounded-2xl border border-white/10 p-3 text-sm"></div>
-        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت دسترسی آزمایشی روی همین مرورگر</button>
+        <button type="submit" class="h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت سفارش</button>
       </div>
     </form>
   </dialog>
