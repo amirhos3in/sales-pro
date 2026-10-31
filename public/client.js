@@ -703,7 +703,11 @@
     const bundleHeld = items.some((item) => item.type === "bundle");
     document.querySelectorAll("#buy-bundle").forEach((bundle) => {
       bundle.disabled = bundleHeld;
-      bundle.textContent = bundleHeld ? "در سبد" : "افزودن به سبد";
+      const idle = bundle.dataset.bundleIdle || "افزودن به سبد";
+      const text = bundleHeld ? "در سبد" : idle;
+      const label = bundle.querySelector("[data-bundle-label]");
+      if (label) label.textContent = text;
+      else bundle.textContent = text;
     });
   }
 

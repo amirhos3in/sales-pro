@@ -754,16 +754,45 @@ export function homePage(base: string) {
       <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/70">درس اول هر مسیر بدون سبد دیده می‌شود.</p>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>
       ${academyImpact(base)}
-      <article class="mt-4 rounded-[28px] border border-gold/40 bg-navy p-5 sm:p-6">
-        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div class="min-w-0">
-            <h2 class="text-lg font-semibold leading-8 text-cream">آکادمی جامع، <span class="text-gold">${toman(BUNDLE_PRICE)}</span></h2>
-            ${bundleOfferCopy()}
+      <style>
+        @keyframes bundle-glow { 0%, 100% { box-shadow: 0 0 22px rgba(212,175,55,0.12); } 50% { box-shadow: 0 0 36px rgba(212,175,55,0.28); } }
+        .bundle-showcase { animation: bundle-glow 3.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .bundle-showcase { animation: none; } }
+      </style>
+      <article class="bundle-showcase relative mt-6 overflow-hidden rounded-3xl border border-gold/40 bg-[#070B18] p-4 sm:p-6">
+        <div class="pointer-events-none absolute inset-0" style="background: radial-gradient(ellipse at 18% 45%, rgba(212,175,55,0.16), transparent 58%)"></div>
+        <div class="relative grid items-center gap-6 lg:grid-cols-2">
+          <div>
+            <p class="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-[#F3E5AB]">💎 پیشنهاد ویژه آکادمی — جامع‌ترین مسیر ورود به دنیای فروش حرفه‌ای</p>
+            <h2 class="mt-4 text-2xl font-semibold leading-[1.55] sm:text-3xl">آکادمی جامع نکس‌سل؛ هر چهار مهارت فروش در یک بسته یکپارچه</h2>
+            <p class="mt-3 text-sm leading-8 text-cream/75">برای کسی که می‌خواهد تمام کانال‌های فروش (آنلاین، حضوری، تلفنی و مذاکره) را یک‌جا مسلط شود و در هر موقعیتی مشتری را به نتیجه برساند.</p>
+            <ul class="mt-5 space-y-3 text-sm leading-7">
+              ${[
+                `دسترسی به ${fa.format(categories.filter((category) => category.tierRequired === "pro").reduce((sum, category) => sum + lessonsOf(category).length, 0))} درس ویدیویی چهار مسیر`,
+                "کوییز سناریومحور در پایان هر درس",
+                "هر درس روی یک موقعیت مکالمه ساخته شده است",
+                "بعد از ثبت سفارش، هر چهار مسیر در همین مرورگر باز می‌شود",
+              ].map((line) => `<li class="flex items-start gap-2"><svg viewBox="0 0 24 24" class="mt-1 size-4 shrink-0 text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${line}</span></li>`).join("")}
+            </ul>
           </div>
-          <button type="button" id="buy-bundle" class="h-11 w-full shrink-0 rounded-2xl bg-cream px-5 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">افزودن به سبد</button>
+          <div class="flex flex-col gap-4">
+            <figure class="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#070B18]">
+              <img src="${base}/present/bundle-monolith.webp" alt="چهار مکعب شیشه‌ای تیره با نور طلایی؛ نماد تماس، جلسه، گفتگو و توافق" width="1400" height="1050" class="aspect-[4/3] w-full object-cover" />
+              <span class="absolute bottom-3 start-3 rounded-full border border-gold/40 bg-[#070B18]/80 px-3 py-1 text-xs text-[#F3E5AB] backdrop-blur">بسته جامع ۴ مسیر تخصصی</span>
+            </figure>
+            <div class="rounded-3xl border border-gold/40 bg-white/[0.05] p-5 backdrop-blur-md">
+              <p class="text-sm text-cream/50 line-through decoration-cream/40 opacity-60">مجموع خرید جداگانه: ${toman(BUNDLE_LIST_PRICE)}</p>
+              <p class="mt-3 inline-flex rounded-full bg-gold px-3 py-1 text-xs font-semibold text-navy">🔥 ${toman(BUNDLE_SAVE)} صرفه‌جویی</p>
+              <p class="mt-4 text-4xl font-black tracking-tight text-cream">${fa.format(BUNDLE_PRICE)} <span class="text-base font-semibold text-cream/70">تومان</span></p>
+              <button type="button" id="buy-bundle" data-bundle-idle="ثبت‌نام در آکادمی جامع با تخفیف ${fa.format(BUNDLE_SAVE / 1_000_000)} میلیونی" class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gold px-5 text-sm font-semibold text-navy shadow-[0_0_24px_rgba(212,175,55,0.35)] disabled:cursor-not-allowed disabled:opacity-60">
+                <span data-bundle-label>ثبت‌نام در آکادمی جامع با تخفیف ${fa.format(BUNDLE_SAVE / 1_000_000)} میلیونی</span>
+                <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 6 8 12l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <p class="mt-3 text-xs leading-6 text-cream/50">دقیقهٔ دستیار هوش مصنوعی و خدمات سازمانی جدا از آموزش‌هاست.</p>
+            </div>
+          </div>
         </div>
       </article>
-      <p class="mt-4 text-sm text-cream/50"><a class="text-cream/70" href="${base}/assistant/">دستیار پشت خط جدا از آموزش است و از همان صفحه می‌شود باهاش کار کرد.</a></p>
     </section>
   `);
 }
