@@ -298,14 +298,6 @@ function voiceChat() {
   </div>`;
 }
 
-const COURSE_MARK: Record<string, string> = {
-  online: "آنلاین",
-  hozuri: "حضوری",
-  telefoni: "تلفنی",
-  mozakerah: "مذاکره",
-  free: "رایگان",
-};
-
 function durationLabel(minutes: number) {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
@@ -345,58 +337,94 @@ function homeCourseCards(base: string) {
   }).join("");
 }
 
+const ACADEMY_PATHS = [
+  {
+    id: "telefoni",
+    title: "آموزش فروش تلفنی",
+    text: "تکنیک‌های ۳۰ ثانیه طلایی، عبور مقتدرانه از گیت‌کیپر و سناریوهای تماس سرد بدون رد شدن عجولانه.",
+    visual: "academy-phone.webp",
+    alt: "هدست تیره کنار کارت هولوگرام طلایی و موج صدا",
+    step: "فروش تلفنی",
+    note: "ورود به مکالمه و ۳۰ ثانیه اول",
+  },
+  {
+    id: "online",
+    title: "آموزش فروش آنلاین",
+    text: "تبدیل فالوور و لید چت به خریدار قطعی، نگه‌داشت حرارت دایرکت و سناریوهای پیگیری بدون ایجاد حس مزاحمت.",
+    visual: "academy-online.webp",
+    alt: "گوشی شیشه‌ای تیره با حباب گفتگو و حلقه‌های قیف طلایی",
+    step: "فروش آنلاین",
+    note: "مدیریت دایرکت و حفظ گرمای چت",
+  },
+  {
+    id: "hozuri",
+    title: "آموزش فروش حضوری",
+    text: "تسلط بر اتمسفر جلسه، زبان بدن مقتدرانه و بستن قرارداد در همان جلسه بدون نیاز به تخفیف‌های عجیب.",
+    visual: "academy-meet.webp",
+    alt: "میز تیره با منشور هندسی و صفحهٔ نورانی طلایی",
+    step: "فروش حضوری",
+    note: "کنترل جلسه و بستن رو در رو",
+  },
+  {
+    id: "mozakerah",
+    title: "آموزش مذاکره حرفه‌ای",
+    text: "استراتژی امتیازدهی مشروط، خلع سلاح اعتراض «قیمت بالاست» و تکنیک‌های بستن فرضی.",
+    visual: "academy-negotiate.webp",
+    alt: "ترازوی فلزی تیره با دو مکعب و هستهٔ نورانی طلایی",
+    step: "اصول مذاکره",
+    note: "مدیریت امتیاز و قراردادهای بزرگ",
+  },
+] as const;
+
 function academyCourseCards(base: string) {
-  return categories.map((category, index) => {
+  return ACADEMY_PATHS.map((path, index) => {
+    const category = findCategory(path.id);
+    if (!category) return "";
     const rows = lessonsOf(category);
     const minutes = rows.reduce((sum, row) => sum + row.lesson.minutes, 0);
-    const paid = category.tierRequired === "pro";
     const first = rows[0]?.lesson.id;
     const enter = first ? `${base}/learn/${category.id}/${first}/` : `${base}/learn/${category.id}/`;
-    const freeBadge = paid ? "" : `<span class="rounded-full bg-emerald-500/20 px-2 py-1 text-[11px] font-semibold text-emerald-200">رایگان</span>`;
-    const actions = paid
-      ? `<div data-card-price><p class="text-2xl font-semibold text-gold">${toman(COURSE_PRICE)}</p></div>
-        <div data-card-progress class="hidden">
-          <div class="flex items-center justify-between gap-2 text-xs">
-            <p data-card-fraction>۰ از ${fa.format(rows.length)} درس تکمیل‌شده</p>
-            <span data-card-status="learning" class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-gold">در حال یادگیری</span>
-            <span data-card-status="done" class="hidden shrink-0 rounded-full bg-gold px-2 py-0.5 text-navy">تکمیل‌شده</span>
-          </div>
-          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div data-card-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
-        </div>
-        <div class="mt-3 grid gap-2">
-          <button type="button" data-card-overview class="h-11 rounded-2xl bg-gold text-sm font-semibold text-navy" aria-haspopup="dialog">مشاهده سرفصل‌ها و معرفی</button>
-          <button type="button" data-card-buy data-buy="${category.id}" class="h-11 rounded-2xl text-sm ring-1 ring-gold/40">افزودن به سبد</button>
-          <a data-card-resume href="${enter}" class="hidden h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">ادامه یادگیری</a>
-        </div>`
-      : `<div data-card-progress class="hidden">
-          <div class="flex items-center justify-between gap-2 text-xs">
-            <p data-card-fraction>۰ از ${fa.format(rows.length)} درس تکمیل‌شده</p>
-            <span data-card-status="learning" class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-gold">در حال یادگیری</span>
-            <span data-card-status="done" class="hidden shrink-0 rounded-full bg-gold px-2 py-0.5 text-navy">تکمیل‌شده</span>
-          </div>
-          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div data-card-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
-        </div>
-        <div class="mt-3 grid gap-2">
-          <a data-card-guest href="${base}/login/" class="inline-flex h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">ورود برای شروع</a>
-          <a data-card-resume href="${enter}" class="hidden h-11 items-center justify-center rounded-2xl bg-gold text-sm font-semibold text-navy">شروع یادگیری</a>
-        </div>`;
-    return `<article ${revealAttrs(index * 80)} class="glass flex cursor-pointer flex-col overflow-hidden rounded-3xl" data-course-card="${category.id}" data-paid="${paid ? "yes" : "no"}" data-card-mode="${paid ? "locked" : "login"}">
-      <div class="flex items-start justify-between gap-3 bg-[#10182E] px-5 py-5">
-        <span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-gold text-sm font-bold text-navy">${esc(COURSE_MARK[category.id] || "ن")}</span>
-        <div class="flex flex-wrap justify-end gap-1.5">
-          ${freeBadge}
-          <span class="rounded-full border border-gold/40 px-2 py-1 text-[11px] text-cream">دارای آزمون سنجش</span>
-        </div>
+    const syllabus = rows.map((row, lessonIndex) => {
+      const href = `${base}/learn/${category.id}/${row.lesson.id}/`;
+      const mark = lessonIndex === 0
+        ? `<span class="shrink-0 rounded-full bg-gold/15 px-2 py-1 text-[11px] font-semibold text-gold">رایگان برای تست</span>`
+        : `<span class="shrink-0 text-[11px] text-cream/45">ادامهٔ مسیر</span>`;
+      return `<li><a href="${href}" class="flex items-start justify-between gap-3 rounded-2xl px-2 py-2 text-sm leading-7 hover:bg-white/5"><span><span class="text-gold">${fa.format(lessonIndex + 1)}.</span> ${esc(row.lesson.title.fa)}</span>${mark}</a></li>`;
+    }).join("");
+    return `<article id="course-${path.id}" ${revealAttrs(index * 60)} class="flex scroll-mt-24 flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#070B18]" data-course-card="${category.id}" data-paid="yes" data-card-mode="locked">
+      <div class="relative aspect-video overflow-hidden border-b border-white/10 bg-[#070B18] shadow-[inset_0_0_48px_rgba(212,175,55,0.16)]">
+        <img src="${base}/present/${path.visual}" width="1280" height="720" alt="${esc(path.alt)}" class="h-full w-full object-cover" />
       </div>
       <div class="flex flex-1 flex-col p-5">
-        <h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2>
-        <p class="mt-2 text-sm leading-7 text-cream/70">${esc(category.description.fa)}</p>
-        <ul class="mt-3 flex flex-wrap gap-2 text-[11px] text-cream/60">
-          <li class="rounded-full bg-white/5 px-2.5 py-1">${durationLabel(minutes)}</li>
-          <li class="rounded-full bg-white/5 px-2.5 py-1">${fa.format(rows.length)} درس</li>
-          <li class="rounded-full bg-white/5 px-2.5 py-1">ویدیویی + کوییز گیمیفای‌شده</li>
+        <ul class="flex flex-wrap gap-2 text-[11px] text-cream/70">
+          <li class="rounded-full border border-white/10 px-2.5 py-1">مقدماتی تا پیشرفته</li>
+          <li class="rounded-full border border-white/10 px-2.5 py-1">${durationLabel(minutes)}</li>
+          <li class="rounded-full border border-white/10 px-2.5 py-1">ویدیو + کوییز تعاملی</li>
         </ul>
-        <div class="mt-4 border-t border-white/10 pt-4">${actions}</div>
+        <h2 class="mt-4 text-xl font-semibold">${esc(path.title)}</h2>
+        <p class="mt-2 text-sm leading-7 text-cream/75">${esc(path.text)}</p>
+        <details class="academy-syllabus mt-4 border-t border-white/10 pt-3">
+          <summary class="flex cursor-pointer items-center justify-between gap-3 text-sm font-semibold">
+            <span>سرفصل‌های منتخب</span>
+            <svg class="academy-chev size-4 shrink-0 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <ol class="mt-2">${syllabus}</ol>
+        </details>
+        <div class="mt-4 border-t border-white/10 pt-4">
+          <div data-card-price><p class="text-2xl font-semibold text-gold">${toman(COURSE_PRICE)}</p></div>
+          <div data-card-progress class="hidden">
+            <div class="flex items-center justify-between gap-2 text-xs">
+              <p data-card-fraction>۰ از ${fa.format(rows.length)} درس تکمیل‌شده</p>
+              <span data-card-status="learning" class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-gold">در حال یادگیری</span>
+              <span data-card-status="done" class="hidden shrink-0 rounded-full bg-gold px-2 py-0.5 text-navy">تکمیل‌شده</span>
+            </div>
+            <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div data-card-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+          </div>
+          <div class="mt-3 grid gap-2">
+            <a data-card-start data-start-href="${enter}" data-start-label="مشاهده سرفصل‌ها و شروع درس اول" href="${enter}" class="inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-l from-[#F3E5AB] to-gold px-4 text-center text-sm font-semibold text-navy">مشاهده سرفصل‌ها و شروع درس اول</a>
+            <button type="button" data-card-buy data-buy="${category.id}" class="h-11 rounded-2xl border border-white/10 text-sm">افزودن به سبد</button>
+          </div>
+        </div>
       </div>
     </article>`;
   }).join("");
@@ -414,7 +442,7 @@ function courseOverview() {
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto p-5" data-lenis-prevent>
         <p data-ov-desc class="text-sm leading-7 text-cream/70"></p>
-        <p class="mt-4 text-sm font-medium text-gold">درس اول هر مسیر بدون سبد دیده می‌شود. قبولی در ۲ سوال از ۳ سوال درس بعد را باز می‌کند.</p>
+        <p class="mt-4 text-sm font-medium text-gold">درس اول هر مسیر بدون سبد دیده می‌شود. بقیهٔ درس‌ها بعد از افزودن همان مسیر به سبد باز می‌شوند. چالش هر درس با دو پاسخ درست از سه سؤال قبول می‌شود.</p>
         <ol data-ov-lessons class="mt-3 space-y-2"></ol>
       </div>
       <div class="border-t border-white/10 p-5">
@@ -788,7 +816,16 @@ export function demoPage(base: string) {
 
 export function academyPage(base: string) {
   const catalog = JSON.stringify(courseCatalog()).replaceAll("<", "\\u003c");
-  return layout(base, "academy", "آموزش | نکس‌سل", `
+  const savePercent = Math.round((BUNDLE_SAVE / BUNDLE_LIST_PRICE) * 100);
+  const steps = ACADEMY_PATHS.map((path, index) => `<li class="min-w-[13.5rem] flex-1 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+    <a href="#course-${path.id}" class="block">
+      <span class="grid size-8 place-items-center rounded-full bg-gold text-sm font-bold text-navy">${fa.format(index + 1)}</span>
+      <p class="mt-3 text-sm font-semibold">${esc(path.step)}</p>
+      <p class="mt-1 text-xs leading-6 text-cream/60">${esc(path.note)}</p>
+    </a>
+  </li>`).join("");
+  const description = "چهار مسیر تخصصی فروش تلفنی، آنلاین، حضوری و مذاکره. هر درس ویدیو و کوییز دارد و درس اول بدون سبد باز است.";
+  return layout(base, "academy", "آکادمی عملیاتی فروش نکس‌سل", `
     <style>
       #course-overview {
         width: min(40rem, calc(100vw - 1.5rem));
@@ -804,16 +841,62 @@ export function academyPage(base: string) {
       @media (max-width: 640px) {
         #course-overview { width: 100vw; max-height: 100vh; height: 100vh; border-radius: 0; }
       }
+      .academy-syllabus .academy-chev { transition: transform 280ms ease; }
+      .academy-syllabus[open] .academy-chev { transform: rotate(180deg); }
+      .academy-syllabus::details-content {
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: height 280ms ease, opacity 280ms ease, content-visibility 280ms allow-discrete;
+      }
+      .academy-syllabus[open]::details-content {
+        height: auto;
+        opacity: 1;
+      }
     </style>
-    <header ${revealAttrs(0)}>
-      <p class="text-xs tracking-[0.16em] text-gold">مسیر مرحله‌به‌مرحله</p>
-      <h1 class="mt-2 text-3xl font-semibold">آموزش</h1>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">درس اول هر مسیر بدون سبد دیده می‌شود. بقیهٔ درس‌ها بعد از افزودن به سبد باز می‌شوند.</p>
+    <header ${revealAttrs(0)} class="overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] px-5 py-8 sm:px-8">
+      <p class="text-xs tracking-[0.18em] text-gold">آکادمی</p>
+      <h1 class="mt-3 text-3xl font-semibold leading-[1.45] sm:text-4xl">آکادمی عملیاتی فروش نکس‌سل</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-8 text-cream/75 sm:text-base">چهار مسیر تخصصی بدون اتلاف وقت و اضافه‌گویی؛ هر درس همراه با ویدیوی کاربردی و کوییز سناریومحور برای تثبیت مهارت.</p>
+      <ol class="mt-6 flex gap-3 overflow-x-auto pb-1" data-lenis-prevent aria-label="مسیر پیشرفت">${steps}</ol>
     </header>
     <div class="mt-6 grid gap-4 md:grid-cols-2">${academyCourseCards(base)}</div>
+    <section class="mt-6 rounded-[2rem] border border-gold bg-[#070B18] p-5 shadow-[0_0_42px_rgba(212,175,55,0.16)] sm:p-7">
+      <p class="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-[#F3E5AB]">پیشنهاد اقتصادی و کامل (۴ دوره در ۱ پکیج)</p>
+      <h2 class="mt-4 text-2xl font-semibold">پکیج جامع ۴ مسیر فروش نکس‌سل</h2>
+      <p class="mt-3 max-w-3xl text-sm leading-8 text-cream/75">دسترسی یکجا به دوره‌های آنلاین، حضوری، تلفنی و مذاکره. هر درس ویدیوی همان مهارت را دارد و با کوییز سناریومحور تمام می‌شود.</p>
+      <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-8">
+        <p class="text-sm text-cream/60">قیمت تکی دوره‌ها: <span class="line-through decoration-cream/40">${toman(BUNDLE_LIST_PRICE)}</span></p>
+        <p class="text-sm">قیمت خرید یکجا: <span class="text-2xl font-semibold text-gold">${toman(BUNDLE_PRICE)}</span> <span class="text-cream/70">(${fa.format(savePercent)}٪ صرفه‌جویی اقتصادی)</span></p>
+      </div>
+      <ul class="mt-5 grid gap-2 text-sm leading-7 text-cream/80 sm:grid-cols-3">
+        <li class="rounded-2xl border border-white/10 px-3 py-3">۴ دوره جامع و کاربردی</li>
+        <li class="rounded-2xl border border-white/10 px-3 py-3">هر درس ویدیو و کوییز سناریومحور دارد</li>
+        <li class="rounded-2xl border border-white/10 px-3 py-3">درس اول هر مسیر بدون سبد باز است</li>
+      </ul>
+      <button type="button" id="buy-bundle" class="mt-5 inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-l from-[#F3E5AB] to-gold px-5 text-sm font-semibold text-navy">ثبت‌نام پکیج جامع با تخفیف ${fa.format(BUNDLE_SAVE / 1_000_000)} میلیونی</button>
+    </section>
+    <section class="mt-6" aria-labelledby="quiz-method">
+      <h2 id="quiz-method" class="text-xl font-semibold">روش تمرین و کوییز</h2>
+      <div class="mt-4 grid gap-3 md:grid-cols-3">
+        <article class="rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+          <h3 class="text-base font-semibold">آزمون‌های سناریومحور</h3>
+          <p class="mt-2 text-sm leading-7 text-cream/70">هر درس سه سؤال از موقعیت همان مکالمه دارد، نه از تعریف‌های حفظی.</p>
+        </article>
+        <article class="rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+          <h3 class="text-base font-semibold">شرط قبولی چالش</h3>
+          <p class="mt-2 text-sm leading-7 text-cream/70">دو پاسخ درست از سه سؤال، چالش همان درس را قبول می‌کند. ویدیوی درس‌های بعدی بعد از افزودن همان مسیر به سبد باز می‌شود.</p>
+        </article>
+        <article class="rounded-[1.75rem] border border-white/10 bg-[#070B18] p-5">
+          <h3 class="text-base font-semibold">پیشرفت روی همین مرورگر</h3>
+          <p class="mt-2 text-sm leading-7 text-cream/70">تماشا و قبولی چالش در همین مرورگر می‌ماند و درصدش در پنل کاربری دیده می‌شود.</p>
+        </article>
+      </div>
+    </section>
+    <p class="mt-6 text-sm text-cream/60"><a class="text-gold" href="${base}/learn/free/">آموزش‌های رایگان</a> جدا از این چهار مسیر است.</p>
     ${courseOverview()}
     <script id="course-catalog" type="application/json">${catalog}</script>
-  `);
+  `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="آکادمی عملیاتی فروش نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
 export function copilotPage(base: string) {

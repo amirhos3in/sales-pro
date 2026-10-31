@@ -431,6 +431,16 @@
         resume.href = resumeHref;
         if (!paid) resume.textContent = done > 0 ? "ادامه یادگیری" : "شروع یادگیری";
       }
+      const start = card.querySelector("[data-card-start]");
+      if (start) {
+        if (showLearn) {
+          start.href = resumeHref;
+          start.textContent = "ادامه یادگیری";
+        } else if (start.dataset.startHref) {
+          start.href = start.dataset.startHref;
+          start.textContent = start.dataset.startLabel || "مشاهده سرفصل‌ها و شروع درس اول";
+        }
+      }
       const fraction = card.querySelector("[data-card-fraction]");
       if (fraction) fraction.textContent = fa.format(done) + " از " + fa.format(total) + " درس تکمیل‌شده - " + fa.format(percent) + "٪";
       const learning = card.querySelector('[data-card-status="learning"]');
@@ -1057,17 +1067,7 @@
       return;
     }
     const academyCard = event.target.closest("[data-course-card]");
-    if (academyCard && !event.target.closest("a, button")) {
-      if (academyCard.dataset.cardMode === "locked") openOverview(academyCard.dataset.courseCard);
-      else if (academyCard.dataset.cardMode === "learn") {
-        const resume = academyCard.querySelector("[data-card-resume]");
-        if (resume) location.href = resume.href;
-      } else if (academyCard.dataset.cardMode === "login") {
-        const guest = academyCard.querySelector("[data-card-guest]");
-        if (guest) location.href = guest.href;
-      }
-      return;
-    }
+    if (academyCard && event.target.closest("summary")) return;
     const menu = event.target.closest("[data-menu]");
     if (menu) {
       document.querySelector("[data-mobile-nav]").classList.toggle("hidden");
