@@ -202,6 +202,10 @@
     document.querySelectorAll("[data-header-name]").forEach((node) => {
       node.textContent = role === "admin" ? "مدیر" : (name || "کاربر");
     });
+    document.querySelectorAll("[data-admin-username]").forEach((node) => {
+      const storedName = user && user.username ? user.username : "";
+      node.textContent = storedName || readAdminCreds().username;
+    });
     document.querySelectorAll("[data-header-letter]").forEach((node) => {
       node.textContent = (name || "ن").slice(0, 1);
     });
@@ -1531,9 +1535,19 @@
     const edit = root.querySelector("[data-auth-edit]");
     const terms = root.querySelector("[data-auth-terms]");
     const boxes = Array.from(root.querySelectorAll("[data-otp-digit]"));
+    const nameStep = root.querySelector("[data-auth-name]");
+    const nameInput = root.querySelector("[data-auth-fullname]");
     let confirmed = "";
     let left = 0;
     let timerId = 0;
+    let naming = false;
+
+    function properName(value) {
+      const text = String(value || "").trim().replace(/\s+/g, " ");
+      if (!text || text === "کاربر" || text === "کاربر نکس‌سل") return "";
+      const parts = text.split(" ").filter(Boolean);
+      return parts.length >= 2 && text.length >= 5 ? text : "";
+    }
 
     function say(message) {
       if (note) note.textContent = message;
@@ -1593,6 +1607,10 @@
         terms.classList.remove("flex");
       }
       boxes.forEach((box) => { box.value = ""; });
+      naming = false;
+      if (nameStep) nameStep.classList.add("hidden");
+      if (nameInput) nameInput.value = "";
+      if (finish) finish.textContent = mode === "register" ? "ثبت‌نام و ورود" : "تأیید و ورود";
       say("");
       phoneInput.focus();
     }
@@ -1635,6 +1653,20 @@
         writeAccounts(accounts);
       } else if (accounts[confirmed]) {
         user = { ...accounts[confirmed], phone: confirmed };
+      }
+      if (mode === "login" && !properName(user.name)) {
+        const typed = nameInput ? properName(nameInput.value) : "";
+        if (!naming || !typed) {
+          naming = true;
+          if (nameStep) nameStep.classList.remove("hidden");
+          if (finish) finish.textContent = "ثبت نام و ورود";
+          say(typed ? "" : "نام و نام خانوادگی را کامل بنویسید.");
+          if (nameInput) nameInput.focus();
+          return;
+        }
+        user = { ...user, name: typed, phone: confirmed };
+        accounts[confirmed] = user;
+        writeAccounts(accounts);
       }
       writeSession({ isAuthenticated: true, role: "customer", currentUser: user });
       upsertCustomerFromUser(user);
@@ -1683,17 +1715,98 @@
   const ADMIN_CREDS_KEY = "nexsell-admin-credentials-v1";
   const ADMIN_SEEN_KEY = "nexsell-admin-seen-v1";
   const CUSTOMER_SEED = [
-    { id: "c1", name: "سارا محمدی", phone: "09121234567", status: "active", registeredAt: "2026-08-12" },
-    { id: "c2", name: "علی رضایی", phone: "09351239876", status: "active", registeredAt: "2026-09-03" },
-    { id: "c3", name: "نگار حسینی", phone: "09197771234", status: "blocked", registeredAt: "2026-07-21" },
-    { id: "c4", name: "مهدی کریمی", phone: "09031236789", status: "active", registeredAt: "2026-10-02" },
-    { id: "c5", name: "فاطمه نوری", phone: "09211234501", status: "active", registeredAt: "2026-10-18" },
+    {
+      id: "c1", name: "سارا محمدی", phone: "09121234567", status: "active", registeredAt: "2026-08-12",
+      aiMinutesTotal: 180, aiMinutesUsed: 70,
+      courses: [
+        { id: "online", title: "آموزش فروش آنلاین", watched: 3, total: 4 },
+        { id: "hozuri", title: "آموزش فروش حضوری", watched: 1, total: 4 },
+      ],
+      services: [{ title: "کارگاه حضوری تیم فروش", at: "2026-09-14" }],
+    },
+    {
+      id: "c2", name: "علی رضایی", phone: "09351239876", status: "active", registeredAt: "2026-09-03",
+      aiMinutesTotal: 90, aiMinutesUsed: 90,
+      courses: [
+        { id: "telefoni", title: "آموزش فروش تلفنی", watched: 4, total: 4 },
+        { id: "mozakerah", title: "آموزش مذاکره", watched: 2, total: 4 },
+      ],
+      services: [{ title: "بازنویسی اسکریپت تیم فروش", at: "2026-09-20" }],
+    },
+    {
+      id: "c3", name: "نگار حسینی", phone: "09197771234", status: "blocked", registeredAt: "2026-07-21",
+      aiMinutesTotal: 60, aiMinutesUsed: 12,
+      courses: [{ id: "online", title: "آموزش فروش آنلاین", watched: 1, total: 4 }],
+      services: [],
+    },
+    {
+      id: "c4", name: "مهدی کریمی", phone: "09031236789", status: "active", registeredAt: "2026-10-02",
+      aiMinutesTotal: 300, aiMinutesUsed: 40,
+      courses: [
+        { id: "online", title: "آموزش فروش آنلاین", watched: 4, total: 4 },
+        { id: "hozuri", title: "آموزش فروش حضوری", watched: 2, total: 4 },
+        { id: "telefoni", title: "آموزش فروش تلفنی", watched: 3, total: 4 },
+        { id: "mozakerah", title: "آموزش مذاکره", watched: 1, total: 4 },
+      ],
+      services: [
+        { title: "منتورینگ مدیر فروش", at: "2026-10-11" },
+        { title: "بهینه‌سازی قیف فروش", at: "2026-10-25" },
+      ],
+    },
+    {
+      id: "c5", name: "فاطمه نوری", phone: "09211234501", status: "active", registeredAt: "2026-10-18",
+      aiMinutesTotal: 40, aiMinutesUsed: 8,
+      courses: [{ id: "hozuri", title: "آموزش فروش حضوری", watched: 2, total: 4 }],
+      services: [{ title: "بهینه‌سازی قیف فروش", at: "2026-10-22" }],
+    },
+  ];
+  const TICKETS_KEY = "nexsell-admin-tickets-v1";
+  const TICKET_SEED = [
+    {
+      id: "t1", name: "سارا محمدی", phone: "09121234567", subject: "درس دوم فروش آنلاین باز نمی‌شود", status: "open", at: "2026-10-20T09:00:00.000Z",
+      messages: [{ from: "user", text: "ویدیوی درس دوم را باز می‌کنم و همان قفل را می‌بینم.", at: "2026-10-20T09:00:00.000Z" }],
+    },
+    {
+      id: "t2", name: "علی رضایی", phone: "09351239876", subject: "دقیقهٔ دستیار زود تمام شد", status: "review", at: "2026-10-22T11:30:00.000Z",
+      messages: [
+        { from: "user", text: "دیروز چند پاسخ گرفتم و ماندهٔ دقیقه‌ام یک‌باره کم شد.", at: "2026-10-22T11:30:00.000Z" },
+        { from: "admin", text: "مانده را در همین مرورگر بررسی می‌کنم و نتیجه را همین‌جا می‌نویسم.", at: "2026-10-22T12:10:00.000Z" },
+      ],
+    },
+    {
+      id: "t3", name: "مهدی کریمی", phone: "09031236789", subject: "زمان کارگاه تیم فروش", status: "closed", at: "2026-10-12T08:00:00.000Z",
+      messages: [
+        { from: "user", text: "برای کارگاه حضوری تیم، هفتهٔ بعد چه روزی خالی است؟", at: "2026-10-12T08:00:00.000Z" },
+        { from: "admin", text: "زمان را در درخواست همکاری ثبت کنید تا در روز کاری هماهنگ شود.", at: "2026-10-12T15:00:00.000Z" },
+      ],
+    },
+    {
+      id: "t4", name: "فاطمه نوری", phone: "09211234501", subject: "کوییز درس اول قبول نشد", status: "open", at: "2026-10-26T16:20:00.000Z",
+      messages: [{ from: "user", text: "دو پاسخ درست زدم ولی چالش قبول نشد. یک بار دیگر بزنم؟", at: "2026-10-26T16:20:00.000Z" }],
+    },
+    {
+      id: "t5", name: "نگار حسینی", phone: "09197771234", subject: "وضعیت حساب مسدود است", status: "review", at: "2026-10-18T10:00:00.000Z",
+      messages: [{ from: "user", text: "با شماره‌ام کد می‌گیرم ولی ورود انجام نمی‌شود.", at: "2026-10-18T10:00:00.000Z" }],
+    },
   ];
 
   function faDate(value) {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return faDigits(String(value || "—"));
     return new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(date);
+  }
+
+  function decorateCustomer(row) {
+    const preset = CUSTOMER_SEED.find((item) => item.id === row.id);
+    const courses = Array.isArray(row.courses) ? row.courses : (preset ? preset.courses.map((item) => ({ ...item })) : []);
+    const services = Array.isArray(row.services) ? row.services : (preset ? preset.services.map((item) => ({ ...item })) : []);
+    return {
+      ...row,
+      aiMinutesTotal: Number.isFinite(Number(row.aiMinutesTotal)) ? Number(row.aiMinutesTotal) : (preset ? preset.aiMinutesTotal : 0),
+      aiMinutesUsed: Number.isFinite(Number(row.aiMinutesUsed)) ? Number(row.aiMinutesUsed) : (preset ? preset.aiMinutesUsed : 0),
+      courses,
+      services,
+    };
   }
 
   function readCustomers() {
@@ -1708,13 +1821,40 @@
             text: row.name + " در فهرست مشتریان ثبت شد",
           }))));
         }
-        return CUSTOMER_SEED.map((row) => ({ ...row }));
+        return CUSTOMER_SEED.map((row) => decorateCustomer(row));
+      }
+      const parsed = JSON.parse(raw);
+      const list = Array.isArray(parsed) ? parsed.map((row) => decorateCustomer(row)) : [];
+      if (JSON.stringify(list) !== JSON.stringify(parsed)) writeCustomers(list);
+      return list;
+    } catch {
+      return [];
+    }
+  }
+
+  function readTickets() {
+    try {
+      const raw = localStorage.getItem(TICKETS_KEY);
+      if (raw === null) {
+        localStorage.setItem(TICKETS_KEY, JSON.stringify(TICKET_SEED));
+        return TICKET_SEED.map((row) => ({ ...row, messages: row.messages.map((item) => ({ ...item })) }));
       }
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
+  }
+
+  function writeTickets(list) {
+    localStorage.setItem(TICKETS_KEY, JSON.stringify(list));
+  }
+
+  function rememberAdminTicket(ticket) {
+    const list = readTickets();
+    if (list.some((item) => item.id === ticket.id)) return;
+    list.unshift(ticket);
+    writeTickets(list);
   }
 
   function writeCustomers(list) {
@@ -1833,7 +1973,7 @@
     if (!app || sessionRole(readSession()) !== "admin") return;
     const view = app.dataset.adminView || "dashboard";
     document.querySelectorAll("[data-admin-link]").forEach((link) => {
-      const on = link.dataset.adminLink === view;
+      const on = link.dataset.adminLink === view || (view === "profile" && link.dataset.adminLink === "customers");
       link.classList.toggle("bg-white/10", on);
       link.classList.toggle("text-white", on);
       link.setAttribute("aria-current", on ? "page" : "false");
@@ -1867,6 +2007,8 @@
 
     if (view === "customers") mountCustomers();
     if (view === "settings") mountAdminSettings();
+    if (view === "tickets") mountAdminTickets();
+    if (view === "profile") mountCustomerProfile();
   }
 
   function mountCustomers() {
@@ -1894,7 +2036,7 @@
       });
       rows.innerHTML = list.map((item) => {
         const blocked = item.status === "blocked";
-        return `<tr class="border-t border-white/10">
+        return `<tr data-customer-id="${escText(item.id)}" class="cursor-pointer border-t border-white/10 hover:bg-white/5">
           <td class="px-3 py-3 text-sm">${escText(item.name)}</td>
           <td class="px-3 py-3 text-sm" dir="ltr">${escText(faDigits(item.phone))}</td>
           <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-xs ${blocked ? "bg-rose-500/15 text-rose-300" : "bg-emerald-500/15 text-emerald-300"}">${blocked ? "مسدود" : "فعال"}</span></td>
@@ -1933,6 +2075,7 @@
       if (edit) {
         const row = readCustomers().find((item) => item.id === edit.dataset.customerEdit);
         if (row) openForm(row);
+        return;
       }
       if (remove) {
         deleteId = remove.dataset.customerDelete || "";
@@ -1940,7 +2083,10 @@
         const name = removeDialog && removeDialog.querySelector("[data-delete-name]");
         if (name) name.textContent = row ? row.name : "";
         if (removeDialog && !removeDialog.open) removeDialog.showModal();
+        return;
       }
+      const rowEl = event.target.closest("tr[data-customer-id]");
+      if (rowEl) location.href = base + "/admin/customers/profile/?id=" + encodeURIComponent(rowEl.dataset.customerId || "");
     });
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -1971,7 +2117,17 @@
         writeCustomers(list);
         pushActivity("مشخصات " + name + " ویرایش شد");
       } else {
-        list.unshift({ id: "c-" + Date.now(), name, phone, status, registeredAt: new Date().toISOString() });
+        list.unshift({
+          id: "c-" + Date.now(),
+          name,
+          phone,
+          status,
+          registeredAt: new Date().toISOString(),
+          aiMinutesTotal: 0,
+          aiMinutesUsed: 0,
+          courses: [],
+          services: [],
+        });
         writeCustomers(list);
         pushActivity(name + " به فهرست مشتریان اضافه شد");
       }
@@ -2047,6 +2203,143 @@
     });
   }
 
+  function ticketStatusLabel(status) {
+    if (status === "closed") return "بسته";
+    if (status === "review") return "در حال بررسی";
+    return "باز";
+  }
+
+  function ticketStatusClass(status) {
+    if (status === "closed") return "bg-slate-500/20 text-slate-300";
+    if (status === "review") return "bg-sky-500/15 text-sky-200";
+    return "bg-[#D4AF37]/15 text-[#F3E5AB]";
+  }
+
+  function mountAdminTickets() {
+    const list = document.querySelector("[data-ticket-list]");
+    const detail = document.querySelector("[data-ticket-detail]");
+    const empty = document.querySelector("[data-ticket-empty]");
+    const form = document.querySelector("[data-ticket-reply]");
+    if (!list || !detail || !form) return;
+    let current = "";
+
+    function paintList() {
+      const tickets = readTickets();
+      list.innerHTML = tickets.map((ticket) => `<li><button type="button" data-ticket-open="${escText(ticket.id)}" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-start ${ticket.id === current ? "ring-1 ring-[#D4AF37]" : ""}">
+        <span class="flex items-center justify-between gap-2"><span class="text-sm font-semibold">${escText(ticket.subject)}</span><span class="rounded-full px-2 py-1 text-[11px] ${ticketStatusClass(ticket.status)}">${ticketStatusLabel(ticket.status)}</span></span>
+        <span class="mt-1 block text-xs text-slate-400">${escText(ticket.name)} · ${escText(faDate(ticket.at))}</span>
+      </button></li>`).join("");
+      if (empty) empty.hidden = Boolean(current);
+    }
+
+    function paintDetail() {
+      const ticket = readTickets().find((item) => item.id === current);
+      detail.hidden = !ticket;
+      if (!ticket) return;
+      detail.querySelector("[data-ticket-subject]").textContent = ticket.subject;
+      detail.querySelector("[data-ticket-who]").textContent = ticket.name + " · " + faDigits(ticket.phone);
+      detail.querySelector("[data-ticket-status]").value = ticket.status === "closed" || ticket.status === "review" ? ticket.status : "open";
+      detail.querySelector("[data-ticket-thread]").innerHTML = (ticket.messages || []).map((message) => `<li class="rounded-2xl px-3 py-2 text-sm leading-7 ${message.from === "admin" ? "bg-[#D4AF37]/10" : "bg-white/5"}"><span class="mb-1 block text-[11px] text-slate-400">${message.from === "admin" ? "مدیر" : "کاربر"} · ${escText(faDate(message.at))}</span>${escText(message.text)}</li>`).join("");
+      if (empty) empty.hidden = true;
+    }
+
+    list.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-ticket-open]");
+      if (!button) return;
+      current = button.dataset.ticketOpen || "";
+      paintList();
+      paintDetail();
+      detail.scrollIntoView({ block: "nearest" });
+    });
+    detail.querySelector("[data-ticket-status]").addEventListener("change", (event) => {
+      const tickets = readTickets();
+      const ticket = tickets.find((item) => item.id === current);
+      if (!ticket) return;
+      ticket.status = event.target.value;
+      writeTickets(tickets);
+      pushActivity("وضعیت تیکت «" + ticket.subject + "» به " + ticketStatusLabel(ticket.status) + " تغییر کرد");
+      paintList();
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const note = form.querySelector("[data-ticket-note]");
+      const text = String(form.elements.reply.value || "").trim();
+      if (text.length < 2) {
+        if (note) note.textContent = "پاسخ را بنویسید.";
+        return;
+      }
+      const tickets = readTickets();
+      const ticket = tickets.find((item) => item.id === current);
+      if (!ticket) return;
+      ticket.messages = (ticket.messages || []).concat({ from: "admin", text, at: new Date().toISOString() });
+      if (ticket.status === "open") ticket.status = "review";
+      writeTickets(tickets);
+      const accounts = readAccounts();
+      if (accounts[ticket.phone]) {
+        accounts[ticket.phone].tickets = [{ id: "reply-" + Date.now(), subject: "پاسخ: " + ticket.subject, at: faDate(new Date().toISOString()) }].concat(accounts[ticket.phone].tickets || []);
+        writeAccounts(accounts);
+      }
+      form.elements.reply.value = "";
+      if (note) note.textContent = "پاسخ در همین مرورگر ثبت شد.";
+      pushActivity("پاسخ تیکت «" + ticket.subject + "» ثبت شد");
+      paintList();
+      paintDetail();
+    });
+    paintList();
+  }
+
+  function mountCustomerProfile() {
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id") || "";
+    const customer = readCustomers().find((item) => item.id === id);
+    const missing = document.querySelector("[data-profile-missing]");
+    const body = document.querySelector("[data-profile-body]");
+    if (!customer) {
+      if (missing) missing.hidden = false;
+      if (body) body.hidden = true;
+      return;
+    }
+    if (missing) missing.hidden = true;
+    if (body) body.hidden = false;
+    const name = document.querySelector("[data-customer-file-name]");
+    const phone = document.querySelector("[data-profile-phone]");
+    if (name) name.textContent = customer.name;
+    if (phone) phone.textContent = faDigits(customer.phone);
+    const total = Math.max(0, Number(customer.aiMinutesTotal) || 0);
+    const used = Math.min(total, Math.max(0, Number(customer.aiMinutesUsed) || 0));
+    const totalNode = document.querySelector("[data-profile-minutes-total]");
+    const usedNode = document.querySelector("[data-profile-minutes-used]");
+    const totalBar = document.querySelector("[data-profile-minutes-total-bar]");
+    const usedBar = document.querySelector("[data-profile-minutes-used-bar]");
+    if (totalNode) totalNode.textContent = fa.format(total) + " دقیقه";
+    if (usedNode) usedNode.textContent = fa.format(used) + " دقیقه";
+    if (totalBar) totalBar.style.width = total > 0 ? "100%" : "0%";
+    if (usedBar) usedBar.style.width = total > 0 ? Math.round((used / total) * 100) + "%" : "0%";
+    const services = document.querySelector("[data-profile-services]");
+    const servicesEmpty = document.querySelector("[data-profile-services-empty]");
+    const serviceRows = Array.isArray(customer.services) ? customer.services : [];
+    if (services) {
+      services.innerHTML = serviceRows.map((item) => `<li class="flex items-center justify-between gap-3 rounded-2xl bg-white/5 px-3 py-2 text-sm"><span>${escText(item.title)}</span><time class="text-xs text-slate-400">${escText(faDate(item.at))}</time></li>`).join("");
+    }
+    if (servicesEmpty) servicesEmpty.hidden = serviceRows.length > 0;
+    const courses = document.querySelector("[data-profile-courses]");
+    const coursesEmpty = document.querySelector("[data-profile-courses-empty]");
+    const courseRows = Array.isArray(customer.courses) ? customer.courses : [];
+    if (courses) {
+      courses.innerHTML = courseRows.map((item) => {
+        const lessons = Math.max(1, Number(item.total) || 1);
+        const watched = Math.min(lessons, Math.max(0, Number(item.watched) || 0));
+        const percent = Math.round((watched / lessons) * 100);
+        return `<li class="rounded-2xl bg-white/5 px-3 py-3">
+          <div class="flex items-center justify-between gap-3 text-sm"><span class="font-semibold">${escText(item.title)}</span><span class="text-slate-300">${fa.format(watched)} از ${fa.format(lessons)} درس</span></div>
+          <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div class="h-full rounded-full bg-[#D4AF37]" style="width:${percent}%"></div></div>
+          <p class="mt-1 text-xs text-slate-400">${fa.format(percent)}٪ دیده‌شده</p>
+        </li>`;
+      }).join("");
+    }
+    if (coursesEmpty) coursesEmpty.hidden = courseRows.length > 0;
+  }
+
   mountAuth();
   mountAdminApp();
 
@@ -2091,6 +2384,16 @@
         message: "تیکت ثبت شد.",
       });
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      const signed = readSession();
+      rememberAdminTicket({
+        id,
+        name: (signed && signed.currentUser && signed.currentUser.name) || "کاربر",
+        phone,
+        subject,
+        status: "open",
+        at: new Date().toISOString(),
+        messages: [{ from: "user", text: body, at: new Date().toISOString() }],
+      });
       const session = readSession();
       let message = "تیکت ثبت شد.";
       if (session && session.isAuthenticated && session.currentUser) {

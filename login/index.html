@@ -127,7 +127,7 @@
         </button>
         <a data-auth-guest href="/sales-pro/login/" class="whitespace-nowrap rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">ورود / ثبت‌نام</a>
         <div data-auth-customer class="flex items-center gap-2" hidden>
-          <a href="/sales-pro/dashboard/" dir="ltr" data-header-phone class="max-w-36 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">—</a>
+          <a href="/sales-pro/dashboard/" data-header-name class="max-w-40 truncate rounded-full px-3 py-1.5 text-xs ring-1 ring-gold/30">کاربر</a>
           <button type="button" data-sign-out class="rounded-full px-3 py-1.5 text-xs ring-1 ring-white/15">خروج</button>
         </div>
         <div data-auth-admin class="flex items-center gap-2" hidden>
@@ -142,7 +142,7 @@
       <button type="button" data-open-cart class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/80">سبد خرید <span data-cart-count>۰</span></button>
       <a data-auth-guest href="/sales-pro/login/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">ورود / ثبت‌نام</a>
       <div data-auth-customer class="mb-2 border-b border-white/10 pb-2" hidden>
-        <p class="px-3 py-2 text-sm font-semibold" dir="ltr" data-header-phone>—</p>
+        <p class="px-3 py-2 text-sm font-semibold" data-header-name>کاربر</p>
         <a href="/sales-pro/dashboard/" class="block rounded-xl px-3 py-2 text-sm text-cream/80">پنل کاربری</a>
         <button type="button" data-sign-out class="block w-full rounded-xl px-3 py-2 text-start text-sm text-cream/70">خروج</button>
       </div>
@@ -177,6 +177,10 @@
       <button type="button" data-otp-resend disabled class="text-gold disabled:opacity-40">ارسال دوباره</button>
     </div>
   </div>
+        <div data-auth-name class="hidden space-y-2">
+          <label class="block text-sm">نام و نام خانوادگی<input data-auth-fullname name="fullName" autocomplete="name" class="mt-1 h-12 w-full rounded-2xl border border-gold/35 bg-white/5 px-3 text-sm outline-none focus:border-gold" /></label>
+          <p class="text-xs leading-6 text-cream/60">برای ساخت حساب، نام و نام خانوادگی لازم است.</p>
+        </div>
         <button type="button" data-auth-finish class="hidden h-12 w-full rounded-2xl bg-gold text-sm font-medium text-navy">تأیید و ورود</button>
         <button type="button" data-auth-edit class="hidden text-sm text-cream/70">ویرایش شماره</button>
         <p data-auth-note class="text-sm text-cream/80" role="status"></p>

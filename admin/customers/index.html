@@ -43,11 +43,12 @@
     <aside class="border-b border-white/10 bg-[#020617] lg:border-b-0 lg:border-e lg:border-white/10">
       <a href="/sales-pro/" class="flex items-center gap-2 px-4 py-4">
         <span class="grid size-9 place-items-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-[#0B132B]">ن</span>
-        <span><span class="block text-sm font-bold">نکس‌سل</span><span class="block text-[11px] text-slate-400">پنل مدیریت</span></span>
+        <span><span class="block text-sm font-bold">Next Cell</span><span class="block text-[11px] text-slate-400">مدیریت: <span data-admin-username>—</span></span></span>
       </a>
       <nav class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible" aria-label="بخش‌های مدیریت">
         <a data-admin-link="dashboard" href="/sales-pro/admin/dashboard/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>داشبورد</a>
         <a data-admin-link="customers" href="/sales-pro/admin/customers/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>مدیریت مشتریان</a>
+        <a data-admin-link="tickets" href="/sales-pro/admin/tickets/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>تیکت‌ها</a>
         <a data-admin-link="settings" href="/sales-pro/admin/settings/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-slate-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8.6 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1-.33H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 .33 1 1.65 1.65 0 0 0 1 .6 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.3.45.64.6 1a1.65 1.65 0 0 0 1 .33H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1 .33 1.65 1.65 0 0 0-.51 1z"/></svg>تنظیمات سیستم</a>
         <button type="button" data-sign-out class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-start text-sm text-rose-300"><svg viewBox="0 0 24 24" class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>خروج</button>
       </nav>
@@ -56,7 +57,7 @@
     <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 class="text-2xl font-bold sm:text-3xl">مدیریت مشتریان</h1>
-        <p class="mt-2 text-sm leading-7 text-slate-400">جستجو، فیلتر و ویرایش فهرست مشتریان همین مرورگر.</p>
+        <p class="mt-2 text-sm leading-7 text-slate-400">جستجو و فیلتر همین فهرست. با کلیک روی ردیف، پروندهٔ مشتری باز می‌شود.</p>
       </div>
       <button type="button" data-customer-add class="h-11 rounded-2xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0B132B]">افزودن مشتری جدید</button>
     </header>
