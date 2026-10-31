@@ -70,6 +70,7 @@ for (const [file, html] of files) {
   mkdirSync(path.dirname(target), { recursive: true });
   writeFileSync(target, html);
 }
+cpSync(path.join(process.cwd(), "public", "present"), path.join(out, "present"), { recursive: true });
 cpSync(path.join(process.cwd(), "public", "client.js"), path.join(out, "client.js"));
 cpSync(path.join(process.cwd(), "public", "lenis.min.js"), path.join(out, "lenis.min.js"));
 cpSync(path.join(process.cwd(), "public", "lenis.css"), path.join(out, "lenis.css"));

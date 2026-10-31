@@ -390,6 +390,37 @@ function paidHomeCards(base: string) {
   );
 }
 
+function productPresent(base: string) {
+  const objects = [
+    ["present-phone.jpg", "گوشی تلفن روی میز تیره، کنار یک برگهٔ خام", "تلفن", "تماسی که بدون قدم بعدی قطع می‌شود."],
+    ["present-script.jpg", "برگهٔ خط‌دار خام با گیره و قلم طلایی", "برگه", "جمله‌ای که باید همان لحظه گفته شود."],
+    ["present-table.jpg", "میز خالی مذاکره با پوشهٔ خام و قلم طلایی", "میز", "جلسه‌ای که به تصمیم نمی‌رسد."],
+    ["present-funnel.jpg", "قیف برنجی با سه کارت خام", "قیف", "توجهی که به گفتگوی خرید نمی‌رسد."],
+  ] as const;
+  const tiles = objects.map(([file, alt, title, line]) => `<figure class="bg-[#070B18] p-3 sm:p-4">
+      <img src="${base}/present/${file}" alt="${esc(alt)}" width="800" height="800" class="aspect-square w-full rounded-2xl object-cover" />
+      <figcaption class="mt-3 text-sm font-semibold text-cream">${title}</figcaption>
+      <p class="mt-1 text-xs leading-6 text-cream/70">${line}</p>
+    </figure>`).join("");
+  return `<section ${revealAttrs(40)} aria-labelledby="present-title" class="mt-8 overflow-hidden rounded-[2rem] border border-gold/30 bg-[#070B18]">
+    <div class="grid lg:grid-cols-2">
+      <div class="p-6 sm:p-8">
+        <p class="text-xs tracking-[0.18em] text-gold">وقتی گفتگو شروع شده</p>
+        <h2 id="present-title" class="mt-3 text-2xl font-semibold leading-[1.5] text-cream sm:text-3xl">فروش شروع شده؛ مسیرش هنوز یاد گرفته نشده.</h2>
+        <p class="mt-4 text-sm leading-8 text-cream/80">مشتری دیگر غریبهٔ کامل نیست. پای تلفن است، روبه‌روست، یا توی پیام. یک جا می‌گوید قیمت بالاست و جملهٔ بعدی را نداری. یک جا هم خودت نمی‌دانی این گفتگو باید به قرار یا خرید برسد. فروش همان وسط می‌ایستد.</p>
+      </div>
+      <div class="grid grid-cols-2 border-t border-gold/20 lg:border-t-0 lg:border-s">${tiles}</div>
+    </div>
+    <div class="flex flex-col gap-4 border-t border-gold/25 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-8">
+      <p class="max-w-2xl text-sm leading-7 text-cream/75">چهار مسیر همین فاصله را درس می‌دهد: آنلاین، حضوری، تلفنی و مذاکره. هر درس ویدیو است و با کوییز تمام می‌شود. اگر پشت خط بمانی و همان لحظه جواب را بخواهی، دستیار از دقیقه‌ای استفاده می‌کند که جدا از دوره می‌خری.</p>
+      <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto">
+        <a href="#courses" class="inline-flex h-11 items-center justify-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">دیدن مسیرها</a>
+        <a href="${base}/services/#ai-minutes" class="inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold text-cream ring-1 ring-gold/40">خرید دقیقهٔ دستیار</a>
+      </div>
+    </div>
+  </section>`;
+}
+
 export function homePage(base: string) {
   return layout(base, "home", "نکس‌سل | آکادمی فروش", `
     <section ${revealAttrs(0)} class="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-10">
@@ -397,7 +428,8 @@ export function homePage(base: string) {
       <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] text-cream sm:text-4xl">آکادمی فروش نکس‌سل</h1>
       <p class="mt-4 max-w-2xl text-sm leading-8 text-cream">چهار مسیر فروش: آنلاین، حضوری، تلفنی و مذاکره.</p>
     </section>
-    <section id="courses" class="mt-8">
+    ${productPresent(base)}
+    <section id="courses" class="mt-8 scroll-mt-24">
       <h2 class="text-xl font-semibold">چهار مسیر فروش</h2>
       <p class="mt-2 max-w-2xl text-sm leading-7 text-cream/70">پرداخت بانکی نیست. دسترسی روی همین مرورگر می‌ماند. درس اول هر مسیر بدون سبد دیده می‌شود.</p>
       <div class="mt-4 grid gap-4 md:grid-cols-2">${paidHomeCards(base)}</div>

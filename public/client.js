@@ -1736,6 +1736,10 @@
       event.preventDefault();
       lenis.scrollTo(target, { offset: -80 });
     });
+    if (location.hash) {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target) requestAnimationFrame(() => lenis.scrollTo(target, { offset: -80, immediate: true }));
+    }
     const menu = document.querySelector("[data-menu]");
     if (menu) {
       menu.addEventListener("click", () => {
