@@ -1350,71 +1350,116 @@ const AVATARS = [
 
 const PANEL_TABS = [
   ["overview", "پیشخوان"],
-  ["profile", "پروفایل من"],
   ["courses", "دوره‌های من"],
-  ["wallet", "کیف پول"],
-  ["audits", "تحلیل‌های تماس من"],
-  ["tickets", "تیکت‌ها"],
+  ["wallet", "کیف پول و کش‌بک"],
+  ["audits", "تحلیل‌های تماس"],
+  ["tickets", "پشتیبانی و تیکت‌ها"],
 ] as const;
 
 function dashboardPage(base: string, initialTab = "overview") {
   const tabLink = (id: string, label: string, compact: boolean) =>
     `<a href="${base}/dashboard/?tab=${id}" data-tab-link="${id}" class="${compact ? "shrink-0 px-3 py-2" : "px-3 py-2.5"} flex items-center gap-2 rounded-2xl text-sm">${label}</a>`;
-  const cards = categories.filter((category) => category.tierRequired === "pro").map((category) => `<article class="glass flex flex-col rounded-[28px] p-5" data-dash-course="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}">
+  const micIcon = `<svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8 21h8"/></svg>`;
+  const waveIcon = `<svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>`;
+  const cards = categories.filter((category) => category.tierRequired === "pro").map((category) => `<article class="dash-card flex flex-col rounded-[28px] p-5" data-dash-course="${category.id}" data-lessons="${lessonsOf(category).map((row) => row.lesson.id).join(",")}">
     <div class="flex items-start justify-between gap-3"><h2 class="text-lg font-semibold">${esc(category.title.fa)}</h2><span data-lock class="rounded-full bg-white/10 px-2.5 py-1 text-[11px]">قفل</span></div>
-    <p class="mt-2 text-sm text-cream/60">${toman(COURSE_PRICE)}</p>
-    <p class="mt-4 text-sm text-cream/60" data-video-line>ویدیوهای دیده‌شده: ۰</p>
-    <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-video-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
-    <p class="mt-3 text-sm text-cream/60" data-quiz-line>چالش‌های قبول‌شده: ۰</p>
-    <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-quiz-bar class="h-full rounded-full bg-cream" style="width:0%"></div></div>
-    <a data-enter="${category.id}" href="${base}/learn/${category.id}/" class="mt-5 hidden h-10 items-center justify-center rounded-2xl border-2 border-gold bg-navy px-4 text-sm font-medium text-gold">ورود به دوره و مشاهده ویدیوها</a>
-    <a data-buy-link="${category.id}" href="${base}/subscription/" class="mt-5 inline-flex h-10 items-center justify-center rounded-2xl bg-cream px-4 text-sm font-medium text-navy">افزودن به سبد</a>
+    <p class="mt-2 text-sm leading-6 text-cream/60" data-course-summary>${esc(category.description.fa)}</p>
+    <p class="mt-3 text-sm text-cream/70" data-course-price>${toman(COURSE_PRICE)}</p>
+    <div data-progress-block hidden>
+      <p class="text-sm text-cream/70" data-video-line>درصد تکمیل ویدیوها: ۰٪</p>
+      <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-video-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+      <p class="mt-3 text-sm text-cream/70" data-quiz-line>چالش‌ها و کوییزهای پاس‌شده: ۰</p>
+      <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div data-quiz-bar class="h-full rounded-full bg-cream" style="width:0%"></div></div>
+    </div>
+    <a data-enter="${category.id}" href="${base}/learn/${category.id}/" class="mt-5 flex h-10 items-center justify-center rounded-2xl border-2 border-gold bg-navy px-4 text-sm font-medium text-gold" hidden>ورود سریع به آخرین درس</a>
+    <a data-buy-link="${category.id}" href="${base}/subscription/" class="mt-5 flex h-10 items-center justify-center rounded-2xl bg-cream px-4 text-sm font-medium text-navy">فعال‌سازی دوره</a>
   </article>`).join("");
-  const courseStatus = categories.filter((category) => category.tierRequired === "pro").map((category) => `<li class="flex items-center justify-between rounded-2xl border border-gold/30 px-3 py-3 text-sm" data-course-status="${category.id}"><span>${esc(category.title.fa)}</span><span data-owned-label class="text-cream/50">ثبت نشده</span></li>`).join("");
   return layout(base, "home", "پنل کاربری | نکس‌سل", `
+    <style>
+      .dash-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(16px); }
+      #logout-dialog, #ticket-dialog {
+        width: min(32rem, calc(100vw - 1.5rem));
+        max-height: min(90vh, 40rem);
+        margin: auto;
+        overflow: auto;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 1.5rem;
+        background: #070B18;
+        color: #F6F1E4;
+        padding: 1.25rem;
+      }
+      #logout-dialog::backdrop, #ticket-dialog::backdrop { background: rgba(0,0,0,0.66); }
+    </style>
     <div data-user-panel data-initial-tab="${esc(initialTab)}" class="lg:flex lg:items-start lg:gap-4">
-      <div class="glass -mx-4 flex gap-2 overflow-x-auto px-4 py-2 lg:hidden" data-lenis-prevent>
-        ${PANEL_TABS.map(([id, label]) => tabLink(id, label, true)).join("")}
+      <div class="sticky top-16 z-30 -mx-4 border-b border-white/10 bg-[#0B132B]/95 px-4 py-2 backdrop-blur lg:hidden">
+        <div class="flex gap-2 overflow-x-auto" data-lenis-prevent>
+          ${PANEL_TABS.map(([id, label]) => tabLink(id, label, true)).join("")}
           <a href="${base}/assistant/" class="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2 text-sm">دستیار</a>
-      </div>
-      <aside class="glass hidden w-64 shrink-0 rounded-[28px] p-4 lg:block">
-        <div class="flex items-center gap-3">
-          <span data-avatar class="grid size-12 shrink-0 place-items-center rounded-full text-lg font-semibold" style="background:#0B132B;color:#D4AF37">ن</span>
+        </div>
+        <div class="mt-2 flex items-center gap-2">
+          <span data-avatar class="grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold" style="background:#0B132B;color:#D4AF37">ن</span>
           <div class="min-w-0">
-            <p data-account-name class="truncate text-sm font-semibold">—</p>
+            <p data-account-name class="truncate text-sm font-semibold">کاربر</p>
             <p data-phone-line class="truncate text-xs text-cream/60" dir="ltr">—</p>
           </div>
+          <a href="${base}/dashboard/?tab=profile" data-tab-link="profile" class="ms-auto shrink-0 rounded-2xl px-3 py-2 text-xs">پروفایل</a>
+          <button type="button" data-sign-out class="shrink-0 rounded-2xl px-3 py-2 text-xs text-rose-400 hover:text-rose-300">خروج از حساب کاربری</button>
         </div>
-        <p data-status-badge="short" class="mt-3 inline-flex rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-navy">بدون دوره</p>
-        <p class="mt-2 text-xs text-cream/60"><span data-minute-balance>۰</span> دقیقه کوپایلوت</p>
-        <nav class="mt-5 flex flex-col gap-1">
+      </div>
+      <aside class="glass hidden w-64 shrink-0 rounded-[28px] p-3 lg:sticky lg:top-24 lg:block">
+        <nav class="flex flex-col gap-1" aria-label="بخش‌های پنل">
           ${PANEL_TABS.map(([id, label]) => tabLink(id, label, false)).join("")}
           <a href="${base}/assistant/" class="mt-2 flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm">دستیار</a>
         </nav>
-        <button type="button" data-sign-out class="mt-4 w-full rounded-2xl px-3 py-2 text-start text-sm text-cream/70 ring-1 ring-white/15">خروج از حساب</button>
+        <div class="mt-4 border-t border-white/10 pt-4">
+          <div class="flex items-center gap-3">
+            <span data-avatar class="grid size-12 shrink-0 place-items-center rounded-full text-lg font-semibold" style="background:#0B132B;color:#D4AF37">ن</span>
+            <div class="min-w-0">
+              <p data-account-name class="truncate text-sm font-semibold">کاربر</p>
+              <p data-phone-line class="truncate text-xs text-cream/60" dir="ltr">—</p>
+            </div>
+          </div>
+          <a href="${base}/dashboard/?tab=profile" data-tab-link="profile" class="mt-3 flex items-center rounded-2xl px-3 py-2 text-sm text-cream/80">پروفایل</a>
+          <button type="button" data-sign-out class="mt-1 w-full rounded-2xl px-3 py-2 text-start text-sm text-rose-400 hover:text-rose-300">خروج از حساب کاربری</button>
+        </div>
       </aside>
       <div class="mt-4 min-w-0 flex-1 lg:mt-0">
         <section data-tab="overview" class="view active space-y-4">
-          <section class="rounded-[28px] bg-navy p-6 ring-1 ring-gold/30">
-            <p class="text-xs tracking-[0.16em] text-gold">پنل کاربری</p>
-            <h1 class="mt-2 text-2xl font-semibold sm:text-3xl"><span data-hello>سلام</span> <span data-profile-name>—</span></h1>
-            <p class="mt-3 text-sm text-cream/70">موبایل: <span data-phone-line dir="ltr">—</span></p>
-            <div class="mt-5 flex flex-wrap items-center gap-2">
-              <span data-status-badge="long" class="rounded-full bg-gold px-3 py-1 text-xs font-medium text-navy">هنوز دوره‌ای ثبت نشده</span>
-            </div>
+          <section class="rounded-[28px] bg-[#070B18] p-6 ring-1 ring-gold/30">
+            <p class="text-xs tracking-[0.16em] text-gold">پیشخوان</p>
+            <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">سلام، <span data-profile-name>کاربر عزیز</span></h1>
+            <p class="mt-3 text-sm text-cream/70">شماره همراه: <span data-phone-line dir="ltr">—</span></p>
+            <a href="${base}/assistant/" class="mt-5 inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">ورود سریع به دستیار فروش</a>
           </section>
-          <div class="grid gap-3 sm:grid-cols-3">
-            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دوره‌های فعال</p><p class="mt-3 text-2xl font-semibold" data-owned-count>۰</p><p class="mt-1 text-xs text-cream/50" data-owned-hint>از ۴ دوره تخصصی</p></article>
-            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">دقیقهٔ تحلیل تماس</p><p class="mt-3 text-2xl font-semibold" data-minute-balance>۰</p><p class="mt-1 text-xs text-cream/50" data-minute-hint>جدا از دوره</p></article>
-            <article class="glass rounded-[24px] p-4"><p class="text-sm text-cream/60">کش‌بک تومانی</p><p class="mt-3 text-2xl font-semibold" data-cashback>۰</p><p class="mt-1 text-xs text-cream/50">۵٪ از خرید دوره و دقیقه</p></article>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <article class="dash-card rounded-[24px] p-4">
+              <p class="text-sm text-cream/60">دوره‌های فعال</p>
+              <p class="mt-3 text-2xl font-semibold"><span data-owned-count>۰</span> <span class="text-base font-medium text-cream/70">از ۴ دوره</span></p>
+              <div class="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div data-owned-bar class="h-full rounded-full bg-gold" style="width:0%"></div></div>
+              <a href="${base}/academy/" class="mt-4 inline-flex text-sm text-gold">مشاهده دوره‌های آکادمی</a>
+            </article>
+            <article class="dash-card rounded-[24px] p-4">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm text-cream/60">کیف دقیقه کوپایلوت</p>
+                <span class="grid size-10 place-items-center rounded-2xl bg-gold/15 text-gold shadow-[0_0_24px_rgba(212,175,55,0.45)]">${micIcon}</span>
+              </div>
+              <p class="mt-3 text-2xl font-semibold"><span data-minute-balance>۰</span> <span class="text-base font-medium text-cream/70">دقیقه فعال</span></p>
+              <a href="${base}/services/#ai-minutes" class="mt-4 inline-flex h-10 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">شارژ سریع دقایق</a>
+            </article>
+            <article class="dash-card rounded-[24px] p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-sm text-cream/60">باشگاه وفاداری و کش‌بک</p>
+                <span class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-navy">۵٪ بازگشت وجه از خریدها</span>
+              </div>
+              <p class="mt-3 text-2xl font-semibold"><span data-cashback>۰</span> <span class="text-base font-medium text-cream/70">تومان</span></p>
+              <a href="${base}/dashboard/?tab=wallet" data-tab-link="wallet" class="mt-4 inline-flex text-sm text-gold">جزئیات کیف پول</a>
+            </article>
+            <article class="dash-card rounded-[24px] p-4">
+              <p class="text-sm text-cream/60">تیکت‌های ثبت‌شده</p>
+              <p class="mt-3 text-2xl font-semibold"><span data-ticket-count>۰</span> <span class="text-base font-medium text-cream/70">تیکت ثبت‌شده</span></p>
+              <a href="${base}/dashboard/?tab=tickets" data-tab-link="tickets" class="mt-4 inline-flex text-sm text-gold">مشاهده تیکت‌ها</a>
+            </article>
           </div>
-          <section class="glass rounded-[28px] p-5">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h2 class="text-lg font-semibold">وضعیت دوره‌ها</h2>
-              <a href="${base}/subscription/" class="inline-flex h-10 items-center justify-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">صفحهٔ قیمت</a>
-            </div>
-            <ul class="mt-4 grid gap-2 sm:grid-cols-2">${courseStatus}</ul>
-          </section>
         </section>
         <section data-tab="profile" class="view">
           <form data-profile-form class="glass space-y-5 rounded-[28px] p-6">
@@ -1439,12 +1484,24 @@ function dashboardPage(base: string, initialTab = "overview") {
         </section>
         <section data-tab="courses" class="view space-y-4">
           <div>
-            <p class="text-xs tracking-[0.16em] text-gold">دوره‌های من</p>
+            <p class="text-xs tracking-[0.16em] text-gold">آموزش</p>
             <h1 class="mt-2 text-2xl font-semibold">دوره‌های من</h1>
-            <p class="mt-1 text-sm text-cream/60" dir="ltr" data-phone-line>—</p>
-            <p class="mt-2 text-sm leading-7 text-cream/60">هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}.</p>
+            <p class="mt-2 text-sm leading-7 text-cream/60">مسیرهای فعال همین حساب، و مسیرهایی که هنوز باز نشده‌اند. هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}.</p>
           </div>
-          <article class="rounded-[28px] bg-navy p-5 ring-1 ring-gold/30" data-bundle-card>
+          <article data-courses-empty class="dash-card rounded-[28px] p-6">
+            <h2 class="text-lg font-semibold">هنوز دوره‌ای فعال نکرده‌اید</h2>
+            <p class="mt-2 text-sm leading-7 text-cream/60">چهار مسیر یادگیری در آکادمی آماده است. درس اول هر مسیر بدون سبد باز است.</p>
+            <a href="${base}/academy/" class="mt-5 inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">مشاهده چهار مسیر یادگیری</a>
+          </article>
+          <div data-course-active-wrap hidden>
+            <h2 class="text-lg font-semibold">دوره‌های من</h2>
+            <div data-course-active class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+          </div>
+          <div data-course-locked-wrap>
+            <h2 class="text-lg font-semibold">سایر دوره‌ها</h2>
+            <div data-course-locked class="mt-3 grid gap-3 sm:grid-cols-2">${cards}</div>
+          </div>
+          <article class="rounded-[28px] bg-[#070B18] p-5 ring-1 ring-gold/30" data-bundle-card>
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-lg font-semibold">آکادمی جامع</h2>
               <span data-bundle-label class="rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-navy">آکادمی جامع، ${toman(BUNDLE_PRICE)}</span>
@@ -1452,60 +1509,104 @@ function dashboardPage(base: string, initialTab = "overview") {
             ${bundleOfferCopy()}
             <button type="button" id="buy-bundle" data-bundle-buy class="mt-4 inline-flex h-11 items-center rounded-2xl bg-cream px-4 text-sm font-semibold text-navy disabled:cursor-not-allowed disabled:opacity-60">افزودن به سبد</button>
           </article>
-          <div class="grid gap-3 sm:grid-cols-2">${cards}</div>
         </section>
         <section data-tab="wallet" class="view space-y-4">
-          <section class="rounded-[28px] bg-navy p-6 ring-1 ring-gold/30">
-            <p class="text-xs tracking-[0.16em] text-gold">کیف دقیقه</p>
-            <h1 class="mt-2 text-2xl font-semibold">کیف پول دقایق کوپایلوت هوش مصنوعی</h1>
-            <p class="mt-6 text-4xl font-semibold text-gold"><span data-minute-balance>۰</span> <span class="text-lg font-medium text-cream">دقیقه</span></p>
-            <p class="mt-3 text-sm leading-7 text-cream/70" data-wallet-lead>تحلیل تماس تیم جدا از دوره است.</p>
-            <a href="${base}/services/#ai-minutes" class="mt-5 inline-flex h-12 items-center rounded-2xl bg-gold px-5 text-sm font-semibold text-navy">تحلیل تماس تیم در خدمات</a>
-          </section>
-          <section class="glass rounded-[28px] p-6">
-            <p class="text-xs tracking-[0.16em] text-gold">وفاداری تومانی</p>
-            <h2 class="mt-2 text-xl font-semibold">کش‌بک جمع‌شده</h2>
-            <p class="mt-4 text-3xl font-semibold"><span data-cashback>۰</span> <span class="text-lg font-medium">تومان</span></p>
-            <p class="mt-3 text-sm leading-7 text-cream/60">با هر خرید دوره یا دقیقه، ۵٪ از همان مبلغ به کش‌بک اضافه می‌شود.</p>
-          </section>
-          <section class="glass rounded-[28px] p-6">
-            <p class="text-sm text-cream/60">اعتبار تومانی حساب</p>
-            <p class="mt-1 text-3xl font-semibold"><span data-wallet-balance>۰</span> <span class="text-lg font-medium">تومان</span></p>
-            <button type="button" data-deposit-open class="mt-5 h-11 rounded-2xl bg-gold px-5 text-sm font-medium text-navy">افزایش موجودی</button>
-          </section>
-          <section class="glass overflow-hidden rounded-[28px]">
-            <h2 class="px-5 pt-5 text-lg font-semibold">تراکنش‌ها</h2>
-            <div class="overflow-x-auto px-2 pb-4">
-              <table class="w-full min-w-[28rem] text-sm">
-                <thead><tr class="text-cream/50"><th class="px-3 py-3 text-start font-medium">تراکنش‌ها</th><th class="px-3 py-3 text-start font-medium">مبلغ</th><th class="px-3 py-3 text-start font-medium">تاریخ</th></tr></thead>
+          <div>
+            <p class="text-xs tracking-[0.16em] text-gold">کیف پول</p>
+            <h1 class="mt-2 text-2xl font-semibold">کیف پول و اعتبار</h1>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <article class="dash-card rounded-[28px] p-5">
+              <p class="text-sm text-cream/60">اعتبار نقد و کش‌بک</p>
+              <p class="mt-4 text-3xl font-semibold"><span data-wallet-balance>۰</span> <span class="text-base font-medium">تومان</span></p>
+              <p class="mt-2 text-sm text-cream/70">کش‌بک خریدها: <span data-cashback>۰</span> تومان</p>
+              <p class="mt-3 text-xs leading-6 text-cream/50">این دو مانده در همین مرورگر ذخیره شده‌اند و هنگام پرداخت از مبلغ سبد کم نمی‌شوند. کش‌بک، ۵٪ خرید دوره و دقیقه است.</p>
+              <button type="button" data-deposit-open class="mt-5 h-11 rounded-2xl bg-gold px-5 text-sm font-medium text-navy">افزایش اعتبار</button>
+            </article>
+            <article class="dash-card rounded-[28px] p-5">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm text-cream/60">اعتبار زمانی دستیار</p>
+                <span class="grid size-10 place-items-center rounded-2xl bg-gold/15 text-gold shadow-[0_0_24px_rgba(212,175,55,0.45)]">${micIcon}</span>
+              </div>
+              <p class="mt-4 text-3xl font-semibold text-gold"><span data-minute-balance>۰</span> <span class="text-base font-medium text-cream">دقیقه</span></p>
+              <p class="mt-3 text-xs leading-6 text-cream/50">دقیقه‌های باقی‌مانده برای پاسخ دستیار. هر پاسخ متنی یک دقیقه از همین مانده کم می‌کند.</p>
+              <a href="${base}/services/#ai-minutes" class="mt-5 inline-flex h-11 items-center rounded-2xl bg-gold px-5 text-sm font-medium text-navy">شارژ دقایق</a>
+            </article>
+          </div>
+          <section class="dash-card overflow-hidden rounded-[28px]">
+            <h2 class="px-5 pt-5 text-lg font-semibold">تاریخچه تراکنش‌ها</h2>
+            <div class="overflow-x-auto px-2 pb-4" data-lenis-prevent>
+              <table class="w-full min-w-[40rem] text-sm">
+                <thead><tr class="text-cream/50"><th class="px-3 py-3 text-start font-medium">شناسه / عنوان تراکنش</th><th class="px-3 py-3 text-start font-medium">تاریخ و ساعت</th><th class="px-3 py-3 text-start font-medium">مبلغ</th><th class="px-3 py-3 text-start font-medium">وضعیت</th><th class="px-3 py-3 text-start font-medium">رسید</th></tr></thead>
                 <tbody data-tx-body></tbody>
               </table>
-              <p data-tx-empty class="px-3 text-sm text-cream/50">هنوز تراکنشی ثبت نشده است.</p>
+              <div data-tx-empty class="px-3 py-8 text-center">
+                <p class="mx-auto grid size-14 place-items-center rounded-full bg-white/5 text-gold">${waveIcon}</p>
+                <p class="mt-3 text-sm text-cream/60">هنوز تراکنشی در سیستم ثبت نشده است</p>
+              </div>
             </div>
           </section>
         </section>
         <section data-tab="audits" class="view space-y-4">
-          <div><h1 class="text-2xl font-semibold">تحلیل‌های تماس من</h1><p class="mt-2 text-sm leading-7 text-cream/60">تماسی اینجا ثبت نشده است. تحلیل تماس از صفحهٔ دستیار انجام می‌شود.</p><a class="mt-4 inline-flex text-sm text-gold" href="${base}/assistant/">رفتن به دستیار</a></div>
+          <div>
+            <p class="text-xs tracking-[0.16em] text-gold">دستیار</p>
+            <h1 class="mt-2 text-2xl font-semibold">تحلیل‌های تماس</h1>
+            <p class="mt-2 text-sm leading-7 text-cream/60">نمای تماس‌هایی که از دستیار گذشته باشند. در این مرورگر تماسی ذخیره نمی‌شود.</p>
+          </div>
+          <article class="dash-card rounded-[28px] px-6 py-10 text-center">
+            <p class="mx-auto grid size-16 place-items-center rounded-full bg-gold/15 text-gold shadow-[0_0_28px_rgba(212,175,55,0.4)]">${micIcon}</p>
+            <p class="mx-auto mt-4 max-w-md text-sm leading-7 text-cream/70">هنوز تماسی برای تحلیل ارسال نشده است. از صفحهٔ دستیار، اعتراض را بگویید یا بنویسید.</p>
+            <a href="${base}/assistant/" class="mt-5 inline-flex h-11 items-center rounded-2xl bg-gold px-5 text-sm font-medium text-navy">رفتن به دستیار</a>
+          </article>
         </section>
         <section data-tab="tickets" class="view space-y-4">
           <div class="flex flex-wrap items-end justify-between gap-3">
-            <div><h1 class="text-2xl font-semibold">تیکت‌ها و پشتیبانی</h1></div>
-            <a href="#new-ticket" class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">ثبت تیکت جدید</a>
+            <div>
+              <p class="text-xs tracking-[0.16em] text-gold">پشتیبانی</p>
+              <h1 class="mt-2 text-2xl font-semibold">تیکت‌ها و پشتیبانی</h1>
+            </div>
+            <button type="button" data-ticket-open class="inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">+ ثبت تیکت جدید</button>
+          </div>
+          <div class="flex gap-2 overflow-x-auto" data-lenis-prevent>
+            <button type="button" data-ticket-filter="all" class="shrink-0 rounded-full px-3 py-1.5 text-sm ring-1 ring-white/15">همه تیکت‌ها</button>
+            <button type="button" data-ticket-filter="open" class="shrink-0 rounded-full px-3 py-1.5 text-sm ring-1 ring-white/15">در حال بررسی</button>
+            <button type="button" data-ticket-filter="answered" class="shrink-0 rounded-full px-3 py-1.5 text-sm ring-1 ring-white/15">پاسخ داده شده</button>
+            <button type="button" data-ticket-filter="closed" class="shrink-0 rounded-full px-3 py-1.5 text-sm ring-1 ring-white/15">بسته شده</button>
           </div>
           <div data-live-tickets class="grid gap-3"></div>
-          <p data-ticket-empty class="text-sm text-cream/50">هنوز تیکتی نیست.</p>
-          <form id="new-ticket" data-panel-ticket class="glass grid gap-3 rounded-[28px] p-5">
-            <label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label>
-            <button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button>
-            <p data-ticket-note class="text-sm text-cream/70" role="status"></p>
-          </form>
+          <article data-ticket-empty class="dash-card rounded-[28px] p-6 text-center">
+            <p class="text-sm leading-7 text-cream/70">تیکت فعالی ندارید. نیاز به راهنمایی دارید؟ تیکت جدید ارسال کنید.</p>
+            <button type="button" data-ticket-open class="mt-4 inline-flex h-11 items-center rounded-2xl bg-gold px-4 text-sm font-medium text-navy">+ ثبت تیکت جدید</button>
+          </article>
+          <p data-ticket-filter-empty class="text-sm text-cream/50" hidden>در این وضعیت تیکتی نیست.</p>
+          <p data-ticket-toast class="text-sm text-cream/70" role="status"></p>
         </section>
       </div>
     </div>
+    <dialog id="ticket-dialog" data-lenis-prevent aria-labelledby="ticket-dialog-title">
+      <form id="new-ticket" data-panel-ticket class="grid gap-3">
+        <h2 id="ticket-dialog-title" class="text-lg font-semibold">ثبت تیکت جدید</h2>
+        <p class="text-sm leading-7 text-cream/60">موضوع در همین مرورگر ذخیره می‌شود.</p>
+        <label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3 outline-none focus:border-gold" /></label>
+        <div class="flex gap-2">
+          <button class="h-11 flex-1 rounded-2xl bg-gold text-sm font-semibold text-navy">ثبت تیکت</button>
+          <button type="button" data-ticket-close class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/20">بستن</button>
+        </div>
+        <p data-ticket-note class="text-sm text-cream/70" role="status"></p>
+      </form>
+    </dialog>
+    <dialog id="logout-dialog" data-lenis-prevent aria-labelledby="logout-dialog-title">
+      <h2 id="logout-dialog-title" class="text-lg font-semibold">آیا مطمئن هستید که می‌خواهید خارج شوید؟</h2>
+      <p class="mt-3 text-sm leading-7 text-cream/70">برای دسترسی مجدد به دوره‌ها و اعتبارات دستیار، باید دوباره با شماره همراه خود وارد شوید.</p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <button type="button" data-logout-confirm class="h-11 rounded-2xl bg-rose-500 px-4 text-sm font-medium text-white">بله، خروج از حساب</button>
+        <button type="button" data-logout-cancel class="h-11 rounded-2xl px-4 text-sm ring-1 ring-white/20">انصراف</button>
+      </div>
+    </dialog>
     <div data-deposit class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-      <div class="w-full max-w-md rounded-3xl bg-navy p-5 text-cream ring-1 ring-gold/40" role="dialog" aria-modal="true" aria-labelledby="deposit-title">
+      <div class="w-full max-w-md rounded-3xl bg-[#070B18] p-5 text-cream ring-1 ring-white/10" role="dialog" aria-modal="true" aria-labelledby="deposit-title">
         <h2 id="deposit-title" class="text-lg font-semibold">شارژ کیف پول</h2>
-        <p class="mt-2 text-sm text-cream/70">مبلغ را انتخاب کنید.</p>
+        <p class="mt-2 text-sm leading-7 text-cream/70">مبلغ را انتخاب کنید. این رقم فقط در همین مرورگر به اعتبار حساب اضافه می‌شود.</p>
         <div class="mt-4 grid gap-2">
           ${[200000, 500000, 1000000].map((amount) => `<button type="button" data-deposit-amount="${amount}" class="h-11 rounded-2xl border border-gold/40 text-sm">${toman(amount)}</button>`).join("")}
         </div>
