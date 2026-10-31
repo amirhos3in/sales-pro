@@ -218,6 +218,7 @@
     paintProfile(user);
 
     paintAcademyCards(state, progress, signedIn);
+    paintArticleLinks(state);
 
     document.querySelectorAll("[data-course]").forEach((card) => {
       const id = card.dataset.course;
@@ -520,6 +521,49 @@
     paintPathButtons();
     paintMinuteOffer();
     paintServiceCards();
+  }
+
+  function paintArticleLinks(state) {
+    document.querySelectorAll("[data-article-cta]").forEach((node) => {
+      const course = node.dataset.course;
+      const lesson = node.dataset.lesson;
+      if (!course) return;
+      const preview = node.dataset.preview === "yes";
+      const open = Boolean(lesson) && (preview || owns(state, course));
+      const label = open ? node.dataset.lessonLabel : node.dataset.courseLabel;
+      node.setAttribute("href", open ? base + "/learn/" + course + "/" + lesson + "/" : base + "/learn/" + course + "/");
+      if (label) node.textContent = label;
+    });
+  }
+
+  function mountArticleFilters() {
+    const grid = document.querySelector("[data-article-grid]");
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll("[data-article-card]"));
+    const empty = document.querySelector("[data-article-empty]");
+    const buttons = Array.from(document.querySelectorAll("[data-article-filter]"));
+    function apply(category) {
+      let shown = 0;
+      cards.forEach((card) => {
+        const match = category === "all" || card.dataset.category === category;
+        card.hidden = !match;
+        if (match) shown += 1;
+      });
+      if (empty) empty.hidden = shown !== 0;
+      buttons.forEach((button) => {
+        const on = button.dataset.articleFilter === category;
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+        button.classList.toggle("bg-gold", on);
+        button.classList.toggle("font-semibold", on);
+        button.classList.toggle("text-navy", on);
+        button.classList.toggle("text-cream/80", !on);
+        button.classList.toggle("ring-1", !on);
+        button.classList.toggle("ring-gold/30", !on);
+      });
+    }
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => apply(button.dataset.articleFilter || "all"));
+    });
   }
 
   function paintPathButtons() {
@@ -1810,6 +1854,7 @@
     });
   }
 
+  mountArticleFilters();
   mountSmoothScroll();
   mountReveal();
   mountMetrics();
