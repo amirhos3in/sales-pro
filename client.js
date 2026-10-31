@@ -1923,17 +1923,165 @@
     });
   }
 
+  function mountImpact() {
+    const root = document.querySelector("[data-impact-quotes]");
+    if (root) {
+      const scroller = root.querySelector("[data-quote-scroller]");
+      const cards = [...scroller.querySelectorAll("[data-quote-card]")];
+      const dots = root.querySelector("[data-quote-dots]");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let index = 0;
+      let timer = 0;
+      const pauses = new Set();
+
+      function perView() {
+        const card = cards[0];
+        if (!card) return 1;
+        const gap = parseFloat(getComputedStyle(scroller).columnGap || getComputedStyle(scroller).gap) || 16;
+        const width = card.getBoundingClientRect().width;
+        return Math.max(1, Math.round((scroller.clientWidth + gap) / (width + gap)));
+      }
+
+      function maxIndex() {
+        return Math.max(0, cards.length - perView());
+      }
+
+      function paintDots() {
+        [...dots.children].forEach((dot, dotIndex) => {
+          const on = dotIndex === index;
+          dot.setAttribute("aria-current", on ? "true" : "false");
+          dot.className = "size-2.5 rounded-full " + (on ? "bg-gold" : "bg-white/25");
+        });
+      }
+
+      function renderDots() {
+        const count = maxIndex() + 1;
+        dots.replaceChildren();
+        for (let dotIndex = 0; dotIndex < count; dotIndex += 1) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.quoteDot = String(dotIndex);
+          button.setAttribute("aria-label", "نظر " + fa.format(dotIndex + 1));
+          button.addEventListener("click", () => go(dotIndex));
+          dots.appendChild(button);
+        }
+        if (index > maxIndex()) index = maxIndex();
+        paintDots();
+      }
+
+      let syncing = false;
+      function go(next, immediate) {
+        const max = maxIndex();
+        index = next > max ? 0 : next < 0 ? max : next;
+        const card = cards[index];
+        const delta = card.getBoundingClientRect().right - scroller.getBoundingClientRect().right;
+        syncing = true;
+        scroller.scrollBy({ left: delta, behavior: reduce || immediate ? "auto" : "smooth" });
+        paintDots();
+        window.setTimeout(() => { syncing = false; }, reduce || immediate ? 40 : 700);
+      }
+
+      function arm() {
+        window.clearInterval(timer);
+        timer = 0;
+        if (reduce || pauses.size) return;
+        timer = window.setInterval(() => go(index + 1), 5000);
+      }
+
+      function pause(reason, on) {
+        if (on) pauses.add(reason);
+        else pauses.delete(reason);
+        arm();
+      }
+
+      root.querySelector("[data-quote-prev]").addEventListener("click", () => go(index - 1));
+      root.querySelector("[data-quote-next]").addEventListener("click", () => go(index + 1));
+      root.addEventListener("pointerenter", () => pause("hover", true));
+      root.addEventListener("pointerleave", () => pause("hover", false));
+      root.addEventListener("focusin", () => pause("focus", true));
+      root.addEventListener("focusout", (event) => {
+        if (!root.contains(event.relatedTarget)) pause("focus", false);
+      });
+      scroller.addEventListener("scrollend", () => {
+        if (syncing) return;
+        const edge = scroller.getBoundingClientRect().right;
+        let best = 0;
+        let bestDist = Infinity;
+        cards.forEach((card, cardIndex) => {
+          const dist = Math.abs(card.getBoundingClientRect().right - edge);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = cardIndex;
+          }
+        });
+        index = Math.min(best, maxIndex());
+        paintDots();
+      });
+      window.addEventListener("resize", () => {
+        renderDots();
+        go(index, true);
+      });
+      document.addEventListener("visibilitychange", () => pause("hidden", document.hidden));
+      renderDots();
+      arm();
+    }
+
+    const rate = document.querySelector("[data-impact-rate]");
+    if (rate) {
+      const key = "nexsell-impact-rating";
+      const note = rate.querySelector("[data-impact-rate-note]");
+      const buttons = [...rate.querySelectorAll("[data-star]")];
+      let saved = Number(localStorage.getItem(key) || 0);
+
+      function paint(value) {
+        buttons.forEach((button) => {
+          const star = Number(button.dataset.star);
+          button.dataset.on = star <= value ? "yes" : "no";
+          button.setAttribute("aria-checked", star === saved ? "true" : "false");
+        });
+      }
+
+      function message(value) {
+        note.textContent = value ? "امتیاز " + fa.format(value) + " ثبت شد. ممنون از بازخورد شما!" : "";
+      }
+
+      buttons.forEach((button) => {
+        const star = Number(button.dataset.star);
+        button.addEventListener("pointerenter", () => paint(star));
+        button.addEventListener("focus", () => paint(star));
+        button.addEventListener("click", () => {
+          saved = star;
+          localStorage.setItem(key, String(saved));
+          paint(saved);
+          message(saved);
+        });
+      });
+      rate.addEventListener("pointerleave", () => paint(saved));
+      rate.addEventListener("focusout", (event) => {
+        if (!rate.contains(event.relatedTarget)) paint(saved);
+      });
+      paint(saved);
+      message(saved);
+    }
+  }
+
   function mountMetrics() {
     const nodes = document.querySelectorAll("[data-count]");
     if (!nodes.length) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const paint = (node, current) => {
+      const decimals = Number(node.dataset.decimals || 0);
+      const format = decimals
+        ? new Intl.NumberFormat("fa-IR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+        : fa;
       const prefix = node.dataset.prefix || "";
       const suffix = node.dataset.suffix || "";
-      node.textContent = prefix + fa.format(current) + suffix;
+      node.textContent = prefix + format.format(current) + suffix;
     };
     nodes.forEach((node) => {
       const value = Number(node.dataset.count) || 0;
+      const decimals = Number(node.dataset.decimals || 0);
+      const factor = 10 ** decimals;
       const run = () => {
         if (reduce) {
           paint(node, value);
@@ -1943,7 +2091,8 @@
         const tick = (now) => {
           const progress = Math.min(1, (now - start) / 1300);
           const eased = 1 - (1 - progress) ** 3;
-          paint(node, Math.round(value * eased));
+          const shown = progress === 1 ? value : Math.round(value * eased * factor) / factor;
+          paint(node, shown);
           if (progress < 1) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
@@ -1964,6 +2113,7 @@
   mountArticleFilters();
   mountSmoothScroll();
   mountReveal();
+  mountImpact();
   mountMetrics();
   const cartDrawer = document.querySelector("#cart-drawer");
   if (cartDrawer) cartDrawer.addEventListener("close", () => parkToast(false));
