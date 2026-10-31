@@ -62,10 +62,11 @@ export function layout(base: string, active: string, title: string, body: string
   <style>
     html { scroll-behavior: auto; }
     [hidden] { display: none !important; }
-    a:focus-visible, button:focus-visible {
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
       outline: 2px solid #D4AF37;
       outline-offset: 3px;
     }
+    summary::-webkit-details-marker { display: none; }
     body {
       background: #0B132B;
       color: #F6F1E4;
@@ -874,20 +875,123 @@ export function servicesPage(base: string) {
   return layout(base, "services", "خدمات | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">خدمات تیم فروش</h1><p class="mt-3 max-w-2xl text-sm leading-7 text-cream/70">قیمت هر خدمت جمع پارامترهای همان کارت است. کارگاه حضوری تیم فروش و منتورینگ مدیر فروش پارامتر زمان دوره دارند و مبلغ با همان زمان عوض می‌شود. تحلیل تماس تیم پایین همین صفحه با نوار دقیقه حساب می‌شود.</p></header><div class="mt-6 grid gap-4 md:grid-cols-2">${cards}</div><div class="mt-8">${aiMinutesOffer()}</div><script id="service-pricing" type="application/json">${model}</script>`);
 }
 
-function supportForm() {
-  return `<form data-ticket data-lenis-prevent class="glass mt-6 grid max-w-xl gap-3 rounded-3xl p-5"><label class="text-sm">موضوع<input name="title" required class="mt-1 h-11 w-full rounded-2xl border border-white/15 bg-white/5 px-3" /></label><label class="text-sm">شرح<textarea name="body" required class="mt-1 min-h-28 w-full rounded-2xl border border-white/15 bg-white/5 px-3 py-2"></textarea></label><button class="h-11 rounded-2xl bg-gold font-semibold text-navy">ثبت تیکت</button><p data-ticket-note class="text-sm text-cream/70"></p></form>`;
+const fieldClass = "mt-1 h-12 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 text-sm text-cream outline-none focus:border-gold";
+
+export function aboutPage(base: string) {
+  const values = [
+    ["نتیجه بر جایگاه", "تمرکز روی بستن فاکتور است، نه اصطلاحات دهان‌پرکن.", `<path d="M4 16V8M9 16V4M14 16v-5M19 16V6" stroke-linecap="round"/>`],
+    ["سناریوی بومی", "تکنیک‌ها برای رفتار واقعی خریدار در بازار ایران نوشته شده‌اند.", `<path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.2"/>`],
+    ["همراهی هوشمند", "دستیار در لحظهٔ چالش، سرنخ جواب را می‌دهد.", `<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3"/>`],
+  ];
+  const cards = values.map(([title, text, icon]) => `<article class="rounded-3xl border border-white/10 bg-white/5 p-5">
+    <span class="grid size-11 place-items-center rounded-2xl border border-gold/30 bg-gold/10 text-gold"><svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${icon}</svg></span>
+    <h2 class="mt-4 text-lg font-semibold">${title}</h2>
+    <p class="mt-2 text-sm leading-7 text-cream/75">${text}</p>
+  </article>`).join("");
+  const description = "نکس‌سل آموزش موقعیت‌محور، سناریوی بازار ایران، دستیار مکالمه و منتورینگ میدانی را کنار هم می‌گذارد.";
+  return layout(base, "about", "درباره ما | نکس‌سل", `
+    <section class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#070B18] px-5 py-10 sm:px-10 sm:py-14">
+      <div class="pointer-events-none absolute -top-16 start-0 h-56 w-56 rounded-full bg-gold/20 blur-3xl"></div>
+      <div class="relative grid items-center gap-8 lg:grid-cols-2">
+        <div>
+          <p class="text-xs tracking-[0.18em] text-gold">درباره نکس‌سل</p>
+          <h1 class="mt-3 text-3xl font-semibold leading-[1.45] text-cream sm:text-4xl">فروش یک نظریه دانشگاهی نیست؛ مهارتی زنده زیر فشار مکالمه است.</h1>
+          <p class="mt-5 text-sm leading-8 text-cream/75 sm:text-base">بیشتر دوره‌های فروش پر از انگیزه‌های لحظه‌ای و فرمول‌های ترجمه‌شده غربی هستند که در اولین مکالمه با مشتری ایرانی از کار می‌افتند. فروشندگان با تکنیک‌های حفظی پای تماس می‌نشینند و با اولین اعتراض، سردرگم می‌شوند.</p>
+          <p class="mt-4 text-sm leading-8 text-cream/85 sm:text-base">ما نکس‌سل را برای حذف این فاصله ساختیم: ترکیب آموزش موقعیت‌محور، سناریوهای بومی بازار ایران، دستیار مکالمه هوش مصنوعی در حین تماس، و منتورینگ میدانی. معیار موفقیت ما نمره آزمون نیست؛ نرخ نهایی تبدیل فاکتورهای شماست.</p>
+        </div>
+        <div class="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#070B18] shadow-[0_0_48px_rgba(212,175,55,0.12)]">
+          <img src="${base}/present/about-manifest.webp" width="1152" height="864" alt="قیف شیشه‌ای و نمودار طلایی روی صفحهٔ تیره" class="aspect-[4/3] h-auto w-full object-cover" />
+        </div>
+      </div>
+    </section>
+    <div class="mt-6 grid gap-4 md:grid-cols-3">${cards}</div>
+    <section class="mt-6 rounded-[2rem] border border-gold/30 bg-[#070B18] px-5 py-8 text-center sm:px-10">
+      <h2 class="text-2xl font-semibold leading-[1.5]">سیستم فروش شما در کدام مرحله گیر کرده است؟</h2>
+      <a href="${base}/contact/#lead" class="mt-5 inline-flex h-12 items-center justify-center rounded-2xl bg-gold px-6 text-sm font-semibold text-navy">ارزیابی و مشاهده خدمات</a>
+    </section>
+  `, `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="درباره ما | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
+}
+
+function contactBody(base: string) {
+  const kinds = [
+    "منتورینگ و بازنویسی سناریوی تیم فروش",
+    "اجرای کارگاه حضوری و مهندسی قیف",
+    "دسترسی و لایسنس دستیار هوش مصنوعی",
+    "راهنمایی خرید دوره‌های آموزشی",
+    "همکاری سازمانی و سایر موارد",
+  ];
+  const options = [`<option value="" disabled selected>نوع درخواست را انتخاب کنید</option>`].concat(
+    kinds.map((label) => `<option value="${esc(label)}">${esc(label)}</option>`),
+  ).join("");
+  const sizes = [
+    ["solo", "فروشنده مستقل (۱ نفر)"],
+    ["small", "تیم کوچک (۲ تا ۵ نفر)"],
+    ["large", "تیم متوسط و بزرگ (بیش از ۵ نفر)"],
+  ];
+  const radios = sizes.map(([id, label]) => `<label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 px-3 py-2 text-sm has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="radio" name="size" value="${id}" class="size-4 accent-gold" />${label}</label>`).join("");
+  const channels = [
+    ["پشتیبانی مستقیم تلفنی", "شنبه تا چهارشنبه، ۹ تا ۱۸. درخواست تماس را در فرم بگذارید تا در همین بازه هماهنگ شود.", "درخواست تماس"],
+    ["پشتیبانی در تلگرام", "هماهنگی تلگرام از همین درخواست انجام می‌شود. پیام همان شیفت، در روز کاری، کمتر از ۱۵ دقیقه برمی‌گردد.", "درخواست تلگرام"],
+    ["پشتیبانی در واتساپ", "ویس یا توضیح سازمانی را در شرح چالش بنویسید تا مسیر واتساپ روی همان درخواست باز شود.", "درخواست واتساپ"],
+    ["ایمیل رسمی", "نامه و قرارداد را در شرح بنویسید تا پیگیری از همان درخواست شروع شود.", "درخواست نامه"],
+  ];
+  const channelCards = channels.map(([title, text, action]) => `<article class="rounded-3xl border border-white/10 bg-[#070B18] p-4">
+    <h3 class="font-semibold">${title}</h3>
+    <p class="mt-2 text-sm leading-7 text-cream/70">${text}</p>
+    <a href="#lead" class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-gold">${action}</a>
+  </article>`).join("");
+  const trusts = [
+    ["زمان پاسخ تیکت", "در روزهای کاری، میانگین بازگشت به تیکت زیر ۳۰ دقیقه است."],
+    ["لایسنس دستیار", "پشتیبانی فنی لایسنس دستیار، جدا از سؤال آموزشی، روی همین درخواست دنبال می‌شود."],
+    ["انتخاب دوره", "اگر مسیر دوره برایتان روشن نیست، انتخاب دوره متناسب با سطح فعلی در ارزیابی همین فرم رایگان است."],
+  ];
+  const trustCards = trusts.map(([title, text]) => `<article class="rounded-3xl border border-gold/25 bg-gold/10 p-4"><h3 class="text-sm font-semibold text-gold">${title}</h3><p class="mt-2 text-sm leading-7 text-cream/80">${text}</p></article>`).join("");
+  const faqs = [
+    ["دستیار صوتی با چه پلتفرم‌ها و تماس‌هایی سازگار است؟", "دستیار روی صفحهٔ خودش در نکس‌سل کار می‌کند. جمله را می‌نویسید یا با میکروفن فارسی می‌گویید و جواب همان لحظه می‌آید. به سانترال تلفن یا نرم‌افزار تماس جدا وصل نیست."],
+    ["آیا بازنویسی سناریو و خدمات منتورینگ شامل ضمانت نتیجه است؟", "ضمانت عددی فروش ندارد. خروجی، سناریو، کارگاه یا همراهی روی مکالمهٔ همان تیم است و دامنه را قبل از شروع در پیشنهاد همان خدمت می‌بینید."],
+    ["بعد از ثبت درخواست در این فرم، فرایند تماس و ارزیابی به چه صورت خواهد بود؟", "درخواست در پیگیری شما ثبت می‌شود. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم. اگر خدمت مشخصی خواسته باشید، قیمت همان خدمت جدا در صفحهٔ خدمات حساب می‌شود."],
+  ];
+  const faq = faqs.map(([q, a]) => `<details class="rounded-2xl border border-white/10 bg-[#070B18] px-4 py-3">
+    <summary class="cursor-pointer text-sm font-semibold leading-7">${q}</summary>
+    <p class="mt-3 text-sm leading-8 text-cream/75">${a}</p>
+  </details>`).join("");
+  return `
+    <header>
+      <p class="text-xs tracking-[0.18em] text-gold">ارتباط و پشتیبانی</p>
+      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45] sm:text-4xl">بگویید فروش در کدام مرحله می‌ایستد.</h1>
+      <p class="mt-3 max-w-2xl text-sm leading-8 text-cream/70">فرم ارزیابی به بخش تحلیل فروش می‌رود. در روزهای کاری، کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم. قیمت خدمات جدا در <a class="text-gold" href="${base}/services/">صفحهٔ خدمات</a> حساب می‌شود.</p>
+    </header>
+    <div class="mt-8 grid items-start gap-4 lg:grid-cols-2">
+      <form id="lead" data-lead novalidate data-lenis-prevent class="scroll-mt-24 rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_40px_rgba(212,175,55,0.08)] sm:p-6">
+        <h2 class="text-xl font-semibold">ارزیابی و ثبت درخواست</h2>
+        <div class="mt-4 grid gap-3">
+          <label class="text-sm">نوع درخواست<select name="kind" required class="${fieldClass}">${options}</select></label>
+          <label class="text-sm">نام و نام خانوادگی<input name="name" autocomplete="name" required class="${fieldClass}" /></label>
+          <label class="text-sm">شماره تماس<input name="phone" dir="ltr" inputmode="tel" autocomplete="tel" required placeholder="09xxxxxxxxx" class="${fieldClass} text-left" /></label>
+          <fieldset class="grid gap-2"><legend class="text-sm">تعداد پرسنل فروش</legend><div class="mt-2 grid gap-2">${radios}</div></fieldset>
+          <label class="text-sm">شرح چالش اصلی<textarea name="body" required rows="5" placeholder="مشتریان شما عمدتاً در کدام مرحله ریزش می‌کنند؟ (تلفنی، دایرکت، اعتراض به قیمت، یا عدم پیگیری...)" class="mt-1 min-h-32 w-full rounded-2xl border border-white/15 bg-[#0B132B] px-3 py-3 text-sm leading-7 outline-none focus:border-gold"></textarea></label>
+        </div>
+        <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-gold text-sm font-semibold text-navy sm:w-auto sm:px-6">ثبت و ارسال به بخش تحلیل فروش</button>
+        <p data-lead-note class="mt-3 text-sm leading-7 text-cream/80" role="status"></p>
+      </form>
+      <div class="grid gap-3">${channelCards}</div>
+    </div>
+    <div class="mt-4 grid gap-3 md:grid-cols-3">${trustCards}</div>
+    <section class="mt-8" aria-labelledby="support-faq">
+      <h2 id="support-faq" class="text-xl font-semibold">سؤال‌های پرتکرار پشتیبانی</h2>
+      <div class="mt-4 grid gap-3">${faq}</div>
+    </section>
+  `;
 }
 
 export function supportPage(base: string) {
-  return layout(base, "support", "پشتیبانی | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">پشتیبانی</h1>${supportForm()}</header>`);
-}
-
-export function aboutPage(base: string) {
-  return layout(base, "about", "درباره ما | نکس‌سل", `<header ${revealAttrs(0)}><p class="text-xs tracking-[0.18em] text-gold">آکادمی فروش نکس‌سل</p><h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-[1.45]">چهار مسیر ویدیویی فروش، با چالش پایان هر درس.</h1><p class="mt-3 max-w-2xl text-sm leading-8 text-cream/75">آنلاین، حضوری، تلفنی و مذاکره. هر مسیر ${toman(COURSE_PRICE)}. آکادمی جامع، ${toman(BUNDLE_PRICE)}.</p><a class="mt-5 inline-flex text-sm text-gold" href="${base}/support/">پیام از صفحهٔ پشتیبانی</a></header>`);
+  const description = "ارزیابی فروش، درخواست خدمت و پشتیبانی نکس‌سل. در روزهای کاری کمتر از ۴ ساعت کاری برای هماهنگی برمی‌گردیم.";
+  return layout(base, "support", "پشتیبانی | نکس‌سل", contactBody(base), `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="پشتیبانی | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
 export function contactPage(base: string) {
-  return layout(base, "contact", "ارتباط با ما | نکس‌سل", `<header ${revealAttrs(0)}><h1 class="text-3xl font-semibold">ارتباط، همان پشتیبانی است.</h1>${supportForm()}</header>`);
+  const description = "فرم ارزیابی فروش نکس‌سل برای منتورینگ، کارگاه، دستیار و انتخاب دوره.";
+  return layout(base, "contact", "ارتباط با ما | نکس‌سل", contactBody(base), `<meta name="description" content="${esc(description)}" /><meta property="og:title" content="ارتباط با ما | نکس‌سل" /><meta property="og:description" content="${esc(description)}" /><meta property="og:locale" content="fa_IR" />`);
 }
 
 export function subscriptionPage(base: string) {
