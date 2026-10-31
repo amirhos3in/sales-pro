@@ -1923,6 +1923,56 @@
     });
   }
 
+  function mountAssistantPreview() {
+    const root = document.querySelector("[data-assistant-preview]");
+    if (!root) return;
+    const hear = root.querySelector("[data-preview-hear]");
+    const say = root.querySelector("[data-preview-say]");
+    const note = root.querySelector("[data-preview-copy-note]");
+    const chip = document.querySelector("[data-preview-chip]");
+    const tabs = [...root.querySelectorAll("[data-preview-tab]")];
+    let timer = 0;
+    function show(tab) {
+      tabs.forEach((item) => {
+        const on = item === tab;
+        item.setAttribute("aria-selected", on ? "true" : "false");
+        item.classList.toggle("bg-gold", on);
+        item.classList.toggle("font-semibold", on);
+        item.classList.toggle("text-navy", on);
+        item.classList.toggle("text-cream/80", !on);
+        item.classList.toggle("ring-1", !on);
+        item.classList.toggle("ring-white/10", !on);
+      });
+      root.classList.add("is-switching");
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        if (hear) hear.textContent = tab.dataset.hear || "";
+        if (say) say.textContent = tab.dataset.say || "";
+        if (chip) chip.textContent = tab.dataset.chip || "";
+        root.classList.remove("is-switching");
+        if (note) note.textContent = "";
+      }, 160);
+    }
+    tabs.forEach((tab) => tab.addEventListener("click", () => show(tab)));
+    const copy = root.querySelector("[data-preview-copy]");
+    if (copy) {
+      copy.addEventListener("click", async () => {
+        const text = say ? say.textContent || "" : "";
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const area = document.createElement("textarea");
+          area.value = text;
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand("copy");
+          area.remove();
+        }
+        if (note) note.textContent = "کپی شد.";
+      });
+    }
+  }
+
   function mountImpact() {
     const root = document.querySelector("[data-impact-quotes]");
     if (root) {
@@ -2110,6 +2160,7 @@
     });
   }
 
+  mountAssistantPreview();
   mountArticleFilters();
   mountSmoothScroll();
   mountReveal();
